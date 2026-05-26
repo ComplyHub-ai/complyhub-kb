@@ -1,4 +1,4 @@
-> **Last updated:** 5 May 2026 · **Reconsider by:** 5 Nov 2026 · **Confidence:** high — canonical rules for all AI tools in this workspace.
+> **Last updated:** 26 May 2026 · **Reconsider by:** 5 Nov 2026 · **Confidence:** high — canonical rules for all AI tools in this workspace.
 
 # Guardrails
 
@@ -10,13 +10,15 @@ Rules that apply to every AI tool (Claude Code, Codex, Claude Desktop) in this w
 |---|---|
 | `complyhub-kb/` | Full — read, write, commit, push to any branch including `main` |
 | `complyhub-kb/audit/` | Full — same as above; lives inside the same repo |
-| `rto-compass-hub/` | Read-only — `git fetch` and `git pull` only; no commit, no push, no file edits |
+| `rto-compass-hub/` on `main` | Read-only — `git fetch` and `git pull` only; no commit, no push, no file edits |
+| `rto-compass-hub/` on `fix/local-run` | Edits and commits allowed — this is the active Vercel migration working branch |
 
 Feature branch naming for `complyhub-kb/` where used: `fix/<slug>`, `kb/<slug>`, `adr-<NNN>`, `restructure/<slug>`
 
 ## Absolute never-do
 
-- Never edit files in `rto-compass-hub/` — read and fetch only
+- Never edit files in `rto-compass-hub/` on `main` — read and fetch only on that branch
+- Never commit or push directly to `main` in `rto-compass-hub/`
 - Never paste API keys, service-role keys, OAuth secrets, or database passwords into conversations or files
 - Never cross-reference one tenant's data into another's work (multi-tenant platform)
 
@@ -41,9 +43,12 @@ Two legally separate Australian businesses share this workspace. Route all finan
 
 ## Codebase write restriction
 
-`rto-compass-hub/` is read-only for this workflow. If a task requires editing codebase files, do not proceed autonomously. Instead, offer the appropriate option based on context:
+Two parallel workflows are active — do not confuse them:
 
+**Workflow 1 — Lovable + Claude Code on `main`**
+`rto-compass-hub/main` is read-only. If a task requires editing codebase files, offer the appropriate option:
 - **If working across Claude Desktop and Claude Code in the same session:** offer a prompt for the user to run in Claude Desktop.
-- **If working with Claude Code or Codex alone (Claude Desktop not active):** offer a prompt to give to Lovable.
+- **If working with Claude Code or Codex alone:** offer a prompt to give to Lovable.
 
-Canonical instructions always belong in `complyhub-kb/` and are manually mirrored elsewhere only when needed.
+**Workflow 2 — Branch work with Carl on `fix/local-run`**
+`rto-compass-hub/fix/local-run` allows edits and commits. All code changes on this branch must follow the rules in `rto-compass-hub/CLAUDE.md` (Carl's file) — that file is authoritative for all code decisions. Do not create guardrails or patterns that conflict with it.
