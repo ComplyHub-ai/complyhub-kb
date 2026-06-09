@@ -102,15 +102,15 @@ Before testing each role, confirm:
 > ⚠️ URLs corrected from role map — verified against live app 2026-06-09
 - [ ] `/dashboard/students-support/dashboard` loads (Students & Support dashboard)
 - [ ] `/dashboard/students-support/suitability` loads (Suitability & LLND)
-- [ ] `/dashboard/students-support/support` loads (Student Support)
+- [ ] `/dashboard/students-support/support` loads (Student Support) — **this is the add record page**
 - [ ] `/dashboard/students-support/adjustments` loads (Adjustments)
+- [ ] `/dashboard/students-support/at-risk` loads (At-Risk)
 - [ ] `/dashboard/students-support/wellbeing` loads (Wellbeing & Safety)
 - [ ] `/dashboard/students-support/placement-wellbeing` loads (Placement Wellbeing)
 - [ ] `/dashboard/students-support/diversity` loads (Diversity & Inclusion)
 - [ ] `/dashboard/students-support/complaints-appeals` loads (Complaints & Appeals)
 - [ ] `/admin/surveys` loads (Surveys)
-- [ ] Add a new student support record on one of the above pages → saves and appears
-> ⚠️ Note: At-Risk navigates to `/dashboard/students-support/dashboard` (same URL as dashboard — may be a tab or sub-view, confirm visually)
+- [ ] On `/dashboard/students-support/support` → add a new student support record → saves and appears in the list
 
 ## 2.4 VET Workforce
 - [ ] `/dashboard/registers/pdr` loads — shows only Tenant 1 PD records
@@ -275,7 +275,7 @@ Before testing each role, confirm:
 > ⚠️ URLs corrected to match live app routes (verified by admin user 2026-06-09)
 - [ ] `/dashboard/students-support/support` loads with write access — can add a student support record
 - [ ] `/dashboard/students-support/complaints-appeals` loads with write access
-- [ ] `/dashboard/students-support/dashboard` loads (at-risk view)
+- [ ] `/dashboard/students-support/at-risk` loads
 - [ ] `/dashboard/students-support/adjustments` loads
 - [ ] `/dashboard/students-support/wellbeing` loads
 
