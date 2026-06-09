@@ -28,6 +28,7 @@ Owner guide:
 | # | Role | Route | Severity | Owner | Status |
 |---|---|---|---|---|---|
 | F-001 | Super Admin | Post-login landing | P1 | RJ | Open |
+| F-002 | Super Admin | `/superadmin/dashboard` | P1 | Carl/Dave | Open |
 
 ---
 
@@ -61,6 +62,40 @@ The seed adds `superadmin@complyhub.ai` to `tenant_members` for Tenant 1 with ro
 
 **Console errors (paste here):**
 _Not yet captured_
+
+---
+
+---
+
+## F-002
+
+**Role:** Super Admin (`superadmin@complyhub.ai`)
+**Checklist items:** 1.2, 1.3
+**Severity:** P1
+**Owner:** Carl / Dave
+**Status:** Open
+
+**Expected:**
+`/superadmin/dashboard` loads with platform management content (tenant list, user list, analytics).
+
+**Actual:**
+Page is blank. Toast fires: "Access Denied — You do not have permission to access this area." The sidebar correctly switches to "Super Admin Panel" (SuperAdminGuard passes), but a `PlatformPermissionGuard` checking for the `sa_dashboard` permission then blocks the page content.
+
+**What works:**
+- SuperAdminGuard correctly identifies the user as super_admin (sidebar switches to platform nav)
+- "Full Access" badge and "super_admin" label display correctly
+
+**Root cause hypothesis:**
+The seed does not populate the platform permissions table for the super_admin user. `PlatformPermissionGuard` requires a resolved permission set (auth → identity → role → permissions stages). The `sa_dashboard` permission record is missing for `superadmin@complyhub.ai` in whatever table stores platform-level permissions.
+
+**Next step for Carl/Dave:**
+1. Identify which table stores platform permissions (likely `platform_permissions` or `user_platform_permissions`)
+2. Check what rows exist for other super_admin users in production to understand the correct shape
+3. Add the missing permission rows to `seed.sql` Section 6 or a new section
+4. Re-apply to branch DB and retest
+
+**Console errors:**
+_Not yet captured — please check browser console and paste here_
 
 ---
 
