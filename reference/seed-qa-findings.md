@@ -34,7 +34,7 @@ Owner guide:
 | F-005 | All roles | Person dropdowns — Unknown names | P2 | Carl (seed gap) | Fixed |
 | F-006 | Administrator | SSR Add form — missing asterisk | P2 | RJ | Open |
 | F-007 | All roles | `/settings/rto` crashes instead of redirecting | P2 | RJ | Fixed — array type guard added |
-| F-008 | Governing Person | Governance Meeting History tab crash | P2 | RJ | Open — needs past meeting in seed |
+| F-008 | Governing Person | Governance Meeting History tab crash | P2 | RJ | Fixed — null guard + case-insensitive filter + seed title |
 | F-009 | Compliance Manager | `/complybot` → 404 | P1 | RJ | Fixed — /complybot route added under ManagerRoute |
 | F-010 | Compliance Manager | PDR register no Add button (expected write access) | P1 | RJ | Fixed — ADMIN_ROLES includes CM, context returns correct role |
 | F-011 | Compliance Manager | `/settings/users-management` → 404 | P1 | RJ | Fixed — nav path corrected to /dashboard/user-management |
