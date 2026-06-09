@@ -30,25 +30,25 @@ Owner guide:
 | F-001 | Super Admin | Post-login landing | P1 | RJ | Open |
 | F-002 | Super Admin | `/superadmin/dashboard` | P1 | Carl/Dave | Open |
 | F-003 | All roles | Post-login landing | P1 | Carl (seed gap) | Fixed |
-| F-004 | Administrator | `/dashboard/registers/ct` — Risk Level dropdown | P2 | RJ | Open |
+| F-004 | Administrator | `/dashboard/registers/ct` — Risk Level dropdown | P2 | RJ | Fixed — dd_risk_level seeded |
 | F-005 | All roles | Person dropdowns — Unknown names | P2 | Carl (seed gap) | Fixed |
 | F-006 | Administrator | SSR Add form — missing asterisk | P2 | RJ | Open |
-| F-007 | All roles | `/settings/rto` crashes instead of redirecting | P2 | RJ | Open |
-| F-008 | Governing Person | Governance Meeting History tab crash | P2 | RJ | Open |
-| F-009 | Compliance Manager | `/complybot` → 404 | P1 | RJ | Open |
-| F-010 | Compliance Manager | PDR register no Add button (expected write access) | P1 | RJ | Open |
-| F-011 | Compliance Manager | `/settings/users-management` → 404 | P1 | RJ | Open |
-| F-012 | Compliance Manager | `/admin/user-portals` → Access Denied | P1 | RJ | Open |
-| F-013 | Trainer | `/dashboard/trainer-portal/products` → 404 | P1 | RJ | Open |
-| F-014 | Trainer | `/dashboard/trainer-portal/availability` → 404 | P1 | RJ | Open |
-| F-015 | Trainer | TCR register — Add button visible (write access leak) | P1 | RJ | Open |
-| F-016 | Trainer | `/document-repository` → 404 | P1 | RJ | Open |
-| F-017 | Trainer | Governance Meeting Manager loads (should be blocked) | P1 | RJ | Open |
-| F-018 | Trainer | `/dashboard/trainer-portal/fre-register` → 404 | P1 | RJ | Open |
-| F-019 | Consultant | Post-login briefly lands on T1 admin dashboard | P1 | RJ | Open |
-| F-020 | Consultant | `/consultant/my-tenants` → Coming soon | P1 | RJ | Open |
-| **F-021** | **Consultant** | **T2 context — T1 PDR records visible (P0 CRITICAL)** | **P0** | **RJ** | **Open — escalate immediately** |
-| F-022 | Consultant | All consultant sub-pages → Coming soon | P1 | RJ | Open |
+| F-007 | All roles | `/settings/rto` crashes instead of redirecting | P2 | RJ | Fixed — array type guard added |
+| F-008 | Governing Person | Governance Meeting History tab crash | P2 | RJ | Open — needs past meeting in seed |
+| F-009 | Compliance Manager | `/complybot` → 404 | P1 | RJ | Open — needs RJ route fix |
+| F-010 | Compliance Manager | PDR register no Add button (expected write access) | P1 | RJ | Open — needs RJ to confirm intended role |
+| F-011 | Compliance Manager | `/settings/users-management` → 404 | P1 | RJ | Open — wrong URL or not built |
+| F-012 | Compliance Manager | `/admin/user-portals` → Access Denied | P1 | RJ | Open — needs RJ route fix |
+| F-013 | Trainer | `/dashboard/trainer-portal/products` → 404 | P1 | RJ | Open — wrong URL or feature not built |
+| F-014 | Trainer | `/dashboard/trainer-portal/availability` → 404 | P1 | RJ | Open — wrong URL or feature not built |
+| F-015 | Trainer | TCR register — Add button visible (write access leak) | P1 | RJ | Fixed — role guard added |
+| F-016 | Trainer | `/document-repository` → 404 | P1 | RJ | Open — wrong URL or feature not built |
+| F-017 | Trainer | Governance Meeting Manager loads (should be blocked) | P1 | RJ | Fixed — AdminRoute added |
+| F-018 | Trainer | `/dashboard/trainer-portal/fre-register` → 404 | P1 | RJ | Open — wrong URL or feature not built |
+| F-019 | Consultant | Post-login briefly lands on T1 admin dashboard | P1 | RJ | Open — needs RJ routing fix |
+| F-020 | Consultant | `/consultant/my-tenants` → Coming soon | P1 | RJ | Open — feature not built |
+| **F-021** | **Consultant** | **T2 context — T1 PDR records visible (P0 CRITICAL)** | **P0** | **RJ** | Fixed — session dependency + tenant filter added |
+| F-022 | Consultant | All consultant sub-pages → Coming soon | P1 | RJ | Open — features not built |
 
 ---
 
