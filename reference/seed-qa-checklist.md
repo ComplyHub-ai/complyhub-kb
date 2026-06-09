@@ -100,25 +100,25 @@ Before testing each role, confirm:
 
 ## 2.3 Students & Support
 > ⚠️ URLs corrected from role map — verified against live app 2026-06-09
-- [ ] `/dashboard/students-support/dashboard` loads (Students & Support dashboard)
-- [ ] `/dashboard/students-support/suitability` loads (Suitability & LLND)
-- [ ] `/dashboard/students-support/support` loads (Student Support) — **this is the add record page**
-- [ ] `/dashboard/students-support/adjustments` loads (Adjustments)
-- [ ] `/dashboard/students-support/at-risk` loads (At-Risk)
-- [ ] `/dashboard/students-support/wellbeing` loads (Wellbeing & Safety)
-- [ ] `/dashboard/students-support/placement-wellbeing` loads (Placement Wellbeing)
-- [ ] `/dashboard/students-support/diversity` loads (Diversity & Inclusion)
-- [ ] `/dashboard/students-support/complaints-appeals` loads (Complaints & Appeals)
-- [ ] `/admin/surveys` loads (Surveys)
-- [ ] On `/dashboard/students-support/support` → add a new student support record → saves and appears in the list
+- ✅ `/dashboard/students-support/dashboard` loads (Students & Support dashboard)
+- ✅ `/dashboard/students-support/suitability` loads (Suitability & LLND)
+- ✅ `/dashboard/students-support/support` loads (Student Support)
+- ✅ `/dashboard/students-support/adjustments` loads (Adjustments)
+- ✅ `/dashboard/students-support/at-risk` loads (At-Risk)
+- ✅ `/dashboard/students-support/wellbeing` loads (Wellbeing & Safety)
+- ✅ `/dashboard/students-support/placement-wellbeing` loads (Placement Wellbeing)
+- ✅ `/dashboard/students-support/diversity` loads (Diversity & Inclusion)
+- ✅ `/dashboard/students-support/complaints-appeals` loads (Complaints & Appeals)
+- ✅ `/admin/surveys` loads (Surveys)
+- ✅ Add a new student support record → saves and appears in list (note: F-006 missing asterisk on Responsible Person)
 
 ## 2.4 VET Workforce
-- [ ] `/dashboard/registers/pdr` loads — shows only Tenant 1 PD records
-- [ ] `/dashboard/registers/tcr` loads
-- [ ] `/dashboard/trainers` loads
-- [ ] `/dashboard/registers/staff-turnover` loads
-- [ ] `/dashboard/registers/trainer-availability` loads
-- [ ] Add a new PDR record → saves with correct tenant_id
+- ✅ `/dashboard/registers/pdr` loads — 3 Tenant 1 records shown, 2 Tenant 2 records correctly hidden (DB-verified)
+- ✅ `/dashboard/registers/tcr` loads
+- ✅ `/dashboard/trainers` loads
+- ✅ `/dashboard/registers/staff-turnover` loads
+- ✅ `/dashboard/registers/trainer-availability` loads
+- ✅ Add a new PDR record → saves with correct tenant_id
 
 ## 2.5 Governance & Risk
 > ⚠️ URLs and items updated from live nav 2026-06-09. CEO Governance Portal shows "rolling out progressively" for Admin — expected, it is Governing Person only.
@@ -138,30 +138,33 @@ Before testing each role, confirm:
 - ✅ CEO Governance Portal → shows "rolling out progressively" gate for Admin — expected (Governing Person only)
 
 ## 2.6 Documents & Compliance
-> ⚠️ Routes updated from live nav 2026-06-09
+> ⚠️ Routes updated from live nav 2026-06-09 — mktg and suggestions-triage added
 - [ ] `/documents-register` loads
 - [ ] `/document-repository` loads
 - [ ] `/dashboard/registers/mktg` loads (Marketing register)
 - [ ] `/dashboard/suggestions-triage` loads (Suggestions Triage)
 - [ ] Upload a document → appears in register
+> In progress
 
 ## 2.7 AI & Automation
 - [ ] `/complybot` loads and responds
 - [ ] `/dashboard/assessors/insights` loads
+> Not yet tested
 
 ## 2.8 User Management
-> ⚠️ Routes updated from live nav 2026-06-09
+> ⚠️ Routes updated from live nav 2026-06-09 — credential-risk and impersonate added
 - [ ] `/admin/user-management` loads — all seed users for Tenant 1 visible
 - [ ] `/admin/user-management/roles` loads — role editing available
 - [ ] `/admin/user-portals` loads
 - [ ] `/admin/credential-risk` loads
 - [ ] `/admin/impersonate` loads
+> In progress
 
 ## 2.9 Settings
-> ⚠️ Settings is NOT in the sidebar nav — access via clicking the org name or gear icon in the top bar/sidebar, or navigate directly by URL
-- [ ] `/settings` loads (try navigating directly by URL)
-- [ ] `/settings/rto` loads — RTO details editable
-- [ ] `/settings/preferences` loads
+> ⚠️ Settings is NOT in the sidebar nav. `/settings`, `/settings/rto`, `/settings/preferences` all return 404. Correct URL unknown — needs investigation. Logged as **F-007**.
+- ❌ `/settings` → 404 not found
+- ❌ `/settings/rto` → 404 not found
+- ❌ `/settings/preferences` → 404 not found
 
 ## 2.10 Cross-tenant isolation
 - ✅ PDR register shows NO Tenant 2 records — confirmed via DB check: 3 T1 records visible, 2 T2 records correctly hidden

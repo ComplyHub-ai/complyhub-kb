@@ -33,6 +33,7 @@ Owner guide:
 | F-004 | Administrator | `/dashboard/registers/ct` — Add form | P2 | RJ | Open |
 | F-005 | All roles | Person dropdowns across all forms | P2 | Carl (seed gap) | Fixed — applied to branch + seed.sql updated |
 | F-006 | Administrator | `/dashboard/students-support/support` — Add form | P2 | RJ | Open |
+| F-007 | Administrator | Settings routes — 2.9 | P2 | RJ | Open |
 
 ---
 
@@ -235,6 +236,33 @@ The `required` prop or asterisk indicator is missing from the Responsible Person
 
 **Console errors:**
 _None_
+
+---
+
+---
+
+## F-007
+
+**Role:** Administrator (`admin@complyhub-seed.com`)
+**Checklist items:** 2.9
+**Severity:** P2
+**Owner:** RJ
+**Status:** Open
+
+**Expected:**
+`/settings`, `/settings/rto`, `/settings/preferences` load the RTO settings pages.
+
+**Actual:**
+All three routes return 404. Settings is also not accessible from the sidebar nav.
+
+**Root cause hypothesis:**
+Settings routes may have been moved to a different path (e.g. `/dashboard/settings`, `/admin/settings`, or accessible only via a gear icon or org name click in the top bar). The checklist routes were derived from the role map and may be stale.
+
+**Next step for RJ:**
+Confirm the correct settings route and update the checklist accordingly.
+
+**Console errors:**
+_None — clean 404_
 
 ---
 
