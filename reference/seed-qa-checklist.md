@@ -190,7 +190,7 @@ Before testing each role, confirm:
 
 ## 3.3 Governance-specific
 - ✅ CEO Governance Portal → same "rolling out progressively" gate as Admin — expected, feature not yet released for any role
-- [ ] Can view Assessment Validation (`/dashboard/assessment-validation`) — read-only access sufficient
+- ✅ Can view Assessment Validation (`/dashboard/assessment-validation`) — all sub-tabs render, no data (expected, not seeded)
 
 ---
 
