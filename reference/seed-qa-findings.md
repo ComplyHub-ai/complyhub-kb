@@ -30,6 +30,7 @@ Owner guide:
 | F-001 | Super Admin | Post-login landing | P1 | RJ | Open |
 | F-002 | Super Admin | `/superadmin/dashboard` | P1 | Carl/Dave | Open |
 | F-003 | All roles | Post-login landing | P1 | Carl (seed gap) | Fixed — applied to branch + seed.sql updated |
+| F-004 | Administrator | `/dashboard/registers/ct` — Add form | P2 | RJ | Open |
 
 ---
 
@@ -138,6 +139,43 @@ Part B — `billing.entitlements` + `trial_expires_at` (Section 24, this commit)
 Seed RTO Pty Ltd  | get_access_gate: allowed=true, reason=paid_invoice
 Trial RTO Pty Ltd | get_access_gate: allowed=true, reason=trial_active
 ```
+
+---
+
+---
+
+## F-004
+
+**Role:** Administrator (`admin@complyhub-seed.com`)
+**Checklist items:** 2.2 — Add a new record in CT register
+**Severity:** P2
+**Owner:** RJ
+**Status:** Open
+
+**Expected:**
+Clicking the "Risk Level*" dropdown in the Credit Transfer Add form opens a list of risk level options to select from.
+
+**Actual:**
+Clicking "Select risk..." produces no dropdown. The field stays empty and validation fires immediately: "Risk level is required." The form cannot be saved — the Save button is blocked by this required field.
+
+**What works:**
+- "+ Log New Entry" button opens the form correctly
+- All other fields (Title, Student Name, Student ID, Course Code, Evidence Type, Date Received, Responsible Person) are functional
+- Form validation is working correctly (required field flagged)
+
+**Root cause hypothesis:**
+The Risk Level dropdown likely reads from a lookup table or enum that is either empty on the branch DB or using a different value source than expected. Possible causes:
+1. A `risk_levels` or similar lookup table is not seeded
+2. The dropdown reads from a hardcoded list in the component that has a rendering bug
+3. A `dd_` dropdown table (part of the enum-to-DD migration) is empty on the branch
+
+**Next step for RJ:**
+1. Check what table/source the Risk Level dropdown reads from in the CT register form component
+2. Verify if it is a seeded lookup table — if yes, add it to `seed.sql`
+3. If it is a component bug, fix the dropdown render
+
+**Console errors:**
+_Not yet captured — please check browser console and paste here_
 
 ---
 
