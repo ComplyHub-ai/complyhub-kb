@@ -121,14 +121,21 @@ Before testing each role, confirm:
 - [ ] Add a new PDR record → saves with correct tenant_id
 
 ## 2.5 Governance & Risk
-- [ ] `/dashboard/governance/meeting-manager` loads
-- [ ] `/dashboard/governance/register` loads
-- [ ] `/dashboard/registers/mcn` loads
-- [ ] `/dashboard/registers/fpp` loads
-- [ ] `/dashboard/registers/audit` loads
-- [ ] `/dashboard/registers/whs` loads
-- [ ] `/dashboard/registers/qi` loads
+> ⚠️ URLs and items updated from live nav 2026-06-09. CEO Governance Portal shows "rolling out progressively" for Admin — expected, it is Governing Person only.
+- [ ] `/dashboard/governance/meeting-manager` loads (Governance Meetings)
+- [ ] `/dashboard/governance/register` loads (Governance Register)
+- [ ] `/dashboard/registers/adc` loads (Annual Declaration)
+- [ ] `/dashboard/registers/mcn` loads (Material Change Notification)
+- [ ] `/dashboard/registers/fpp` loads (Fit & Proper Person)
+- [ ] `/dashboard/registers/pfp` loads (Prepaid Fee Protection)
+- [ ] `/dashboard/registers/pli` loads (Public Liability Insurance)
+- [ ] `/dashboard/registers/qi` loads (Quality Indicator Reporting)
+- [ ] `/dashboard/registers/audit` loads (Audit & Internal Review)
+- [ ] `/dashboard/regulatory-intelligence` loads (Regulatory Intelligence)
+- [ ] `/dashboard/registers/whs` loads (Work Health & Safety)
+- [ ] `/dashboard/registers/thp` loads (Third Party Arrangements)
 - [ ] Add a governance meeting → saves correctly
+- [ ] CEO Governance Portal → shows "rolling out progressively" gate for Admin ✅ expected (Governing Person only)
 
 ## 2.6 Documents
 - [ ] `/documents-register` loads
