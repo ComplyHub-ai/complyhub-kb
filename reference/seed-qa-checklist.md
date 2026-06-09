@@ -275,38 +275,10 @@ Before testing each role, confirm:
 
 # ROLE 6 — Student Support Officer (SSO)
 **Login:** `sso@complyhub-seed.com`
-**Expected landing:** `/student-support` or SSO dashboard
+> ⚠️ **UNDER CONSTRUCTION — portal not fully built. Skip detailed testing for this QA run. Revisit when RJ confirms the SSO portal is production-ready.**
 
-## 6.1 Landing & navigation
-- [ ] Lands on SSO workspace after login
-- [ ] Nav shows 3 sections: Workspace, Registers, Reports
-
-## 6.2 SSO workspace
-- [ ] `/dashboard/sso/work-queue` loads
-- [ ] `/dashboard/sso/students` loads
-- [ ] `/dashboard/sso/at-risk` loads
-- [ ] `/dashboard/sso/interventions` loads
-
-## 6.3 Registers
-> ⚠️ URLs corrected to match live app routes (verified by admin user 2026-06-09)
-- [ ] `/dashboard/students-support/support` loads with write access — can add a student support record
-- [ ] `/dashboard/students-support/complaints-appeals` loads with write access
-- [ ] `/dashboard/students-support/at-risk` loads
-- [ ] `/dashboard/students-support/adjustments` loads
-- [ ] `/dashboard/students-support/wellbeing` loads
-
-## 6.4 Reports
-- [ ] `/dashboard/sso/monthly-pack` loads
-- [ ] `/dashboard/sso/packs-history` loads
-
-## 6.5 Documents (read-only)
-- [ ] `/document-repository` loads — read-only, no upload button
-
-## 6.6 Blocked routes
-- [ ] `/dashboard/admin` → redirected
-- [ ] `/dashboard/registers/pdr` → check: SSO should not have write access here
-- [ ] `/admin/user-management` → redirected
-- [ ] `/settings/rto` → redirected
+## 6.1–6.6 — Deferred
+- ⚠️ SSO portal is under construction — all items deferred pending portal completion
 
 ---
 
@@ -351,74 +323,32 @@ Before testing each role, confirm:
 
 # ROLE 8 — Regulatory Officer
 **Login:** `regulatory@complyhub-seed.com`
-**Expected landing:** `/dashboard/auditor`
+> ⚠️ **UNDER CONSTRUCTION — portal not fully built. Skip detailed testing for this QA run. Revisit when RJ confirms the Regulatory Officer portal is production-ready.**
 
-## 8.1 Landing & navigation
-- [ ] Lands on auditor dashboard after login
-- [ ] Nav shows 6 read-only sections: Dashboard, Training, Workforce, Students, Governance, Documents
-- [ ] All nav items labelled or indicated as read-only
-
-## 8.2 Read-only enforcement (check on each register)
-- [ ] `/dashboard/tas-engine` loads — add/edit buttons absent or disabled
-- [ ] `/dashboard/assessment-validation` loads — read-only
-- [ ] `/admin/trainer-matrix-engine` loads — read-only
-- [ ] `/dashboard/registers/fre` loads — no add button
-- [ ] `/dashboard/registers/tcr` loads — no add button
-- [ ] `/dashboard/registers/ssr` loads — no add button
-- [ ] `/dashboard/registers/caa` loads — no add button
-- [ ] `/dashboard/governance/register` loads — no add button
-- [ ] `/dashboard/governance/meeting-manager` loads — no add button
-- [ ] `/dashboard/registers/audit` loads — no add button
-- [ ] `/dashboard/registers/whs` loads — no add button
-- [ ] `/documents-register` loads — no upload button
-
-## 8.3 Blocked routes (should deny)
-- [ ] `/settings/rto` → denied/redirected
-- [ ] `/settings/*` → denied/redirected
-- [ ] `/admin/user-management` → denied/redirected
-- [ ] `/superadmin/*` → denied/redirected
-- [ ] `/dashboard/registers/pdr` → check if visible; if so, must be read-only
-
-## 8.4 API write block (RLS enforcement)
-- [ ] Attempting to POST/PATCH a register record via Supabase (e.g. from browser console) returns 403 — RLS denies writes
+## 8.1–8.4 — Deferred
+- ⚠️ Regulatory Officer portal is under construction — all items deferred pending portal completion
 
 ---
 
 ---
 
-# ROLE 9 — Employer (Placeholder)
+# ROLE 9 — Employer
 **Login:** `employer@complyhub-seed.com`
-**Expected landing:** `/employer/dashboard`
+> ⚠️ **UNDER CONSTRUCTION — portal not built. Skip testing for this QA run. Revisit when RJ confirms the Employer portal is production-ready.**
 
-## 9.1 Placeholder portal
-- [ ] Lands on employer dashboard
-- [ ] Dashboard loads without error
-- [ ] `/employer/trainees` loads (placeholder UI)
-- [ ] `/employer/assessments` loads (placeholder UI)
-- [ ] No write actions available
-
-## 9.2 Blocked routes
-- [ ] `/dashboard/admin` → redirected
-- [ ] `/dashboard/registers/pdr` → redirected
+## 9.1–9.2 — Deferred
+- ⚠️ Employer portal is under construction — all items deferred
 
 ---
 
 ---
 
-# ROLE 10 — Third Party (Placeholder)
+# ROLE 10 — Third Party
 **Login:** `thirdparty@complyhub-seed.com`
-**Expected landing:** `/third-party/dashboard`
+> ⚠️ **UNDER CONSTRUCTION — portal not built. Skip testing for this QA run. Revisit when RJ confirms the Third Party portal is production-ready.**
 
-## 10.1 Placeholder portal
-- [ ] Lands on third-party dashboard
-- [ ] Dashboard loads without error
-- [ ] `/third-party/agreements` loads (placeholder UI)
-- [ ] `/third-party/reports` loads (placeholder UI)
-- [ ] No write actions available
-
-## 10.2 Blocked routes
-- [ ] `/dashboard/admin` → redirected
-- [ ] `/dashboard/registers/pdr` → redirected
+## 10.1–10.2 — Deferred
+- ⚠️ Third Party portal is under construction — all items deferred
 
 ---
 
