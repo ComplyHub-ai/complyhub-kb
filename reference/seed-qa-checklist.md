@@ -173,21 +173,23 @@ Before testing each role, confirm:
 
 # ROLE 3 — Governing Person
 **Login:** `governing@complyhub-seed.com`
-**Expected landing:** Same as Administrator (identical access)
+**Expected landing:** `/dashboard/executive` (NOT admin dashboard — checklist was wrong)
 
 ## 3.1 Landing & navigation
-- [ ] Lands on admin dashboard (same as Administrator)
-- [ ] All 9 nav sections visible (same as Administrator)
+- ✅ Lands on `/dashboard/executive` after login (Governing Person dashboard)
+- ✅ All 9 nav sections visible
 
-## 3.2 Full access parity with Administrator
-- [ ] `/dashboard/registers/pdr` loads with write access (can add a record)
-- [ ] `/dashboard/governance/meeting-manager` loads with write access
-- [ ] `/admin/user-management` loads
-- [ ] `/settings/rto` loads and is editable
-- [ ] `/dashboard/tas-engine` loads
+## 3.2 Access check
+> ⚠️ Checklist incorrectly said "write access" — Governing Person has oversight/read access on most registers, not data entry. This is by design.
+- ✅ `/dashboard/registers/pdr` loads — 3 Tenant 1 records visible, no Add button (read-only by design)
+- ✅ `/dashboard/governance/meeting-manager` loads — meeting visible, no Add button visible (read-only for Governing Person)
+- ❌ Governance Meeting → History tab → "We hit a loading snag. Try refreshing." — **F-008**
+- ✅ `/admin/user-management` loads
+- ❌ `/settings/rto` → "We hit a loading snag. Try refreshing." — **F-007** (route exists but page crashes)
+- ✅ `/dashboard/tas-engine` loads
 
 ## 3.3 Governance-specific
-- [ ] Can create a governance meeting
+- [ ] CEO Governance Portal loads (Governing Person should see content, not the gate Admin sees)
 - [ ] Can view validation details
 
 ---

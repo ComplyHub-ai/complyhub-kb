@@ -33,7 +33,8 @@ Owner guide:
 | F-004 | Administrator | `/dashboard/registers/ct` — Add form | P2 | RJ | Open |
 | F-005 | All roles | Person dropdowns across all forms | P2 | Carl (seed gap) | Fixed — applied to branch + seed.sql updated |
 | F-006 | Administrator | `/dashboard/students-support/support` — Add form | P2 | RJ | Open |
-| F-007 | Administrator | Settings routes — 2.9 | P2 | RJ | Open |
+| F-007 | Administrator + Governing Person | `/settings/rto` page crash | P2 | RJ | Open |
+| F-008 | Governing Person | Governance Meeting History tab | P2 | RJ | Open |
 
 ---
 
@@ -255,14 +256,47 @@ _None_
 **Actual:**
 All three routes return 404. Settings is also not accessible from the sidebar nav.
 
+**Update (Role 3 testing):**
+`/settings/rto` confirmed to exist on the Vercel deployment — it is NOT a 404. The page loads but crashes with "We hit a loading snag. Try refreshing the page." for both Administrator and Governing Person roles. The route is real but the page component throws an error.
+
 **Root cause hypothesis:**
-Settings routes may have been moved to a different path (e.g. `/dashboard/settings`, `/admin/settings`, or accessible only via a gear icon or org name click in the top bar). The checklist routes were derived from the role map and may be stale.
+Page component crashes on load — likely a data fetch that fails (missing seed data the settings page expects, e.g. RTO profile fields, billing configuration, or an empty table causing a null dereference).
 
 **Next step for RJ:**
-Confirm the correct settings route and update the checklist accordingly.
+1. Check browser console on `/settings/rto` for the specific JS error
+2. Identify which data fetch is failing and whether it needs additional seed data
 
 **Console errors:**
-_None — clean 404_
+_Not yet captured — please check browser console on /settings/rto and paste here_
+
+---
+
+---
+
+## F-008
+
+**Role:** Governing Person (`governing@complyhub-seed.com`)
+**Checklist items:** 3.2
+**Severity:** P2
+**Owner:** RJ
+**Status:** Open
+
+**Expected:**
+Governance Meeting Manager → History tab loads a list of past meetings.
+
+**Actual:**
+Clicking the History tab shows "We hit a loading snag. Try refreshing the page." Page does not recover on refresh.
+
+**Root cause hypothesis:**
+The History tab query likely expects past meetings with completed status. The seed only has one future meeting (06 Jul 2026) with no history records. The component may crash on empty or null data rather than showing an empty state gracefully.
+
+**Next step for RJ:**
+1. Check browser console for the specific error when clicking History
+2. If it's a null/empty data crash — fix the component to handle empty history gracefully
+3. If it's a missing seed record — add a completed past meeting to seed.sql
+
+**Console errors:**
+_Not yet captured — please check browser console on the History tab and paste here_
 
 ---
 
