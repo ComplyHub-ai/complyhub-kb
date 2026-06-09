@@ -99,11 +99,18 @@ Before testing each role, confirm:
 - ❌ Edit an existing CT record → blocked by F-004 (no record to edit)
 
 ## 2.3 Students & Support
-- [ ] `/dashboard/registers/ssr` loads
-- [ ] `/student-support/reports/at-risk` loads
-- [ ] `/student-support/reports/wellbeing` loads
-- [ ] `/dashboard/registers/caa` loads
-- [ ] Add a new SSR record → saves and appears
+> ⚠️ URLs corrected from role map — verified against live app 2026-06-09
+- [ ] `/dashboard/students-support/dashboard` loads (Students & Support dashboard)
+- [ ] `/dashboard/students-support/suitability` loads (Suitability & LLND)
+- [ ] `/dashboard/students-support/support` loads (Student Support)
+- [ ] `/dashboard/students-support/adjustments` loads (Adjustments)
+- [ ] `/dashboard/students-support/wellbeing` loads (Wellbeing & Safety)
+- [ ] `/dashboard/students-support/placement-wellbeing` loads (Placement Wellbeing)
+- [ ] `/dashboard/students-support/diversity` loads (Diversity & Inclusion)
+- [ ] `/dashboard/students-support/complaints-appeals` loads (Complaints & Appeals)
+- [ ] `/admin/surveys` loads (Surveys)
+- [ ] Add a new student support record on one of the above pages → saves and appears
+> ⚠️ Note: At-Risk navigates to `/dashboard/students-support/dashboard` (same URL as dashboard — may be a tab or sub-view, confirm visually)
 
 ## 2.4 VET Workforce
 - [ ] `/dashboard/registers/pdr` loads — shows only Tenant 1 PD records
@@ -265,11 +272,12 @@ Before testing each role, confirm:
 - [ ] `/dashboard/sso/interventions` loads
 
 ## 6.3 Registers
-- [ ] `/dashboard/registers/ssr` loads with write access — can add a student support record
-- [ ] `/dashboard/registers/caa` loads with write access
-- [ ] `/student-support/reports/at-risk` loads
-- [ ] `/student-support/reports/reasonable-adjustment` loads
-- [ ] `/student-support/reports/wellbeing` loads
+> ⚠️ URLs corrected to match live app routes (verified by admin user 2026-06-09)
+- [ ] `/dashboard/students-support/support` loads with write access — can add a student support record
+- [ ] `/dashboard/students-support/complaints-appeals` loads with write access
+- [ ] `/dashboard/students-support/dashboard` loads (at-risk view)
+- [ ] `/dashboard/students-support/adjustments` loads
+- [ ] `/dashboard/students-support/wellbeing` loads
 
 ## 6.4 Reports
 - [ ] `/dashboard/sso/monthly-pack` loads
