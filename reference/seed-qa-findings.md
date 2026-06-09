@@ -29,6 +29,7 @@ Owner guide:
 |---|---|---|---|---|---|
 | F-001 | Super Admin | Post-login landing | P1 | RJ | Open |
 | F-002 | Super Admin | `/superadmin/dashboard` | P1 | Carl/Dave | Open |
+| F-003 | Administrator | Post-login landing | P1 | Carl (seed gap) | Fixed — applied to branch |
 
 ---
 
@@ -98,6 +99,40 @@ Both `platform_permissions` and `platform_role_permissions` tables are completel
 
 **Console errors:**
 _Not yet captured — please check browser console and paste here_
+
+---
+
+---
+
+## F-003
+
+**Role:** Administrator (`admin@complyhub-seed.com`)
+**Checklist items:** 2.1
+**Severity:** P1
+**Owner:** Carl (seed gap)
+**Status:** Fixed — applied to branch DB, seed.sql updated
+
+**Expected:**
+Administrator lands on admin dashboard after login.
+
+**Actual:**
+"Your Trial Has Ended" screen shown immediately after login. No access to any tenant features.
+
+**Root cause:**
+`sec.tenant_is_active()` checks `billing_subscriptions.billing_state` first — NOT `tenants.subscription_status`. The `billing_subscriptions` table was completely empty. The seed set `subscription_status = 'active'` on the `tenants` table but the billing gate never reads that column directly.
+
+**Fix applied:**
+Added Section 23 to `seed.sql` — inserts one `billing_subscriptions` row per tenant:
+- Tenant 1: `billing_state = 'active'`, `plan_key = 'growth'`
+- Tenant 2: `billing_state = 'trial_active'`, `plan_key = 'trial'`
+
+Both tenants now return `sec.tenant_is_active() = true`. Applied directly to branch DB via MCP.
+
+**Verified:**
+```
+Seed RTO Pty Ltd   | billing_state: trial_active | is_active: true
+Trial RTO Pty Ltd  | billing_state: trial_active | is_active: true
+```
 
 ---
 
