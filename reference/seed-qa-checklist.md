@@ -1,7 +1,8 @@
 # ComplyHub — Seed QA Checklist
 **Branch DB:** `agcdvmrwzzgnlmfyrxtb`
-**Last updated:** 2026-06-08
-**Status:** Draft — pending team review before first run
+**Last updated:** 2026-06-09
+**Status:** In progress — QA run active (Brian/Khian)
+**Findings log:** `seed-qa-findings.md`
 
 ---
 
@@ -51,28 +52,29 @@ Before testing each role, confirm:
 **Expected landing:** `/superadmin/dashboard`
 
 ## 1.1 Landing & navigation
-- [ ] Lands on `/superadmin/dashboard` after login — NOT `/dashboard`
-- [ ] Left nav shows SuperAdmin sections only (no tenant register links)
-- [ ] Tenant register links (PDR, TAS, etc.) are not accessible directly via URL (redirect to `/superadmin/dashboard`)
+- ❌ Lands on `/superadmin/dashboard` after login — NOT `/dashboard` → **F-001** lands in Tenant 1 admin context
+- ❌ Left nav shows SuperAdmin sections only → shows tenant nav instead
+- ⚠️ Tenant register links not accessible via URL → not tested (blocked by F-001)
 
 ## 1.2 Platform management
-- [ ] `/superadmin/tenants` loads — both seed tenants (seed-rto, trial-rto) visible
-- [ ] `/superadmin/users` loads — all 10 seed users visible
-- [ ] `/superadmin/system/audit` loads in read-only mode
-- [ ] `/superadmin/system/flags` loads — feature flags editable
-- [ ] `/superadmin/billing/revenue` loads (requires `sa_billing` permission)
-- [ ] `/superadmin/billing/sales` loads (requires `sa_sales` permission)
-- [ ] `/superadmin/regulatory-intelligence` loads
+- ❌ `/superadmin/tenants` → Access Denied toast, blank page — **F-002** (platform_permissions tables empty)
+- ❌ `/superadmin/users` → blocked by F-002
+- ❌ `/superadmin/system/audit` → blocked by F-002
+- ❌ `/superadmin/system/flags` → blocked by F-002
+- ❌ `/superadmin/billing/revenue` → blocked by F-002
+- ❌ `/superadmin/billing/sales` → blocked by F-002
+- ❌ `/superadmin/regulatory-intelligence` → blocked by F-002
 
 ## 1.3 Permission guard
-- [ ] Navigating to a permission-gated route without that permission shows denied state + toast (test by removing a permission if possible, or note as future test)
+- ⚠️ Not tested — blocked by F-002
 
 ## 1.4 Tenant isolation enforcement
-- [ ] Navigating to `/dashboard/registers/pdr` redirects to `/superadmin/dashboard` (super_admin must not access tenant content)
-- [ ] Navigating to `/dashboard/admin` redirects to `/superadmin/dashboard`
+- ⚠️ Not tested — blocked by F-001/F-002
 
 ## 1.5 QA tracker
-- [ ] `/superadmin/qa-testing` loads
+- ⚠️ Not tested — blocked by F-002
+
+> **Role 1 blocked** — F-001 (RJ) and F-002 (Carl) must be resolved before retesting.
 
 ---
 
@@ -83,18 +85,18 @@ Before testing each role, confirm:
 **Expected landing:** `/dashboard/admin` or main dashboard
 
 ## 2.1 Landing & navigation
-- [ ] Lands on admin dashboard after login
-- [ ] All 9 nav sections visible: Dashboard, Training & Assessment, Students & Support, VET Workforce, Governance & Risk, Documents, AI & Automation, User Management, Settings
+- ✅ Lands on Admin Dashboard after login (Seed RTO Pty Ltd / Administrator)
+- ✅ All 9 nav sections visible: Dashboard, Training & Assessment, Students & Support, VET Workforce, Governance & Risk, Documents & Compliance, AI & Automation, User Management, Settings
 
 ## 2.2 Training & Assessment
-- [ ] `/dashboard/tas-engine` loads with Tenant 1 data
-- [ ] `/dashboard/assessment-validation` loads
-- [ ] `/admin/trainer-matrix-engine` loads
-- [ ] `/dashboard/registers/ct` loads — CT register shows Tenant 1 records only
-- [ ] `/dashboard/registers/rpl` loads
-- [ ] `/dashboard/registers/fre` loads
-- [ ] Add a new record in CT register → record saves → appears in table
-- [ ] Edit an existing CT record → change saves correctly
+- ✅ `/dashboard/tas-engine` loads with Tenant 1 data
+- ✅ `/dashboard/assessment-validation` loads
+- ✅ `/admin/trainer-matrix-engine` loads
+- ✅ `/dashboard/registers/ct` loads — CT register shows Tenant 1 records only
+- ✅ `/dashboard/registers/rpl` loads
+- ✅ `/dashboard/registers/fre` loads
+- ❌ Add a new record in CT register → **F-004** Risk Level dropdown empty, form cannot save
+- ❌ Edit an existing CT record → blocked by F-004 (no record to edit)
 
 ## 2.3 Students & Support
 - [ ] `/dashboard/registers/ssr` loads
