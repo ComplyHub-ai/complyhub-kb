@@ -1,8 +1,9 @@
 # ComplyHub — Seed QA Findings Log
 **Branch DB:** `agcdvmrwzzgnlmfyrxtb`
-**QA Run started:** 2026-06-09
+**QA Round 1:** 2026-06-09 — 22 findings identified
+**QA Round 2:** Pending — fixes deployed to Vercel, re-test required
 **Tester:** Brian (Khian)
-**Status:** In progress
+**Status:** Round 1 complete — all fixable items resolved on `fix/local-run`
 
 ---
 

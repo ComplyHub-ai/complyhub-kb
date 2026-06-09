@@ -1,8 +1,44 @@
 # ComplyHub — Seed QA Checklist
 **Branch DB:** `agcdvmrwzzgnlmfyrxtb`
-**Last updated:** 2026-06-09
-**Status:** In progress — QA run active (Brian/Khian)
+**Last updated:** 2026-06-10
+**Status:** Round 1 complete — fixes deployed, Round 2 re-test required
 **Findings log:** `seed-qa-findings.md`
+**Branch Vercel URL:** `https://complyhub-rto-git-fix-local-run-complyhub.vercel.app`
+
+---
+
+## Current State Summary
+
+Round 1 manual QA (2026-06-09) found 22 findings (F-001 to F-022).
+All fixable bugs and seed gaps have been resolved on `fix/local-run` and deployed to Vercel.
+
+**Fixed (20):** F-001 to F-019, F-021
+**Open — features not yet built (2):** F-020, F-022 (consultant sub-pages)
+
+---
+
+## Next Actions — Round 2 Re-test
+
+Now that fixes are deployed, the following need to be re-tested against the live Vercel branch URL. Use the same seed credentials (password: `Seed1234!`).
+
+### Priority 1 — Re-test previously blocked roles
+These were fully blocked in Round 1 and can now be properly tested:
+- **Role 1 (Super Admin)** — F-001 and F-002 fixed. Re-run all of Section 1.
+- **Role 4 (CM)** — F-009/F-010/F-011/F-012 fixed. Re-run all of Section 4.
+- **Role 5 (Trainer)** — F-013/F-014/F-015/F-016/F-017/F-018 fixed. Re-run all of Section 5.
+- **Role 7 (Consultant)** — F-019/F-021 fixed. Re-run all of Section 7, especially 7.4 (P0 isolation check).
+
+### Priority 2 — Run Cross-Cutting Scenarios (not yet tested)
+CC-1 through CC-5 were never run. Run these after roles above pass.
+
+### Priority 3 — Re-verify previously passing roles
+Roles 2 and 3 had some items fixed (F-004, F-006, F-007, F-008). Spot-check:
+- Role 2: Re-test CT register Add (F-004 fixed), Settings page (F-007 fixed)
+- Role 3: Re-test Governance Meeting History tab (F-008 fixed), /settings/rto (F-007 fixed)
+
+### Not in scope for Round 2
+- Roles 6, 8, 9, 10 — still under construction, deferred
+- F-020, F-022 — consultant portal sub-pages not built yet
 
 ---
 
