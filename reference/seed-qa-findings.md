@@ -32,7 +32,7 @@ Owner guide:
 | F-003 | All roles | Post-login landing | P1 | Carl (seed gap) | Fixed |
 | F-004 | Administrator | `/dashboard/registers/ct` — Risk Level dropdown | P2 | RJ | Fixed — dd_risk_level seeded |
 | F-005 | All roles | Person dropdowns — Unknown names | P2 | Carl (seed gap) | Fixed |
-| F-006 | Administrator | SSR Add form — missing asterisk | P2 | RJ | Open |
+| F-006 | Administrator | SSR Add form — missing asterisk | P2 | RJ | Fixed |
 | F-007 | All roles | `/settings/rto` crashes instead of redirecting | P2 | RJ | Fixed — array type guard added |
 | F-008 | Governing Person | Governance Meeting History tab crash | P2 | RJ | Fixed — null guard + case-insensitive filter + seed title |
 | F-009 | Compliance Manager | `/complybot` → 404 | P1 | RJ | Fixed — /complybot route added under ManagerRoute |
