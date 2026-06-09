@@ -88,11 +88,13 @@ Page is blank. Toast fires: "Access Denied — You do not have permission to acc
 **Root cause hypothesis:**
 The seed does not populate the platform permissions table for the super_admin user. `PlatformPermissionGuard` requires a resolved permission set (auth → identity → role → permissions stages). The `sa_dashboard` permission record is missing for `superadmin@complyhub.ai` in whatever table stores platform-level permissions.
 
-**Next step for Carl/Dave:**
-1. Identify which table stores platform permissions (likely `platform_permissions` or `user_platform_permissions`)
-2. Check what rows exist for other super_admin users in production to understand the correct shape
-3. Add the missing permission rows to `seed.sql` Section 6 or a new section
-4. Re-apply to branch DB and retest
+**Confirmed root cause:**
+Both `platform_permissions` and `platform_role_permissions` tables are completely empty on the branch DB — not just missing for the seed user, but entirely unpopulated. `PlatformPermissionGuard` queries these tables and finds nothing, so it denies access to every super_admin route.
+
+**Next step for Carl:**
+1. Check `platform_permissions` and `platform_role_permissions` in production to get the correct row shape
+2. Add the required rows to `seed.sql` as a new section (Section 24 or similar)
+3. Re-apply to branch DB (`execute_sql` or `db reset`) and retest
 
 **Console errors:**
 _Not yet captured — please check browser console and paste here_
