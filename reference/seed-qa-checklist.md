@@ -189,8 +189,8 @@ Before testing each role, confirm:
 - ✅ `/dashboard/tas-engine` loads
 
 ## 3.3 Governance-specific
-- [ ] CEO Governance Portal loads (Governing Person should see content, not the gate Admin sees)
-- [ ] Can view validation details
+- ✅ CEO Governance Portal → same "rolling out progressively" gate as Admin — expected, feature not yet released for any role
+- [ ] Can view Assessment Validation (`/dashboard/assessment-validation`) — read-only access sufficient
 
 ---
 
