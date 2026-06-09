@@ -29,12 +29,26 @@ Owner guide:
 |---|---|---|---|---|---|
 | F-001 | Super Admin | Post-login landing | P1 | RJ | Open |
 | F-002 | Super Admin | `/superadmin/dashboard` | P1 | Carl/Dave | Open |
-| F-003 | All roles | Post-login landing | P1 | Carl (seed gap) | Fixed — applied to branch + seed.sql updated |
-| F-004 | Administrator | `/dashboard/registers/ct` — Add form | P2 | RJ | Open |
-| F-005 | All roles | Person dropdowns across all forms | P2 | Carl (seed gap) | Fixed — applied to branch + seed.sql updated |
-| F-006 | Administrator | `/dashboard/students-support/support` — Add form | P2 | RJ | Open |
-| F-007 | Administrator + Governing Person | `/settings/rto` page crash | P2 | RJ | Open |
-| F-008 | Governing Person | Governance Meeting History tab | P2 | RJ | Open |
+| F-003 | All roles | Post-login landing | P1 | Carl (seed gap) | Fixed |
+| F-004 | Administrator | `/dashboard/registers/ct` — Risk Level dropdown | P2 | RJ | Open |
+| F-005 | All roles | Person dropdowns — Unknown names | P2 | Carl (seed gap) | Fixed |
+| F-006 | Administrator | SSR Add form — missing asterisk | P2 | RJ | Open |
+| F-007 | All roles | `/settings/rto` crashes instead of redirecting | P2 | RJ | Open |
+| F-008 | Governing Person | Governance Meeting History tab crash | P2 | RJ | Open |
+| F-009 | Compliance Manager | `/complybot` → 404 | P1 | RJ | Open |
+| F-010 | Compliance Manager | PDR register no Add button (expected write access) | P1 | RJ | Open |
+| F-011 | Compliance Manager | `/settings/users-management` → 404 | P1 | RJ | Open |
+| F-012 | Compliance Manager | `/admin/user-portals` → Access Denied | P1 | RJ | Open |
+| F-013 | Trainer | `/dashboard/trainer-portal/products` → 404 | P1 | RJ | Open |
+| F-014 | Trainer | `/dashboard/trainer-portal/availability` → 404 | P1 | RJ | Open |
+| F-015 | Trainer | TCR register — Add button visible (write access leak) | P1 | RJ | Open |
+| F-016 | Trainer | `/document-repository` → 404 | P1 | RJ | Open |
+| F-017 | Trainer | Governance Meeting Manager loads (should be blocked) | P1 | RJ | Open |
+| F-018 | Trainer | `/dashboard/trainer-portal/fre-register` → 404 | P1 | RJ | Open |
+| F-019 | Consultant | Post-login briefly lands on T1 admin dashboard | P1 | RJ | Open |
+| F-020 | Consultant | `/consultant/my-tenants` → Coming soon | P1 | RJ | Open |
+| **F-021** | **Consultant** | **T2 context — T1 PDR records visible (P0 CRITICAL)** | **P0** | **RJ** | **Open — escalate immediately** |
+| F-022 | Consultant | All consultant sub-pages → Coming soon | P1 | RJ | Open |
 
 ---
 
@@ -297,6 +311,178 @@ The History tab query likely expects past meetings with completed status. The se
 
 **Console errors:**
 _Not yet captured — please check browser console on the History tab and paste here_
+
+---
+
+---
+
+## F-009
+
+**Role:** Compliance Manager (`compliance@complyhub-seed.com`)
+**Checklist items:** 4.2
+**Severity:** P1 | **Owner:** RJ | **Status:** Open
+
+**Expected:** `/complybot` loads and responds.
+**Actual:** 404 — redirected to `/not-found`.
+**Note:** ComplyBot works for Administrator (Role 2 confirmed ✅). Route may be access-controlled differently for Compliance Manager.
+
+---
+
+## F-010
+
+**Role:** Compliance Manager (`compliance@complyhub-seed.com`)
+**Checklist items:** 4.2
+**Severity:** P1 | **Owner:** RJ | **Status:** Open
+
+**Expected:** `/dashboard/registers/pdr` loads with write access — Add button visible.
+**Actual:** Register loads but no Add button — read-only view only. Matches Governing Person behaviour.
+**Note:** Compliance Manager is listed as having write access to PDR in the role spec. Either the spec is wrong or the guard is wrong. RJ to confirm intended behaviour.
+
+---
+
+## F-011
+
+**Role:** Compliance Manager (`compliance@complyhub-seed.com`)
+**Checklist items:** 4.4
+**Severity:** P1 | **Owner:** RJ | **Status:** Open
+
+**Expected:** `/settings/users-management` loads — user list, no role editing.
+**Actual:** 404. Route may have moved or been renamed.
+
+---
+
+## F-012
+
+**Role:** Compliance Manager (`compliance@complyhub-seed.com`)
+**Checklist items:** 4.4
+**Severity:** P1 | **Owner:** RJ | **Status:** Open
+
+**Expected:** `/admin/user-portals` loads — portal overview, read-only.
+**Actual:** Access Denied. Compliance Manager is blocked when the role spec says this should be accessible.
+
+---
+
+## F-013
+
+**Role:** Trainer/Assessor (`trainer@complyhub-seed.com`)
+**Checklist items:** 5.2
+**Severity:** P1 | **Owner:** RJ | **Status:** Open
+
+**Expected:** `/dashboard/trainer-portal/products` loads — assigned training products visible.
+**Actual:** 404. Route may not exist or trainer has no assigned products seeded.
+
+---
+
+## F-014
+
+**Role:** Trainer/Assessor (`trainer@complyhub-seed.com`)
+**Checklist items:** 5.2
+**Severity:** P1 | **Owner:** RJ | **Status:** Open
+
+**Expected:** `/dashboard/trainer-portal/availability` loads — trainer can update their availability.
+**Actual:** 404.
+
+---
+
+## F-015
+
+**Role:** Trainer/Assessor (`trainer@complyhub-seed.com`)
+**Checklist items:** 5.3
+**Severity:** P1 | **Owner:** RJ | **Status:** Open
+
+**Expected:** `/dashboard/registers/tcr` loads read-only — no Add button for Trainer role.
+**Actual:** "Log New Entry" button is visible. Trainer can attempt to write TCR records — role boundary violation.
+
+---
+
+## F-016
+
+**Role:** Trainer/Assessor (`trainer@complyhub-seed.com`)
+**Checklist items:** 5.5
+**Severity:** P1 | **Owner:** RJ | **Status:** Open
+
+**Expected:** `/document-repository` loads — read-only, no upload button.
+**Actual:** 404.
+
+---
+
+## F-017
+
+**Role:** Trainer/Assessor (`trainer@complyhub-seed.com`)
+**Checklist items:** 5.6
+**Severity:** P1 | **Owner:** RJ | **Status:** Open
+
+**Expected:** `/dashboard/governance/meeting-manager` → redirected away for Trainer role.
+**Actual:** Page loads fully with live meeting data (seeded meeting "Governance Meeting - 06 Jul 2026", 80% readiness score, Trainer Compliance Status). Trainer should not see governance content.
+
+---
+
+## F-018
+
+**Role:** Trainer/Assessor (`trainer@complyhub-seed.com`)
+**Checklist items:** 5.7
+**Severity:** P1 | **Owner:** RJ | **Status:** Open
+
+**Expected:** `/dashboard/trainer-portal/fre-register` loads.
+**Actual:** 404.
+
+---
+
+## F-019
+
+**Role:** Consultant (`consultant@complyhub-seed.com`)
+**Checklist items:** 7.1
+**Severity:** P1 | **Owner:** RJ | **Status:** Open
+
+**Expected:** After login, lands directly on `/consultant/dashboard`.
+**Actual:** Post-auth flow briefly redirects to `/dashboard/admin` (Tenant 1 admin context) before reaching `/consultant/dashboard`. Same pattern as F-001 for super_admin — the app loads a tenant context before the role-specific guard redirects.
+
+---
+
+## F-020
+
+**Role:** Consultant (`consultant@complyhub-seed.com`)
+**Checklist items:** 7.2
+**Severity:** P1 | **Owner:** RJ | **Status:** Open
+
+**Expected:** `/consultant/my-tenants` shows both Tenant 1 and Tenant 2 listed.
+**Actual:** "Coming soon" placeholder. Cannot verify tenant list or switch between tenants via this page.
+
+---
+
+## F-021 — P0 CRITICAL
+
+**Role:** Consultant (`consultant@complyhub-seed.com`)
+**Checklist items:** 7.3, 7.4
+**Severity:** P0 | **Owner:** RJ | **Status:** Open — escalate immediately
+
+**Expected:**
+While in Tenant 2 (Trial RTO) context, `/dashboard/registers/pdr` shows only Tenant 2 records (2 seeded: PDR-SEED-T2-001, PDR-SEED-T2-002).
+
+**Actual:**
+5 records visible in Tenant 2 context — includes Jane Trainer (Trainer/Assessor) records which belong to Tenant 1. All 5 PDR records from both tenants are displayed.
+
+**Impact:**
+This is the original Angela-reported cross-tenant data leak. RJ's fix (adding `.eq('tenant_id', ctx.active_tenant_id)` to the PDR query) resolves it for single-tenant users (Admin confirmed ✅) but NOT for multi-tenant users like the Consultant. When the consultant switches to Tenant 2 context, `ctx.active_tenant_id` is likely still returning Tenant 1's ID, so the filter passes T1 records through.
+
+**Root cause hypothesis:**
+`get_my_app_context` RPC does not update `active_tenant_id` when the consultant switches workspace context. The RPC may cache or default to the user's primary tenant regardless of which workspace the consultant entered.
+
+**Next step for RJ — urgent:**
+1. Check what `get_my_app_context` returns for the consultant when in Tenant 2 context
+2. Verify whether the workspace-switch flow updates `active_tenant_id` in the database or session
+3. The fix must ensure `ctx.active_tenant_id` reflects the currently active workspace, not the default tenant
+
+---
+
+## F-022
+
+**Role:** Consultant (`consultant@complyhub-seed.com`)
+**Checklist items:** 7.2
+**Severity:** P1 | **Owner:** RJ | **Status:** Open
+
+**Expected:** `/consultant/my-tenants`, `/consultant/tenants-hub`, `/consultant/calendar`, `/consultant/account-settings` show functional content.
+**Actual:** All show "Coming soon" placeholder. Portal sub-pages are not yet built.
 
 ---
 

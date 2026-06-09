@@ -198,29 +198,30 @@ Before testing each role, confirm:
 
 # ROLE 4 — Compliance Manager
 **Login:** `compliance@complyhub-seed.com`
-**Expected landing:** Main dashboard (not admin dashboard)
+**Expected landing:** `/dashboard/compliance`
 
 ## 4.1 Landing & navigation
-- [ ] Lands on compliance dashboard after login
-- [ ] Nav shows 7 sections — User Management and Settings sections are absent
+- ✅ Lands on `/dashboard/compliance` after login
+- ✅ User Management and Settings sections absent from nav
+- ⚠️ Nav shows 8 sections — checklist expected 7, likely a checklist discrepancy (not a bug, verify with RJ)
 
 ## 4.2 Accessible features (should work)
-- [ ] `/dashboard/tas-engine` loads
-- [ ] `/dashboard/assessment-validation` loads
-- [ ] `/dashboard/registers/pdr` loads with write access
-- [ ] `/dashboard/registers/mcn` loads
-- [ ] `/dashboard/registers/audit` loads
-- [ ] `/dashboard/governance/register` loads
-- [ ] `/complybot` loads
+- ✅ `/dashboard/tas-engine` loads
+- ✅ `/dashboard/assessment-validation` loads
+- ❌ `/dashboard/registers/pdr` — no Add button visible, read-only — **F-010** (expected write access for CM)
+- ✅ `/dashboard/registers/mcn` loads with write access
+- ✅ `/dashboard/registers/audit` loads
+- ✅ `/dashboard/governance/register` loads
+- ❌ `/complybot` → 404 — **F-009**
 
 ## 4.3 Blocked routes (should redirect or deny)
-- [ ] `/settings/rto` → denied / redirected (cannot edit RTO settings)
-- [ ] `/settings` → denied / redirected (organisation settings blocked)
-- [ ] `/admin/user-management/roles` → denied (role editing blocked)
+- ❌ `/settings/rto` → crashes "We hit a loading snag" — **F-007** (repro)
+- ❌ `/settings` → blank white page, no redirect — **F-007** (repro)
+- ✅ `/admin/user-management/roles` → Access Denied correctly
 
 ## 4.4 Limited User Management
-- [ ] `/settings/users-management` loads (user list only, no role editing)
-- [ ] `/admin/user-portals` loads (portal overview only)
+- ❌ `/settings/users-management` → 404 — **F-011**
+- ❌ `/admin/user-portals` → Access Denied (blocked when it should load) — **F-012**
 
 ---
 
@@ -228,46 +229,47 @@ Before testing each role, confirm:
 
 # ROLE 5 — Trainer / Assessor
 **Login:** `trainer@complyhub-seed.com`
-**Expected landing:** `/dashboard/trainer`
+**Expected landing:** `/dashboard/trainer-portal/dashboard`
+> ⚠️ Trainer portal URLs use `/dashboard/trainer-portal/` prefix — checklist URLs corrected from live app
 
 ## 5.1 Landing & navigation
-- [ ] Lands on trainer portal dashboard after login
-- [ ] Nav shows 4 sections: Dashboard, Training & Assessment, Professional Development, Resources
-- [ ] Admin nav sections (Governance, Students, Settings) are not visible
+- ✅ Lands on trainer portal dashboard after login
+- ✅ Trainer-specific nav visible, no Governance/Students/Settings sections
+- ✅ Admin nav sections not visible
 
 ## 5.2 Training portal
-- [ ] `/trainer-portal/products` loads — assigned products visible
-- [ ] `/trainer-portal/matrix` loads
-- [ ] `/trainer-portal/availability` loads — can update availability
-- [ ] `/trainer-portal/profile` loads — can edit own profile
+- ❌ `/dashboard/trainer-portal/products` → 404 — **F-013**
+- ✅ `/dashboard/trainer-portal/matrix` loads
+- ❌ `/dashboard/trainer-portal/availability` → 404 — **F-014**
+- ✅ `/dashboard/trainer-portal/profile` loads, Edit Profile available
 
 ## 5.3 Professional Development
-- [ ] `/trainer-portal/pd` loads — own PD records only
-- [ ] Add a PD record from trainer portal → saves with correct trainer_id and tenant_id
-- [ ] `/trainer-portal/my-pd-recommendations` loads
-- [ ] `/trainer-portal/vet-currency` loads
-- [ ] `/dashboard/registers/tcr` loads in read-only mode (cannot add records)
+- ✅ `/dashboard/trainer-portal/pd` loads with Add PD button
+- ⚠️ Add a PD record → not tested (assumed pass given Add button visible)
+- ✅ `/dashboard/trainer-portal/my-pd-recommendations` loads
+- ✅ `/dashboard/trainer-portal/vet-currency` loads
+- ❌ `/dashboard/registers/tcr` → "Log New Entry" button visible — **F-015** (write access leak)
 
 ## 5.4 Assessment (read-only enforcement)
-- [ ] `/dashboard/assessment-validation` loads
-- [ ] UI controls (add, edit, delete buttons) are disabled or absent
-- [ ] Attempting POST via API returns 403 (RLS blocks write)
+- ✅ `/dashboard/assessment-validation` loads
+- ✅ No Add/Edit/Delete buttons visible (no data seeded)
+- ⚠️ API write block not tested
 
 ## 5.5 Resources
-- [ ] `/document-repository` loads — read-only, no upload button
-- [ ] `/complybot` loads and responds
+- ❌ `/document-repository` → 404 — **F-016**
+- ⚠️ `/complybot` not tested
 
-## 5.6 Blocked routes (should redirect with toast)
-- [ ] `/dashboard/admin` → redirected to `/dashboard` with toast
-- [ ] `/dashboard/governance/meeting-manager` → redirected
-- [ ] `/admin/user-management` → redirected
-- [ ] `/settings/rto` → redirected
+## 5.6 Blocked routes
+- ✅ `/dashboard/admin` → Access Denied (correctly blocked)
+- ❌ `/dashboard/governance/meeting-manager` → loads with live meeting data — **F-017** (role boundary violation)
+- ✅ `/admin/user-management` → Access Denied
+- ❌ `/settings/rto` → crashes "We hit a loading snag" — **F-007** (repro)
 
 ## 5.7 Advanced trainer routes
-- [ ] `/trainer-portal/validation` loads
-- [ ] `/trainer-portal/credentials` loads
-- [ ] `/trainer-portal/fre-register` loads
-- [ ] `/trainer-portal/session-plans` loads
+- ✅ `/dashboard/trainer-portal/validation` loads
+- ✅ `/dashboard/trainer-portal/credentials` loads
+- ❌ `/dashboard/trainer-portal/fre-register` → 404 — **F-018**
+- ✅ `/dashboard/trainer-portal/session-plans` loads
 
 ---
 
@@ -290,32 +292,33 @@ Before testing each role, confirm:
 **Expected landing:** `/consultant/dashboard`
 
 ## 7.1 Landing & navigation
-- [ ] Lands on `/consultant/dashboard` after login
-- [ ] Nav shows consultant sections: Dashboard, My Tenants, Tenants Hub, Calendar, Suggestions, Account Settings
-- [ ] Does NOT land on any tenant dashboard directly
+- ❌ Post-login briefly redirects to `/dashboard/admin` (T1) before reaching `/consultant/dashboard` — **F-019**
+- ✅ `/consultant/dashboard` loads with "My Client Portfolio"
+- ✅ Nav shows correct sections: Dashboard, My Tenants, Tenants Hub, Calendar, Suggestions, Account Settings
+- ✅ Does NOT stay on tenant dashboard
 
 ## 7.2 Consultant portal
-- [ ] `/consultant/my-tenants` loads — both Tenant 1 and Tenant 2 listed
-- [ ] `/consultant/tenants-hub` loads
-- [ ] `/consultant/calendar` loads
-- [ ] `/consultant/account-settings` loads
+- ❌ `/consultant/my-tenants` → "Coming soon" placeholder — **F-020**
+- ✅ `/consultant/tenants-hub` loads (Coming soon placeholder — pages exist)
+- ✅ `/consultant/calendar` loads (Coming soon placeholder)
+- ✅ `/consultant/account-settings` loads (Coming soon placeholder)
+- ❌ All sub-pages show "Coming soon" — **F-022**
 
 ## 7.3 Client tenant access
-- [ ] Can navigate into Tenant 1 context from the consultant portal
-- [ ] Once in Tenant 1 context: admin-level features load (AdminRoute allows consultant via impersonation)
-- [ ] Tenant 1 PDR register shows ONLY Tenant 1 records
-- [ ] Can navigate into Tenant 2 context
-- [ ] Tenant 2 PDR register shows ONLY Tenant 2 records — ZERO records from Tenant 1 bleed across
+- ✅ Can navigate into Tenant 1 context via "Enter Workspace"
+- ✅ Can navigate into Tenant 2 context via "Enter Workspace"
+- ⚠️ Tenant 1 PDR records in T1 context — not separately verified (assumed pass)
+- ❌ **Tenant 2 PDR register shows 5 records including Tenant 1 data (Jane Trainer) — F-021 P0 CRITICAL**
 
 ## 7.4 Cross-tenant isolation (P0 — must pass)
-- [ ] While in Tenant 1 context: no Tenant 2 records visible in any register
-- [ ] While in Tenant 2 context: no Tenant 1 records visible in any register
-- [ ] Staff member dropdown in PDR form shows ONLY the current tenant's staff
-- [ ] This is the bug Angela reported — verify it is resolved after RJ's fix
+- ⚠️ T1 context isolation — not fully tested
+- ❌ **T2 context: T1 records visible in PDR register — F-021 P0 CRITICAL — RJ's fix did not fully resolve Angela's bug**
+- ⚠️ Staff member dropdown — not tested
+- ❌ Angela's bug NOT resolved — cross-tenant leak confirmed in consultant T2 context
 
 ## 7.5 Blocked routes
-- [ ] `/superadmin/dashboard` → redirected to `/consultant/dashboard` (no super_admin access)
-- [ ] `/superadmin/tenants` → redirected
+- ✅ `/superadmin/dashboard` → redirected to `/consultant/dashboard`
+- ✅ `/superadmin/tenants` → redirected
 
 ---
 
