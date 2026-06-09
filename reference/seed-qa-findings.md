@@ -31,6 +31,8 @@ Owner guide:
 | F-002 | Super Admin | `/superadmin/dashboard` | P1 | Carl/Dave | Open |
 | F-003 | All roles | Post-login landing | P1 | Carl (seed gap) | Fixed — applied to branch + seed.sql updated |
 | F-004 | Administrator | `/dashboard/registers/ct` — Add form | P2 | RJ | Open |
+| F-005 | All roles | Person dropdowns across all forms | P2 | Carl (seed gap) | Fixed — applied to branch + seed.sql updated |
+| F-006 | Administrator | `/dashboard/students-support/support` — Add form | P2 | RJ | Open |
 
 ---
 
@@ -176,6 +178,63 @@ The Risk Level dropdown likely reads from a lookup table or enum that is either 
 
 **Console errors:**
 _Not yet captured — please check browser console and paste here_
+
+---
+
+---
+
+## F-005
+
+**Role:** All roles (first seen: Administrator)
+**Checklist items:** 2.3 — Add SSR record; likely affects any form with a person picker
+**Severity:** P2
+**Owner:** Carl (seed gap)
+**Status:** Open
+
+**Expected:**
+Person picker dropdowns (e.g. "Responsible Person") show the real name of each seed user — e.g. "Adam Admin", "Trainer User", etc.
+
+**Actual:**
+All options in the Responsible Person dropdown display as "Unknown". Selecting one still allows the form to save, so functionality is not blocked — but data quality is poor and the field is meaningless for testing purposes.
+
+**Root cause:**
+The seed's `tenant_members` INSERT does not include the `full_name` column. All 10 seed users have `full_name = NULL`. Person picker dropdowns that join to `tenant_members.full_name` or `profiles.full_name` fall back to "Unknown".
+
+**Fix required in seed.sql:**
+Add `full_name` to the `tenant_members` INSERT column list and populate realistic names for each seed user. Example:
+- `admin@complyhub-seed.com` → "Adam Admin"
+- `trainer@complyhub-seed.com` → "Terry Trainer"
+- `compliance@complyhub-seed.com` → "Claire Compliance"
+- etc.
+
+Also check `profiles` table — if `full_name` or `display_name` is also blank there, update Section 5 of seed.sql accordingly.
+
+**Console errors:**
+_None expected — this is a data gap, not a code error_
+
+---
+
+---
+
+## F-006
+
+**Role:** Administrator (`admin@complyhub-seed.com`)
+**Checklist items:** 2.3 — Add SSR record
+**Severity:** P2
+**Owner:** RJ
+**Status:** Open
+
+**Expected:**
+"Responsible Person" field shows an asterisk (*) like other required fields (Title*, Status*, Support Area*) to indicate it is required.
+
+**Actual:**
+"Responsible Person" label has no asterisk. The field appears to be required (cannot save without a selection) but nothing in the UI signals this to the user.
+
+**Root cause hypothesis:**
+The `required` prop or asterisk indicator is missing from the Responsible Person form field component in the Student Support Register Add form.
+
+**Console errors:**
+_None_
 
 ---
 
