@@ -29,7 +29,7 @@ Owner guide:
 |---|---|---|---|---|---|
 | F-001 | Super Admin | Post-login landing | P1 | RJ | Open |
 | F-002 | Super Admin | `/superadmin/dashboard` | P1 | Carl/Dave | Open |
-| F-003 | Administrator | Post-login landing | P1 | Carl (seed gap) | Fixed — applied to branch |
+| F-003 | All roles | Post-login landing | P1 | Carl (seed gap) | Fixed — applied to branch + seed.sql updated |
 
 ---
 
@@ -118,20 +118,25 @@ Administrator lands on admin dashboard after login.
 **Actual:**
 "Your Trial Has Ended" screen shown immediately after login. No access to any tenant features.
 
-**Root cause:**
-`sec.tenant_is_active()` checks `billing_subscriptions.billing_state` first — NOT `tenants.subscription_status`. The `billing_subscriptions` table was completely empty. The seed set `subscription_status = 'active'` on the `tenants` table but the billing gate never reads that column directly.
+**Root cause (full chain):**
+There are TWO billing guards in sequence: `BillingGateGuard` (calls `billing-gate` edge fn) and `TrialExpirationGuard` (calls `get_access_gate` RPC). Both must pass.
 
-**Fix applied:**
-Added Section 23 to `seed.sql` — inserts one `billing_subscriptions` row per tenant:
-- Tenant 1: `billing_state = 'active'`, `plan_key = 'growth'`
-- Tenant 2: `billing_state = 'trial_active'`, `plan_key = 'trial'`
+1. `BillingGateGuard` — calls `billing-gate` edge fn → calls `sec.user_default_tenant()` → crashes on missing `user_last_tenant` table (deprecated) → returns `allowed:true, no_tenant` → passes through
+2. `TrialExpirationGuard` — calls `get_access_gate(tenant_id)` directly → step 3 legacy fallback: T1 had `trial_consumed=true` → `reason='trial_used'` → `allowed:false` → redirects to `/billing/subscribe?reason=trial_used` → "Your Trial Has Ended" screen
 
-Both tenants now return `sec.tenant_is_active() = true`. Applied directly to branch DB via MCP.
+**Fix applied (two parts):**
+
+Part A — `billing_subscriptions` (Section 23, already committed):
+- Adds rows per tenant so `sec.tenant_is_active()` passes. Rows existed (auto-created by trigger) but this makes it explicit.
+
+Part B — `billing.entitlements` + `trial_expires_at` (Section 24, this commit):
+- T1: `billing.entitlements` row with `status='active'`, `period_end='2027-12-31'`, `provider='manual'` — caught at `get_access_gate` step 2 → `allowed:true, reason='paid_invoice'`
+- T2: `trial_expires_at='2027-12-31'` on tenants row — caught at step 1c trial safety net → `allowed:true, reason='trial_active'`
 
 **Verified:**
 ```
-Seed RTO Pty Ltd   | billing_state: trial_active | is_active: true
-Trial RTO Pty Ltd  | billing_state: trial_active | is_active: true
+Seed RTO Pty Ltd  | get_access_gate: allowed=true, reason=paid_invoice
+Trial RTO Pty Ltd | get_access_gate: allowed=true, reason=trial_active
 ```
 
 ---
