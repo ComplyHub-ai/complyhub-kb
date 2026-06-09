@@ -35,10 +35,10 @@ Owner guide:
 | F-006 | Administrator | SSR Add form — missing asterisk | P2 | RJ | Open |
 | F-007 | All roles | `/settings/rto` crashes instead of redirecting | P2 | RJ | Fixed — array type guard added |
 | F-008 | Governing Person | Governance Meeting History tab crash | P2 | RJ | Open — needs past meeting in seed |
-| F-009 | Compliance Manager | `/complybot` → 404 | P1 | RJ | Open — needs ManagerRoute wrapper on complybot route in AppRoutes |
-| F-010 | Compliance Manager | PDR register no Add button (expected write access) | P1 | RJ | Open — needs investigation |
-| F-011 | Compliance Manager | `/settings/users-management` → 404 | P1 | RJ | Fixed — nav path corrected to /admin/user-management |
-| F-012 | Compliance Manager | `/admin/user-management` → Access Denied for CM | P1 | RJ | Open — needs ManagerRoute wrapper on user-management route in AppRoutes |
+| F-009 | Compliance Manager | `/complybot` → 404 | P1 | RJ | Fixed — /complybot route added under ManagerRoute |
+| F-010 | Compliance Manager | PDR register no Add button (expected write access) | P1 | RJ | Fixed — ADMIN_ROLES includes CM, context returns correct role |
+| F-011 | Compliance Manager | `/settings/users-management` → 404 | P1 | RJ | Fixed — nav path corrected to /dashboard/user-management |
+| F-012 | Compliance Manager | `/admin/user-management` → Access Denied for CM | P1 | RJ | Fixed — /dashboard/user-management route added under ManagerRoute |
 | F-013 | Trainer | Trainer products page 404 | P1 | RJ | Fixed — nav corrected to /dashboard/trainer-portal/select-products |
 | F-014 | Trainer | Trainer availability page 404 | P1 | RJ | Fixed — nav corrected to /dashboard/registers/trainer-availability |
 | F-015 | Trainer | TCR register — Add button visible (write access leak) | P1 | RJ | Fixed — role guard added |
