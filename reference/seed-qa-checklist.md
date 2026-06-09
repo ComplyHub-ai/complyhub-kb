@@ -122,24 +122,27 @@ Before testing each role, confirm:
 
 ## 2.5 Governance & Risk
 > ⚠️ URLs and items updated from live nav 2026-06-09. CEO Governance Portal shows "rolling out progressively" for Admin — expected, it is Governing Person only.
-- [ ] `/dashboard/governance/meeting-manager` loads (Governance Meetings)
-- [ ] `/dashboard/governance/register` loads (Governance Register)
-- [ ] `/dashboard/registers/adc` loads (Annual Declaration)
-- [ ] `/dashboard/registers/mcn` loads (Material Change Notification)
-- [ ] `/dashboard/registers/fpp` loads (Fit & Proper Person)
-- [ ] `/dashboard/registers/pfp` loads (Prepaid Fee Protection)
-- [ ] `/dashboard/registers/pli` loads (Public Liability Insurance)
-- [ ] `/dashboard/registers/qi` loads (Quality Indicator Reporting)
-- [ ] `/dashboard/registers/audit` loads (Audit & Internal Review)
-- [ ] `/dashboard/regulatory-intelligence` loads (Regulatory Intelligence)
-- [ ] `/dashboard/registers/whs` loads (Work Health & Safety)
-- [ ] `/dashboard/registers/thp` loads (Third Party Arrangements)
-- [ ] Add a governance meeting → saves correctly
-- [ ] CEO Governance Portal → shows "rolling out progressively" gate for Admin ✅ expected (Governing Person only)
+- ✅ `/dashboard/governance/meeting-manager` loads (Governance Meetings)
+- ✅ `/dashboard/governance/register` loads (Governance Register)
+- ✅ `/dashboard/registers/adc` loads (Annual Declaration)
+- ✅ `/dashboard/registers/mcn` loads (Material Change Notification)
+- ✅ `/dashboard/registers/fpp` loads (Fit & Proper Person)
+- ✅ `/dashboard/registers/pfp` loads (Prepaid Fee Protection)
+- ✅ `/dashboard/registers/pli` loads (Public Liability Insurance)
+- ✅ `/dashboard/registers/qi` loads (Quality Indicator Reporting)
+- ✅ `/dashboard/registers/audit` loads (Audit & Internal Review)
+- ✅ `/dashboard/regulatory-intelligence` loads (Regulatory Intelligence)
+- ✅ `/dashboard/registers/whs` loads (Work Health & Safety)
+- ✅ `/dashboard/registers/thp` loads (Third Party Arrangements)
+- ✅ Add a governance meeting → saves correctly
+- ✅ CEO Governance Portal → shows "rolling out progressively" gate for Admin — expected (Governing Person only)
 
-## 2.6 Documents
+## 2.6 Documents & Compliance
+> ⚠️ Routes updated from live nav 2026-06-09
 - [ ] `/documents-register` loads
 - [ ] `/document-repository` loads
+- [ ] `/dashboard/registers/mktg` loads (Marketing register)
+- [ ] `/dashboard/suggestions-triage` loads (Suggestions Triage)
 - [ ] Upload a document → appears in register
 
 ## 2.7 AI & Automation
@@ -147,18 +150,22 @@ Before testing each role, confirm:
 - [ ] `/dashboard/assessors/insights` loads
 
 ## 2.8 User Management
+> ⚠️ Routes updated from live nav 2026-06-09
 - [ ] `/admin/user-management` loads — all seed users for Tenant 1 visible
 - [ ] `/admin/user-management/roles` loads — role editing available
 - [ ] `/admin/user-portals` loads
+- [ ] `/admin/credential-risk` loads
+- [ ] `/admin/impersonate` loads
 
 ## 2.9 Settings
-- [ ] `/settings` loads
+> ⚠️ Settings is NOT in the sidebar nav — access via clicking the org name or gear icon in the top bar/sidebar, or navigate directly by URL
+- [ ] `/settings` loads (try navigating directly by URL)
 - [ ] `/settings/rto` loads — RTO details editable
 - [ ] `/settings/preferences` loads
 
 ## 2.10 Cross-tenant isolation
-- [ ] PDR register shows NO records belonging to Tenant 2
-- [ ] CT register shows NO records belonging to Tenant 2
+- ✅ PDR register shows NO Tenant 2 records — confirmed via DB check: 3 T1 records visible, 2 T2 records correctly hidden
+- ✅ CT register shows NO Tenant 2 records — 0 records displayed (no CT data seeded for either tenant, correct)
 
 ---
 
