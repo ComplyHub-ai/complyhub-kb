@@ -139,26 +139,23 @@ Before testing each role, confirm:
 
 ## 2.6 Documents & Compliance
 > ⚠️ Routes updated from live nav 2026-06-09 — mktg and suggestions-triage added
-- [ ] `/documents-register` loads
-- [ ] `/document-repository` loads
-- [ ] `/dashboard/registers/mktg` loads (Marketing register)
-- [ ] `/dashboard/suggestions-triage` loads (Suggestions Triage)
-- [ ] Upload a document → appears in register
-> In progress
+- ✅ `/documents-register` loads
+- ✅ `/document-repository` loads
+- ✅ `/dashboard/registers/mktg` loads (Marketing register)
+- ✅ `/dashboard/suggestions-triage` loads (Suggestions Triage)
+- ✅ Upload a document → appears in register
 
 ## 2.7 AI & Automation
-- [ ] `/complybot` loads and responds
-- [ ] `/dashboard/assessors/insights` loads
-> Not yet tested
+- ✅ `/complybot` loads and responds
+- ✅ `/dashboard/assessors/insights` loads
 
 ## 2.8 User Management
 > ⚠️ Routes updated from live nav 2026-06-09 — credential-risk and impersonate added
-- [ ] `/admin/user-management` loads — all seed users for Tenant 1 visible
-- [ ] `/admin/user-management/roles` loads — role editing available
-- [ ] `/admin/user-portals` loads
-- [ ] `/admin/credential-risk` loads
-- [ ] `/admin/impersonate` loads
-> In progress
+- ✅ `/admin/user-management` loads — all seed users for Tenant 1 visible
+- ✅ `/admin/user-management/roles` loads — role editing available
+- ✅ `/admin/user-portals` loads
+- ✅ `/admin/credential-risk` loads
+- ✅ `/admin/impersonate` loads
 
 ## 2.9 Settings
 > ⚠️ Settings is NOT in the sidebar nav. `/settings`, `/settings/rto`, `/settings/preferences` all return 404. Correct URL unknown — needs investigation. Logged as **F-007**.
