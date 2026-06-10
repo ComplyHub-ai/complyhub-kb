@@ -34,12 +34,12 @@ Owner guide:
 | F-004 | Administrator | CT Risk Level dropdown | P2 | RJ | Fixed | ✅ Confirmed fixed |
 | F-005 | All roles | Person dropdowns — Unknown names | P2 | Carl | Fixed | ✅ Not retested |
 | F-006 | Administrator | SSR Add form — missing asterisk | P2 | RJ | Fixed | ✅ Not retested |
-| **F-007** | **All roles** | **`/settings/rto` crashes** | **P2** | **RJ** | Fixed (attempt) | ❌ Still failing — root cause now known: `useTour` outside `TourProvider` |
-| **F-008** | **Governing Person** | **History tab crash** | **P2** | **RJ** | Fixed (attempt) | ❌ Still failing — now blank page (no crash message) |
-| **F-009** | **CM** | **`/complybot` → 404** | **P1** | **RJ** | Fixed (attempt) | ❌ Still failing — now blank white page (not 404) |
-| **F-010** | **CM** | **PDR register — no Add button** | **P1** | **RJ** | Fixed (attempt) | ❌ Still failing — CM still read-only |
-| **F-011** | **CM** | **`/settings/users-management` 404** | **P1** | **RJ** | Fixed (attempt) | ❌ Still failing — `/not-found` |
-| **F-012** | **CM** | **`/admin/user-portals` Access Denied** | **P1** | **RJ** | Fixed (attempt) | ❌ Still failing — `/access-denied` |
+| F-007 | All roles | `/settings/rto` crashes | P2 | RJ | Fixed (attempt) | ✅ Fixed — TourProvider added to App.tsx |
+| **F-008** | **Governing Person** | **History tab blank page** | **P2** | **RJ** | Fixed (attempt) | ❌ Needs retest — blank (no crash, no empty state visible) |
+| **F-009** | **CM** | **`/complybot` blank page** | **P1** | **RJ** | Fixed (attempt) | ❌ Needs retest — route resolves but all panels render empty |
+| F-010 | CM | PDR register — no Add button | P1 | RJ | Fixed (attempt) | ✅ Fixed — ctx.tenant_role used instead of ctx.role |
+| F-011 | CM | `/dashboard/user-management` 404 | P1 | RJ | Fixed (attempt) | ✅ Fixed — route moved inside /dashboard children tree |
+| F-012 | CM | `/admin/user-portals` Access Denied | P1 | RJ | Fixed (attempt) | ⚠️ By design — RJ confirmed CM should not have user-portals |
 | **F-013** | **Trainer** | **Products page 404** | **P1** | **RJ** | Fixed (attempt) | ⚠️ Needs retest via nav link — Round 2 tested wrong URL |
 | **F-014** | **Trainer** | **Availability page 404** | **P1** | **RJ** | Fixed (attempt) | ⚠️ Needs retest via nav link — Round 2 tested wrong URL |
 | F-015 | Trainer | TCR write access leak | P1 | RJ | Fixed | ✅ Confirmed fixed |
@@ -51,8 +51,8 @@ Owner guide:
 | F-021 | Consultant | T2 PDR cross-tenant leak (P0) | P0 | RJ | Fixed | ✅ Confirmed fixed — 2 T2 records only, no T1 bleed |
 | F-022 | Consultant | Consultant sub-pages Coming soon | P1 | RJ | Open | ⚠️ Deferred — not built |
 | **NEW-001** | **Super Admin** | **SA sees Tenant 1 governance register data** | **P0** | **RJ** | New | ❌ Open — P0 escalate |
-| **NEW-002** | **Super Admin** | **SA authenticated redirect → `/dashboard/admin`** | **P1** | **RJ** | New | ❌ Open |
-| **NEW-003** | **Super Admin** | **`/superadmin/billing/revenue` → 404** | **P2** | **RJ** | New | ❌ Open |
+| NEW-002 | Super Admin | SA authenticated redirect → `/dashboard/admin` | P1 | RJ | New | ⚠️ Test methodology — agent tested `/login` which doesn't exist. Landing page correctly redirects SA. |
+| NEW-003 | Super Admin | `/superadmin/billing/revenue` → 404 | P2 | RJ | New | ⚠️ Checklist URL wrong — correct path is `/superadmin/billing` |
 
 ---
 
