@@ -40,13 +40,13 @@ Owner guide:
 | **F-010** | **CM** | **PDR register — no Add button** | **P1** | **RJ** | Fixed (attempt) | ❌ Still failing — CM still read-only |
 | **F-011** | **CM** | **`/settings/users-management` 404** | **P1** | **RJ** | Fixed (attempt) | ❌ Still failing — `/not-found` |
 | **F-012** | **CM** | **`/admin/user-portals` Access Denied** | **P1** | **RJ** | Fixed (attempt) | ❌ Still failing — `/access-denied` |
-| **F-013** | **Trainer** | **Products page 404** | **P1** | **RJ** | Fixed (attempt) | ❌ Still failing — `/not-found` |
-| **F-014** | **Trainer** | **Availability page 404** | **P1** | **RJ** | Fixed (attempt) | ❌ Still failing — `/not-found` |
+| **F-013** | **Trainer** | **Products page 404** | **P1** | **RJ** | Fixed (attempt) | ⚠️ Needs retest via nav link — Round 2 tested wrong URL |
+| **F-014** | **Trainer** | **Availability page 404** | **P1** | **RJ** | Fixed (attempt) | ⚠️ Needs retest via nav link — Round 2 tested wrong URL |
 | F-015 | Trainer | TCR write access leak | P1 | RJ | Fixed | ✅ Confirmed fixed |
-| **F-016** | **Trainer** | **Document repository 404** | **P1** | **RJ** | Fixed (attempt) | ❌ Still failing — `/not-found` |
+| **F-016** | **Trainer** | **Document repository 404** | **P1** | **RJ** | Fixed (attempt) | ⚠️ Needs retest via nav link — Round 2 tested wrong URL |
 | F-017 | Trainer | Governance Meeting Manager unblocked | P1 | RJ | Fixed | ✅ Confirmed fixed — Access Denied correctly |
-| **F-018** | **Trainer** | **FRE register 404** | **P1** | **RJ** | Fixed (attempt) | ❌ Still failing — `/not-found` |
-| **F-019** | **Consultant** | **Post-login wrong landing** | **P1** | **RJ** | Fixed (attempt) | ❌ Still failing — lands on `/dashboard/admin` |
+| **F-018** | **Trainer** | **FRE register 404** | **P1** | **RJ** | Fixed (attempt) | ⚠️ Needs retest via nav link — Round 2 tested wrong URL |
+| **F-019** | **Consultant** | **Post-login wrong landing** | **P1** | **RJ** | Fixed (attempt) | ⚠️ Needs retest — log out and log back in fresh |
 | F-020 | Consultant | `/consultant/my-tenants` Coming soon | P1 | RJ | Open | ⚠️ Deferred — not built |
 | F-021 | Consultant | T2 PDR cross-tenant leak (P0) | P0 | RJ | Fixed | ✅ Confirmed fixed — 2 T2 records only, no T1 bleed |
 | F-022 | Consultant | Consultant sub-pages Coming soon | P1 | RJ | Open | ⚠️ Deferred — not built |

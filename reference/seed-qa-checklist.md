@@ -32,15 +32,26 @@ Fix the remaining open findings, then re-test.
 ### P0 — Fix immediately
 - **NEW-001**: SA sees governance register data — RLS deny policy missing. Dave to check.
 
-### Still failing — investigate why fix didn't take
-These were fixed in code but didn't work in the deployed app. Likely the fix is in `fix/local-run` but the deployment used a different build, OR the fix logic is wrong:
-- **F-007**: `useTour` outside `TourProvider` — wrap RTOSettings in TourProvider or make hook safe
+### Bucket A — Test methodology issue (NOT code bugs)
+Round 2 retested the old failing URLs from Round 1 instead of clicking the updated nav links.
+The code IS correct and routes DO exist. Must be retested by clicking the nav link.
+
+| Finding | Old URL (Round 2 tested — wrong) | Correct nav path (click this) |
+|---|---|---|
+| F-013 | `/dashboard/trainer-portal/products` | Click "Assigned Training Products" in nav → should go to `/dashboard/trainer-portal/select-products` |
+| F-014 | `/dashboard/trainer-portal/availability` | Click "Availability" in nav → should go to `/dashboard/registers/trainer-availability` |
+| F-016 | `/document-repository` | Click "Training Resources" in nav → should go to `/dashboard/document-repository` |
+| F-018 | `/dashboard/trainer-portal/fre-register` | Click "FRE Register" in nav → should go to `/dashboard/trainer-portal/resources-equipment` |
+| F-019 | Checked redirect on login | Log out, log back in as consultant → should land on `/consultant/dashboard` directly |
+
+**Round 3 instruction:** Do NOT type these URLs manually. Click the nav item, let it navigate, then report the address bar URL and whether the page loaded.
+
+### Bucket B — Genuine fix failures (code changes didn't work)
+- **F-007**: `useTour` outside `TourProvider` — root cause confirmed, fix needed
 - **F-008**: History tab blank page — empty state missing after null guard fix
 - **F-009**: ComplyBot blank for CM — route resolves but component renders nothing
 - **F-010**: CM PDR still read-only — context role string mismatch suspected
 - **F-011/F-012**: CM user management — route or access still broken
-- **F-013/F-014/F-016/F-018**: Trainer 404s — route corrections didn't match actual AppRoutes paths
-- **F-019**: Consultant landing — `landingRoutes.ts` change didn't apply
 
 ### Not in scope for Round 3
 - Roles 6, 8, 9, 10 — under construction
