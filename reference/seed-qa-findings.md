@@ -1,9 +1,9 @@
 # ComplyHub — Seed QA Findings Log
 **Branch DB:** `agcdvmrwzzgnlmfyrxtb`
 **QA Round 1:** 2026-06-09 — 22 findings identified
-**QA Round 2:** Pending — fixes deployed to Vercel, re-test required
-**Tester:** Brian (Khian)
-**Status:** Round 1 complete — all fixable items resolved on `fix/local-run`
+**QA Round 2:** 2026-06-10 — 6 confirmed fixed, 11 still failing, 3 new findings
+**Tester:** Brian (Khian) — Round 1 / Claude (automated) — Round 2
+**Status:** Round 2 complete — fixes needed for F-007 to F-019 (excl. fixed), plus NEW-001 P0
 
 ---
 
@@ -26,30 +26,33 @@ Owner guide:
 
 ## Summary
 
-| # | Role | Route | Severity | Owner | Status |
-|---|---|---|---|---|---|
-| F-001 | Super Admin | Post-login landing | P1 | RJ | Fixed — active_tenant_id set to NULL in seed |
-| F-002 | Super Admin | `/superadmin/dashboard` | P1 | Carl/Dave | Fixed — platform_permissions seeded from production |
-| F-003 | All roles | Post-login landing | P1 | Carl (seed gap) | Fixed |
-| F-004 | Administrator | `/dashboard/registers/ct` — Risk Level dropdown | P2 | RJ | Fixed — dd_risk_level seeded |
-| F-005 | All roles | Person dropdowns — Unknown names | P2 | Carl (seed gap) | Fixed |
-| F-006 | Administrator | SSR Add form — missing asterisk | P2 | RJ | Fixed |
-| F-007 | All roles | `/settings/rto` crashes instead of redirecting | P2 | RJ | Fixed — array type guard added |
-| F-008 | Governing Person | Governance Meeting History tab crash | P2 | RJ | Fixed — null guard + case-insensitive filter + seed title |
-| F-009 | Compliance Manager | `/complybot` → 404 | P1 | RJ | Fixed — /complybot route added under ManagerRoute |
-| F-010 | Compliance Manager | PDR register no Add button (expected write access) | P1 | RJ | Fixed — ADMIN_ROLES includes CM, context returns correct role |
-| F-011 | Compliance Manager | `/settings/users-management` → 404 | P1 | RJ | Fixed — nav path corrected to /dashboard/user-management |
-| F-012 | Compliance Manager | `/admin/user-management` → Access Denied for CM | P1 | RJ | Fixed — /dashboard/user-management route added under ManagerRoute |
-| F-013 | Trainer | Trainer products page 404 | P1 | RJ | Fixed — nav corrected to /dashboard/trainer-portal/select-products |
-| F-014 | Trainer | Trainer availability page 404 | P1 | RJ | Fixed — nav corrected to /dashboard/registers/trainer-availability |
-| F-015 | Trainer | TCR register — Add button visible (write access leak) | P1 | RJ | Fixed — role guard added |
-| F-016 | Trainer | Document repository 404 for Trainer | P1 | RJ | Fixed — nav corrected to /dashboard/document-repository |
-| F-017 | Trainer | Governance Meeting Manager loads (should be blocked) | P1 | RJ | Fixed — AdminRoute added |
-| F-018 | Trainer | Trainer FRE register 404 | P1 | RJ | Fixed — nav corrected to /dashboard/trainer-portal/resources-equipment |
-| F-019 | Consultant | Post-login lands on T1 admin dashboard | P1 | RJ | Fixed — landingRoutes.ts → /consultant/dashboard |
-| F-020 | Consultant | `/consultant/my-tenants` → Coming soon | P1 | RJ | Open — feature not built |
-| **F-021** | **Consultant** | **T2 context — T1 PDR records visible (P0 CRITICAL)** | **P0** | **RJ** | Fixed — session dependency + tenant filter added |
-| F-022 | Consultant | All consultant sub-pages → Coming soon | P1 | RJ | Open — features not built |
+| # | Role | Route | Severity | Owner | R1 Status | R2 Status |
+|---|---|---|---|---|---|---|
+| F-001 | Super Admin | Post-login landing | P1 | RJ | Fixed | ✅ Confirmed fixed |
+| F-002 | Super Admin | `/superadmin/dashboard` | P1 | Carl/Dave | Fixed | ✅ Confirmed fixed |
+| F-003 | All roles | Post-login landing | P1 | Carl | Fixed | ✅ Not retested (billing) |
+| F-004 | Administrator | CT Risk Level dropdown | P2 | RJ | Fixed | ✅ Confirmed fixed |
+| F-005 | All roles | Person dropdowns — Unknown names | P2 | Carl | Fixed | ✅ Not retested |
+| F-006 | Administrator | SSR Add form — missing asterisk | P2 | RJ | Fixed | ✅ Not retested |
+| **F-007** | **All roles** | **`/settings/rto` crashes** | **P2** | **RJ** | Fixed (attempt) | ❌ Still failing — root cause now known: `useTour` outside `TourProvider` |
+| **F-008** | **Governing Person** | **History tab crash** | **P2** | **RJ** | Fixed (attempt) | ❌ Still failing — now blank page (no crash message) |
+| **F-009** | **CM** | **`/complybot` → 404** | **P1** | **RJ** | Fixed (attempt) | ❌ Still failing — now blank white page (not 404) |
+| **F-010** | **CM** | **PDR register — no Add button** | **P1** | **RJ** | Fixed (attempt) | ❌ Still failing — CM still read-only |
+| **F-011** | **CM** | **`/settings/users-management` 404** | **P1** | **RJ** | Fixed (attempt) | ❌ Still failing — `/not-found` |
+| **F-012** | **CM** | **`/admin/user-portals` Access Denied** | **P1** | **RJ** | Fixed (attempt) | ❌ Still failing — `/access-denied` |
+| **F-013** | **Trainer** | **Products page 404** | **P1** | **RJ** | Fixed (attempt) | ❌ Still failing — `/not-found` |
+| **F-014** | **Trainer** | **Availability page 404** | **P1** | **RJ** | Fixed (attempt) | ❌ Still failing — `/not-found` |
+| F-015 | Trainer | TCR write access leak | P1 | RJ | Fixed | ✅ Confirmed fixed |
+| **F-016** | **Trainer** | **Document repository 404** | **P1** | **RJ** | Fixed (attempt) | ❌ Still failing — `/not-found` |
+| F-017 | Trainer | Governance Meeting Manager unblocked | P1 | RJ | Fixed | ✅ Confirmed fixed — Access Denied correctly |
+| **F-018** | **Trainer** | **FRE register 404** | **P1** | **RJ** | Fixed (attempt) | ❌ Still failing — `/not-found` |
+| **F-019** | **Consultant** | **Post-login wrong landing** | **P1** | **RJ** | Fixed (attempt) | ❌ Still failing — lands on `/dashboard/admin` |
+| F-020 | Consultant | `/consultant/my-tenants` Coming soon | P1 | RJ | Open | ⚠️ Deferred — not built |
+| F-021 | Consultant | T2 PDR cross-tenant leak (P0) | P0 | RJ | Fixed | ✅ Confirmed fixed — 2 T2 records only, no T1 bleed |
+| F-022 | Consultant | Consultant sub-pages Coming soon | P1 | RJ | Open | ⚠️ Deferred — not built |
+| **NEW-001** | **Super Admin** | **SA sees Tenant 1 governance register data** | **P0** | **RJ** | New | ❌ Open — P0 escalate |
+| **NEW-002** | **Super Admin** | **SA authenticated redirect → `/dashboard/admin`** | **P1** | **RJ** | New | ❌ Open |
+| **NEW-003** | **Super Admin** | **`/superadmin/billing/revenue` → 404** | **P2** | **RJ** | New | ❌ Open |
 
 ---
 
@@ -259,30 +262,25 @@ _None_
 
 ## F-007
 
-**Role:** Administrator (`admin@complyhub-seed.com`)
-**Checklist items:** 2.9
+**Role:** All roles
+**Checklist items:** 2.9, 3.2, 4.3, 5.6
 **Severity:** P2
 **Owner:** RJ
-**Status:** Open
+**Status:** ❌ Still failing — root cause now confirmed
 
-**Expected:**
-`/settings`, `/settings/rto`, `/settings/preferences` load the RTO settings pages.
+**Expected:** `/settings/rto` loads RTO settings page.
+**Actual:** Page crashes with "We hit a loading snag. Try refreshing the page." for all roles.
 
-**Actual:**
-All three routes return 404. Settings is also not accessible from the sidebar nav.
+**Root cause confirmed (Round 2):**
+```
+Error: useTour must be used within a TourProvider
+  at ze (RTOSettings-B6PGvPVB.js:1:27070)
+ErrorBoundary caught: Error: useTour must be used within a TourProvider
+```
+`RTOSettings` calls `useRtoSettingsTour()` which internally calls `useTour()`. The `useTour` hook requires a `TourProvider` ancestor in the component tree. RTOSettings is not wrapped in `TourProvider`, so the hook throws on mount, the error boundary catches it, and renders "We hit a loading snag."
 
-**Update (Role 3 testing):**
-`/settings/rto` confirmed to exist on the Vercel deployment — it is NOT a 404. The page loads but crashes with "We hit a loading snag. Try refreshing the page." for both Administrator and Governing Person roles. The route is real but the page component throws an error.
-
-**Root cause hypothesis:**
-Page component crashes on load — likely a data fetch that fails (missing seed data the settings page expects, e.g. RTO profile fields, billing configuration, or an empty table causing a null dereference).
-
-**Next step for RJ:**
-1. Check browser console on `/settings/rto` for the specific JS error
-2. Identify which data fetch is failing and whether it needs additional seed data
-
-**Console errors:**
-_Not yet captured — please check browser console on /settings/rto and paste here_
+**Fix needed:**
+Wrap `RTOSettings` in `TourProvider`, or make `useRtoSettingsTour` safe when called outside a provider (add a try/catch or context check in the hook).
 
 ---
 
@@ -294,24 +292,14 @@ _Not yet captured — please check browser console on /settings/rto and paste he
 **Checklist items:** 3.2
 **Severity:** P2
 **Owner:** RJ
-**Status:** Open
+**Status:** ❌ Still failing — symptom changed
 
-**Expected:**
-Governance Meeting Manager → History tab loads a list of past meetings.
+**Expected:** History tab loads past meetings list.
+**Actual Round 1:** "We hit a loading snag. Try refreshing the page."
+**Actual Round 2:** Completely blank white content area — no error message, no empty state, no console errors captured. The null guard fix changed the crash to a silent blank render.
 
-**Actual:**
-Clicking the History tab shows "We hit a loading snag. Try refreshing the page." Page does not recover on refresh.
-
-**Root cause hypothesis:**
-The History tab query likely expects past meetings with completed status. The seed only has one future meeting (06 Jul 2026) with no history records. The component may crash on empty or null data rather than showing an empty state gracefully.
-
-**Next step for RJ:**
-1. Check browser console for the specific error when clicking History
-2. If it's a null/empty data crash — fix the component to handle empty history gracefully
-3. If it's a missing seed record — add a completed past meeting to seed.sql
-
-**Console errors:**
-_Not yet captured — please check browser console on the History tab and paste here_
+**Fix needed:**
+The null guard prevented the crash but the component now renders nothing. Need to add an explicit empty state (e.g. "No meeting history yet") when `filteredMeetings.length === 0`, and verify the completed past meeting seeded (15 May 2026) is returned by the hook query.
 
 ---
 
@@ -321,11 +309,12 @@ _Not yet captured — please check browser console on the History tab and paste 
 
 **Role:** Compliance Manager (`compliance@complyhub-seed.com`)
 **Checklist items:** 4.2
-**Severity:** P1 | **Owner:** RJ | **Status:** Open
+**Severity:** P1 | **Owner:** RJ | **Status:** ❌ Still failing — symptom changed
 
 **Expected:** `/complybot` loads and responds.
-**Actual:** 404 — redirected to `/not-found`.
-**Note:** ComplyBot works for Administrator (Role 2 confirmed ✅). Route may be access-controlled differently for Compliance Manager.
+**Actual Round 1:** 404 → `/not-found`
+**Actual Round 2:** Blank white page — route resolves (no 404) but component renders nothing. No console errors.
+**Note:** The `/complybot` route was added under ManagerRoute (which allows CM). The route is reached but the ComplyBot component renders blank. Likely a component-level issue — ComplyBot may require an admin context or a tenant setup that CM's session doesn't provide.
 
 ---
 
@@ -484,6 +473,48 @@ This is the original Angela-reported cross-tenant data leak. RJ's fix (adding `.
 
 **Expected:** `/consultant/my-tenants`, `/consultant/tenants-hub`, `/consultant/calendar`, `/consultant/account-settings` show functional content.
 **Actual:** All show "Coming soon" placeholder. Portal sub-pages are not yet built.
+
+---
+
+---
+
+## NEW-001 — P0 CRITICAL
+
+**Role:** Super Admin (`superadmin@complyhub.ai`)
+**Checklist items:** CC-3, 1.4
+**Severity:** P0 | **Owner:** RJ/Dave | **Status:** Open — escalate
+
+**Expected:** SA navigating to `/dashboard/governance/register` is redirected away. SA must never see tenant content.
+**Actual:** Page loads and displays 2 Tenant 1 governance records (CI-001 "Untitled", RISK-001 "Risk Item"). RLS is not blocking SA from reading tenant governance data.
+
+**Root cause hypothesis:**
+The `governance_register` (or underlying table) RLS SELECT policy either allows `super_admin` reads OR uses `sec.is_tenant_member()` which SA passes because they have a `tenant_members` row. Compare with `pdr_register` which correctly returns 0 records for SA — check what's different about the governance register RLS.
+
+**Next step:** Dave to check RLS policies on the governance register table. Must have an explicit deny for super_admin matching the pattern on other registers.
+
+---
+
+## NEW-002
+
+**Role:** Super Admin (`superadmin@complyhub.ai`)
+**Checklist items:** CC-4
+**Severity:** P1 | **Owner:** RJ | **Status:** Open
+
+**Expected:** SA who is already logged in and navigates to `/login` is redirected to `/superadmin/dashboard`.
+**Actual:** Redirected to `/dashboard/admin` (Tenant 1 admin context).
+**Note:** Related to F-001 pattern — the authenticated redirect falls through to tenant context instead of platform context.
+
+---
+
+## NEW-003
+
+**Role:** Super Admin (`superadmin@complyhub.ai`)
+**Checklist items:** 1.2
+**Severity:** P2 | **Owner:** RJ | **Status:** Open
+
+**Expected:** `/superadmin/billing/revenue` loads Revenue dashboard.
+**Actual:** `/not-found` — route does not exist. `/superadmin/billing/sales` works correctly.
+**Note:** Checklist route may be wrong or the revenue route was renamed. RJ to confirm correct path.
 
 ---
 
