@@ -2,8 +2,9 @@
 **Branch DB:** `agcdvmrwzzgnlmfyrxtb`
 **QA Round 1:** 2026-06-09 — 22 findings identified
 **QA Round 2:** 2026-06-10 — 6 confirmed fixed, 11 still failing, 3 new findings
-**Tester:** Brian (Khian) — Round 1 / Claude (automated) — Round 2
-**Status:** Round 2 complete — fixes needed for F-007 to F-019 (excl. fixed), plus NEW-001 P0
+**QA Round 3 (partial):** 2026-06-10 — F-008, F-009 confirmed fixed manually
+**Tester:** Brian (Khian) — Round 1 + Round 3 manual / Claude (automated) — Round 2
+**Status:** Active — Round 3 retest in progress
 
 ---
 
@@ -26,31 +27,33 @@ Owner guide:
 
 ## Summary
 
-| # | Role | Route | Severity | Owner | R1 Status | R2 Status |
-|---|---|---|---|---|---|---|
-| F-001 | Super Admin | Post-login landing | P1 | RJ | Fixed | ✅ Confirmed fixed |
-| F-002 | Super Admin | `/superadmin/dashboard` | P1 | Carl/Dave | Fixed | ✅ Confirmed fixed |
-| F-003 | All roles | Post-login landing | P1 | Carl | Fixed | ✅ Not retested (billing) |
-| F-004 | Administrator | CT Risk Level dropdown | P2 | RJ | Fixed | ✅ Confirmed fixed |
-| F-005 | All roles | Person dropdowns — Unknown names | P2 | Carl | Fixed | ✅ Not retested |
-| F-006 | Administrator | SSR Add form — missing asterisk | P2 | RJ | Fixed | ✅ Not retested |
-| F-007 | All roles | `/settings/rto` crashes | P2 | RJ | Fixed (attempt) | ✅ Fixed — TourProvider added to App.tsx |
-| **F-008** | **Governing Person** | **History tab blank page** | **P2** | **RJ** | Fixed (attempt) | ❌ Needs retest — blank (no crash, no empty state visible) |
-| **F-009** | **CM** | **`/complybot` blank page** | **P1** | **RJ** | Fixed (attempt) | ❌ Needs retest — route resolves but all panels render empty |
-| F-010 | CM | PDR register — no Add button | P1 | RJ | Fixed (attempt) | ✅ Fixed — ctx.tenant_role used instead of ctx.role |
-| F-011 | CM | `/dashboard/user-management` 404 | P1 | RJ | Fixed (attempt) | ✅ Fixed — route moved inside /dashboard children tree |
-| F-012 | CM | `/admin/user-portals` Access Denied | P1 | RJ | Fixed (attempt) | ⚠️ By design — RJ confirmed CM should not have user-portals |
-| **F-013** | **Trainer** | **Products page 404** | **P1** | **RJ** | Fixed (attempt) | ⚠️ Needs retest via nav link — Round 2 tested wrong URL |
-| **F-014** | **Trainer** | **Availability page 404** | **P1** | **RJ** | Fixed (attempt) | ⚠️ Needs retest via nav link — Round 2 tested wrong URL |
-| F-015 | Trainer | TCR write access leak | P1 | RJ | Fixed | ✅ Confirmed fixed |
-| **F-016** | **Trainer** | **Document repository 404** | **P1** | **RJ** | Fixed (attempt) | ⚠️ Needs retest via nav link — Round 2 tested wrong URL |
-| F-017 | Trainer | Governance Meeting Manager unblocked | P1 | RJ | Fixed | ✅ Confirmed fixed — Access Denied correctly |
-| **F-018** | **Trainer** | **FRE register 404** | **P1** | **RJ** | Fixed (attempt) | ⚠️ Needs retest via nav link — Round 2 tested wrong URL |
-| **F-019** | **Consultant** | **Post-login wrong landing** | **P1** | **RJ** | Fixed (attempt) | ⚠️ Needs retest — log out and log back in fresh |
-| F-020 | Consultant | `/consultant/my-tenants` Coming soon | P1 | RJ | Open | ⚠️ Deferred — not built |
-| F-021 | Consultant | T2 PDR cross-tenant leak (P0) | P0 | RJ | Fixed | ✅ Confirmed fixed — 2 T2 records only, no T1 bleed |
-| F-022 | Consultant | Consultant sub-pages Coming soon | P1 | RJ | Open | ⚠️ Deferred — not built |
-| NEW-001 | Super Admin | SA sees Tenant 1 governance register data | P0 | RJ | New | ✅ Fixed — useGovernanceRegister now uses active_tenant_id |
+| # | Role | Route | Severity | Owner | R1 Status | R2 Status | R3 Status |
+|---|---|---|---|---|---|---|---|
+| F-001 | Super Admin | Post-login landing | P1 | RJ | Fixed | ✅ Confirmed fixed | — |
+| F-002 | Super Admin | `/superadmin/dashboard` | P1 | Carl/Dave | Fixed | ✅ Confirmed fixed | — |
+| F-003 | All roles | Post-login landing | P1 | Carl | Fixed | ✅ Not retested | — |
+| F-004 | Administrator | CT Risk Level dropdown | P2 | RJ | Fixed | ✅ Confirmed fixed | — |
+| F-005 | All roles | Person dropdowns — Unknown names | P2 | Carl | Fixed | ✅ Not retested | — |
+| F-006 | Administrator | SSR Add form — missing asterisk | P2 | RJ | Fixed | ✅ Not retested | — |
+| F-007 | All roles | `/settings/rto` crashes | P2 | RJ | Fixed (attempt) | ✅ Fixed | ⚠️ Needs full retest |
+| F-008 | Governing Person | History tab blank page | P2 | RJ | Fixed (attempt) | ❌ Blank | ✅ Confirmed fixed — meeting cards render correctly |
+| F-009 | CM | `/complybot` Access Denied / blank | P1 | RJ | Fixed (attempt) | ❌ Access Denied | ✅ Confirmed fixed — complybot loads, ManagerRoute grants access |
+| F-010 | CM | PDR register — no Add button | P1 | RJ | Fixed (attempt) | ✅ Fixed | ⚠️ Needs retest |
+| F-011 | CM | `/dashboard/user-management` 404 | P1 | RJ | Fixed (attempt) | ✅ Fixed | ⚠️ Needs retest |
+| F-012 | CM | `/admin/user-portals` Access Denied | P1 | RJ | Fixed (attempt) | ⚠️ By design | — |
+| F-013 | Trainer | Products page 404 | P1 | RJ | Fixed (attempt) | ⚠️ Wrong URL tested | ⚠️ Needs nav-link retest |
+| F-014 | Trainer | Availability page 404 | P1 | RJ | Fixed (attempt) | ⚠️ Wrong URL tested | ⚠️ Needs nav-link retest |
+| F-015 | Trainer | TCR write access leak | P1 | RJ | Fixed | ✅ Confirmed fixed | — |
+| F-016 | Trainer | Document repository 404 | P1 | RJ | Fixed (attempt) | ⚠️ Wrong URL tested | ⚠️ Needs nav-link retest |
+| F-017 | Trainer | Governance Meeting Manager unblocked | P1 | RJ | Fixed | ✅ Confirmed fixed | — |
+| F-018 | Trainer | FRE register 404 | P1 | RJ | Fixed (attempt) | ⚠️ Wrong URL tested | ⚠️ Needs nav-link retest |
+| F-019 | Consultant | Post-login wrong landing | P1 | RJ | Fixed (attempt) | ⚠️ Needs fresh login retest | ⚠️ Needs retest |
+| F-020 | Consultant | `/consultant/my-tenants` Coming soon | P1 | RJ | Open | ⚠️ Deferred | — |
+| F-021 | Consultant | T2 PDR cross-tenant leak (P0) | P0 | RJ | Fixed | ✅ Confirmed fixed | — |
+| F-022 | Consultant | Consultant sub-pages Coming soon | P1 | RJ | Open | ⚠️ Deferred | — |
+| NEW-001 | Super Admin | SA sees governance register data (P0) | P0 | RJ | New | ✅ Fixed | ⚠️ Needs retest |
+| NEW-002 | Super Admin | SA authenticated redirect | P1 | RJ | New | ⚠️ Test methodology issue | — |
+| NEW-003 | Super Admin | `/superadmin/billing/revenue` 404 | P2 | RJ | New | ⚠️ Checklist URL wrong | — |
 | NEW-002 | Super Admin | SA authenticated redirect → `/dashboard/admin` | P1 | RJ | New | ⚠️ Test methodology — agent tested `/login` which doesn't exist. Landing page correctly redirects SA. |
 | NEW-003 | Super Admin | `/superadmin/billing/revenue` → 404 | P2 | RJ | New | ⚠️ Checklist URL wrong — correct path is `/superadmin/billing` |
 
