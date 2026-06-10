@@ -50,7 +50,7 @@ Owner guide:
 | F-020 | Consultant | `/consultant/my-tenants` Coming soon | P1 | RJ | Open | ⚠️ Deferred — not built |
 | F-021 | Consultant | T2 PDR cross-tenant leak (P0) | P0 | RJ | Fixed | ✅ Confirmed fixed — 2 T2 records only, no T1 bleed |
 | F-022 | Consultant | Consultant sub-pages Coming soon | P1 | RJ | Open | ⚠️ Deferred — not built |
-| **NEW-001** | **Super Admin** | **SA sees Tenant 1 governance register data** | **P0** | **RJ** | New | ❌ Open — P0 escalate |
+| NEW-001 | Super Admin | SA sees Tenant 1 governance register data | P0 | RJ | New | ✅ Fixed — useGovernanceRegister now uses active_tenant_id |
 | NEW-002 | Super Admin | SA authenticated redirect → `/dashboard/admin` | P1 | RJ | New | ⚠️ Test methodology — agent tested `/login` which doesn't exist. Landing page correctly redirects SA. |
 | NEW-003 | Super Admin | `/superadmin/billing/revenue` → 404 | P2 | RJ | New | ⚠️ Checklist URL wrong — correct path is `/superadmin/billing` |
 
