@@ -5,8 +5,9 @@
 **QA Round 3 (partial):** 2026-06-10 — F-008, F-009 confirmed fixed manually
 **QA Round 4:** 2026-06-10 — 7 confirmed fixed, 8 still failing, 2 new findings, 2 new seed gaps
 **QA Round 5:** 2026-06-11 — All Round 4 failures fixed on branch. Production DB migration pending for NEW-004.
-**Tester:** Brian (Khian) — Round 1 + Round 3 manual / Claude (automated) — Round 2 / Claude Chrome — Round 4 / Brian + Claude — Round 5
-**Status:** Round 5 complete. Awaiting NEW-003 confirmation from RJ. Production DB migration for NEW-004 pending before merge.
+**QA Round 6 (Session A partial):** 2026-06-11 — Pre-flight, Roles 1–2 complete. Role 3 cut short (rate limit). SEED-001 regression. 2 new findings (NEW-006, NEW-007).
+**Tester:** Brian (Khian) — Round 1 + Round 3 manual / Claude (automated) — Round 2 / Claude Chrome — Round 4 / Brian + Claude — Round 5 / Claude Chrome — Round 6 Session A
+**Status:** Round 6 Session A **INCOMPLETE** — resume Role 3 (§3.2–3.5). SEED-001 regression: `dd_org_internal_roles` has only 5 rows (Student Support Officer missing). Awaiting RJ on NEW-003. Production DB migration for NEW-004 still pending before merge.
 
 ---
 
@@ -29,37 +30,87 @@ Owner guide:
 
 ## Summary
 
-| # | Role | Route | Severity | Owner | R1 | R2 | R3 | R4 | R5 |
-|---|---|---|---|---|---|---|---|---|---|
-| F-001 | Super Admin | Post-login landing | P1 | RJ | Fixed | ✅ Fixed | — | — (see NEW-002) | — |
-| F-002 | Super Admin | `/superadmin/dashboard` | P1 | Carl/Dave | Fixed | ✅ Fixed | — | — | — |
-| F-003 | All roles | Post-login landing | P1 | Carl | Fixed | ✅ Fixed | — | — | — |
-| F-004 | Administrator | CT Risk Level dropdown | P2 | RJ | Fixed | ✅ Fixed | — | ✅ Fixed | — |
-| F-005 | All roles | Person dropdowns — Unknown names | P2 | Carl | Fixed | ✅ Fixed | — | ⚠️ Not retested | — |
-| F-006 | Administrator | SSR Add form — missing asterisk | P2 | RJ | Fixed | ✅ Fixed | — | ⚠️ Not retested | — |
-| F-007 | All roles | `/settings/rto` crashes | P2 | RJ | Fixed | ✅ Fixed | ⚠️ Needs retest | ✅ Fixed all roles | — |
-| F-008 | Governing Person | History tab blank page | P2 | RJ | Fixed | ❌ Blank | ✅ Fixed | ✅ Fixed | — |
-| F-009 | CM | `/complybot` Access Denied | P1 | RJ | Fixed | ❌ Denied | ✅ Fixed | ✅ Fixed | — |
-| F-010 | CM | PDR register — no Add button | P1 | RJ | Fixed | ✅ Fixed | ⚠️ Retest | ✅ Fixed | — |
-| F-011 | CM | `/dashboard/user-management` 404 | P1 | RJ | Fixed | ✅ Fixed | ⚠️ Retest | ✅ Closed by design | — |
-| F-012 | CM | `/admin/user-portals` Access Denied | P1 | RJ | Fixed | ⚠️ By design | — | ✅ Closed by design | — |
-| F-013 | Trainer | Products page — nav link absent | P1 | RJ | Fixed | ⚠️ Wrong URL | ⚠️ Retest | ❌ Failing | ✅ Fixed |
-| F-014 | Trainer | Availability page — nav link absent | P1 | RJ | Fixed | ⚠️ Wrong URL | ⚠️ Retest | ❌ Failing | ✅ Fixed |
-| F-015 | Trainer | TCR write access leak | P1 | RJ | Fixed | ✅ Fixed | — | — | — |
-| F-016 | Trainer | Document repository — wrong URL | P1 | RJ | Fixed | ⚠️ Wrong URL | ⚠️ Retest | ✅ Closed by design | — |
-| F-017 | Trainer | Governance Meeting Manager unblocked | P1 | RJ | Fixed | ✅ Fixed | — | — | — |
-| F-018 | Trainer | FRE register — nav link absent | P1 | RJ | Fixed | ⚠️ Wrong URL | ⚠️ Retest | ❌ Failing | ✅ Fixed |
-| F-019 | Consultant | Post-login wrong landing | P1 | RJ | Fixed | ⚠️ Retest | ⚠️ Retest | ✅ Fixed | — |
-| F-020 | Consultant | `/consultant/my-tenants` Coming soon | P1 | RJ | Open | ⚠️ Deferred | — | ⚠️ Deferred | ⏸️ Deferred |
-| F-021 | Consultant | T2 PDR cross-tenant leak (P0) | P0 | RJ | Fixed | ✅ Fixed | — | — | — |
-| F-022 | Consultant | Consultant sub-pages Coming soon | P1 | RJ | Open | ⚠️ Deferred | — | ⚠️ Deferred | ⏸️ Deferred |
-| NEW-001 | Super Admin | SA sees governance register data (P0) | P0 | Dave | New | ✅ Fixed | ⚠️ Retest | ✅ Fixed | — |
-| NEW-002 | Super Admin | SA post-login lands on `/dashboard/admin` | P1 | RJ | New | ⚠️ Method issue | — | ❌ Failing | ✅ Fixed |
-| NEW-003 | Super Admin | `/superadmin/billing/revenue` 404 | P2 | RJ | New | ⚠️ Wrong URL | — | ❌ Failing | ⏸️ Awaiting RJ |
-| NEW-004 | Governing Person | `sso_reports_register` missing table | P2 | Dave | — | — | — | ❌ New | ✅ Fixed on branch ⚠️ Prod pending |
-| NEW-005 | CM | CM bypasses AdminRoute on `/settings/rto` | P1 | RJ | — | — | — | ❌ New | ✅ Fixed |
-| SEED-001 | Administrator | CT form — Responsible Role dropdown empty | P2 | Carl | — | — | — | ❌ New | ✅ Fixed |
-| SEED-002 | Administrator | CT form — Status dropdown empty | P2 | Carl | — | — | — | ❌ New | ✅ Fixed |
+| # | Role | Route | Severity | Owner | R1 | R2 | R3 | R4 | R5 | R6 |
+|---|---|---|---|---|---|---|---|---|---|---|
+| F-001 | Super Admin | Post-login landing | P1 | RJ | Fixed | ✅ Fixed | — | — (see NEW-002) | — | — |
+| F-002 | Super Admin | `/superadmin/dashboard` | P1 | Carl/Dave | Fixed | ✅ Fixed | — | — | — | — |
+| F-003 | All roles | Post-login landing | P1 | Carl | Fixed | ✅ Fixed | — | — | — | — |
+| F-004 | Administrator | CT Risk Level dropdown | P2 | RJ | Fixed | ✅ Fixed | — | ✅ Fixed | — | — |
+| F-005 | All roles | Person dropdowns — Unknown names | P2 | Carl | Fixed | ✅ Fixed | — | ⚠️ Not retested | — | ✅ Fixed |
+| F-006 | Administrator | SSR Add form — missing asterisk | P2 | RJ | Fixed | ✅ Fixed | — | ⚠️ Not retested | — | — |
+| F-007 | All roles | `/settings/rto` crashes | P2 | RJ | Fixed | ✅ Fixed | ⚠️ Needs retest | ✅ Fixed all roles | — | ✅ Admin verified |
+| F-008 | Governing Person | History tab blank page | P2 | RJ | Fixed | ❌ Blank | ✅ Fixed | ✅ Fixed | — | ⚠️ Incomplete |
+| F-009 | CM | `/complybot` Access Denied | P1 | RJ | Fixed | ❌ Denied | ✅ Fixed | ✅ Fixed | — | — |
+| F-010 | CM | PDR register — no Add button | P1 | RJ | Fixed | ✅ Fixed | ⚠️ Retest | ✅ Fixed | — | — |
+| F-011 | CM | `/dashboard/user-management` 404 | P1 | RJ | Fixed | ✅ Fixed | ⚠️ Retest | ✅ Closed by design | — | — |
+| F-012 | CM | `/admin/user-portals` Access Denied | P1 | RJ | Fixed | ⚠️ By design | — | ✅ Closed by design | — | — |
+| F-013 | Trainer | Products page — nav link absent | P1 | RJ | Fixed | ⚠️ Wrong URL | ⚠️ Retest | ❌ Failing | ✅ Fixed | — |
+| F-014 | Trainer | Availability page — nav link absent | P1 | RJ | Fixed | ⚠️ Wrong URL | ⚠️ Retest | ❌ Failing | ✅ Fixed | — |
+| F-015 | Trainer | TCR write access leak | P1 | RJ | Fixed | ✅ Fixed | — | — | — | — |
+| F-016 | Trainer | Document repository — wrong URL | P1 | RJ | Fixed | ⚠️ Wrong URL | ⚠️ Retest | ✅ Closed by design | — | — |
+| F-017 | Trainer | Governance Meeting Manager unblocked | P1 | RJ | Fixed | ✅ Fixed | — | — | — | — |
+| F-018 | Trainer | FRE register — nav link absent | P1 | RJ | Fixed | ⚠️ Wrong URL | ⚠️ Retest | ❌ Failing | ✅ Fixed | — |
+| F-019 | Consultant | Post-login wrong landing | P1 | RJ | Fixed | ⚠️ Retest | ⚠️ Retest | ✅ Fixed | — | — |
+| F-020 | Consultant | `/consultant/my-tenants` Coming soon | P1 | RJ | Open | ⚠️ Deferred | — | ⚠️ Deferred | ⏸️ Deferred | — |
+| F-021 | Consultant | T2 PDR cross-tenant leak (P0) | P0 | RJ | Fixed | ✅ Fixed | — | — | — | — |
+| F-022 | Consultant | Consultant sub-pages Coming soon | P1 | RJ | Open | ⚠️ Deferred | — | ⚠️ Deferred | ⏸️ Deferred | — |
+| NEW-001 | Super Admin | SA sees governance register data (P0) | P0 | Dave | New | ✅ Fixed | ⚠️ Retest | ✅ Fixed | — | ✅ Verified |
+| NEW-002 | Super Admin | SA post-login lands on `/dashboard/admin` | P1 | RJ | New | ⚠️ Method issue | — | ❌ Failing | ✅ Fixed | ✅ Verified |
+| NEW-003 | Super Admin | `/superadmin/billing/revenue` 404 | P2 | RJ | New | ⚠️ Wrong URL | — | ❌ Failing | ⏸️ Awaiting RJ | ❌ 404 confirmed |
+| NEW-004 | Governing Person | `sso_reports_register` missing table | P2 | Dave | — | — | — | ❌ New | ✅ Fixed on branch ⚠️ Prod pending | ✅ Admin verified; GP incomplete |
+| NEW-005 | CM | CM bypasses AdminRoute on `/settings/rto` | P1 | RJ | — | — | — | ❌ New | ✅ Fixed | — |
+| SEED-001 | Administrator | CT form — Responsible Role dropdown empty | P2 | Carl | — | — | — | ❌ New | ✅ Fixed | ❌ Regression |
+| SEED-002 | Administrator | CT form — Status dropdown empty | P2 | Carl | — | — | — | ❌ New | ✅ Fixed | ✅ Verified |
+| NEW-006 | Administrator | `/complybot` history fetch error | P2 | RJ | — | — | — | — | — | ⚠️ New |
+| NEW-007 | Administrator | `/dashboard/assessment-validation` console error | P2 | RJ | — | — | — | — | — | ❌ New |
+
+---
+
+## Round 6 — Session A (partial, 2026-06-11)
+
+**App URL:** `https://complyhub-rto-git-fix-local-run-complyhub.vercel.app`
+**Tester:** Claude Chrome (Sonnet 4.6)
+**Outcome:** INCOMPLETE — rate limit hit during Role 3
+
+### Pre-flight
+
+| Check | Result | Notes |
+|---|---|---|
+| `dd_org_internal_roles` — exactly 6 rows | ❌ FAIL | DB returns 5 rows — Student Support Officer missing. Console: `Raw data from dd_org_internal_roles: Array(5)` |
+| `gov_dd_status` — exactly 6 rows | ✅ PASS | All 6 statuses present |
+| `tenant_members` T1 — 10 users, non-null names | ✅ PASS | All real names in user management |
+| `sso_reports_register` table exists | ✅ PASS | Query returns `[]` (empty, not 404) |
+| T1 ≥3 PDR, T2 exactly 2 PDR | ✅ PASS | T1=3, T2=2 confirmed via DB |
+
+### Role 1 — Super Admin: 11/12 ✅
+
+- ✅ NEW-002 — fresh login lands on `/superadmin/dashboard`
+- ✅ NEW-001 — SA governance register RLS blocks (0 records)
+- ✅ All platform routes clean except NEW-003
+- ⚠️ NEW-003 — `/superadmin/billing/revenue` → 404 (recorded as-is, awaiting RJ)
+
+### Role 2 — Administrator: 45/47 ✅
+
+- ✅ F-005 — person pickers show real names (CT form + SSR Add form)
+- ✅ F-007 — `/settings/rto` loads clean
+- ✅ NEW-004 — meeting manager clean for Admin (no `sso_reports_register` warning)
+- ❌ SEED-001 — Responsible Role dropdown shows only 5 options (Student Support Officer missing)
+- ❌ NEW-007 — `/dashboard/assessment-validation` console error: `Error fetching validation progress`
+- ⚠️ NEW-006 — `/complybot` console error: `Error fetching history` (UI renders; likely no history for seed user)
+
+### Role 3 — Governing Person: 4/4 completed, remainder incomplete
+
+- ✅ 3.1 Landing & navigation — all items pass
+- ⚠️ 3.2–3.5 — not completed (rate limit before GP nav click to meeting manager)
+
+### Resume checklist (Session A finish)
+
+Do **not** re-run completed sections. Pick up at Role 3 §3.2:
+
+- [ ] 3.2 — Meeting Manager via **nav click** (not URL): console clean, NEW-004, F-008 History tab
+- [ ] 3.3 — Register access read-only checks
+- [ ] 3.4 — Settings access (F-007)
+- [ ] 3.5 — CEO Governance Portal gate
 
 ---
 
@@ -147,12 +198,12 @@ Two billing guards in sequence — `BillingGateGuard` and `TrialExpirationGuard`
 
 **Role:** All roles
 **Checklist items:** 2.3
-**Severity:** P2 | **Owner:** Carl | **Status:** Open — not retested in Round 5
+**Severity:** P2 | **Owner:** Carl | **Status:** ✅ Confirmed fixed (Round 6 Session A)
 
 **Expected:** Person picker dropdowns show real names.
-**Actual:** All options display as "Unknown" — `full_name` is NULL in `tenant_members` seed.
+**Actual Round 1:** All options display as "Unknown" — `full_name` is NULL in `tenant_members` seed.
 
-**Fix required in seed.sql:** Add `full_name` to `tenant_members` INSERT and populate realistic names for each seed user.
+**Round 6 Session A:** ✅ CT Register "Responsible Person" shows Adam Admin, Clara Compliance, Ed Employer, George Governing, Jane Trainer, Rex Regulatory, Sam SuperAdmin, Sophie SSO, Tara ThirdParty. SSR Add form person picker also shows real names — no "Unknown" values.
 
 ---
 
@@ -196,6 +247,7 @@ Two billing guards in sequence — `BillingGateGuard` and `TrialExpirationGuard`
 **Actual Round 1:** "We hit a loading snag."
 **Actual Round 2:** Blank white page.
 **Round 4:** Correct — 3 past meetings render with status badges.
+**Round 6 Session A:** ⚠️ Not retested for Governing Person — rate limit hit before GP nav click to meeting manager. Administrator session confirmed meeting manager functional; GP-specific F-008 verify still required.
 
 ---
 
@@ -434,6 +486,7 @@ Consultant sub-pages all show "Coming soon". Not blocking merge.
 - `src/routes/guards/AdminRoute.tsx` — stored `globalRole` from `fetchEffectiveRole()` in state instead of reading `profile?.role` synchronously (defence-in-depth) — commit `1b91bd316`
 
 **Verified Round 5:** ✅ Fresh login as `superadmin@complyhub.ai` lands on `/superadmin/dashboard`.
+**Verified Round 6 Session A:** ✅ Fresh login lands on `/superadmin/dashboard` immediately — no `/dashboard/admin` detour.
 
 ---
 
@@ -449,6 +502,8 @@ Consultant sub-pages all show "Coming soon". Not blocking merge.
 **Actual:** `/superadmin/billing/revenue` → 404. `/superadmin/billing/sales` works.
 
 **Action needed from RJ:** Confirm whether a revenue route exists at a different path, or if it has not been built yet. If not built, close as deferred.
+
+**Round 6 Session A:** ❌ Still 404 — navigates to `/not-found`. Console clean. Recorded as-is per instructions.
 
 ---
 
@@ -510,6 +565,8 @@ CREATE POLICY "tenant isolation" ON public.sso_reports_register
 ```
 
 **Verified Round 5 (branch):** ✅ No `sso_reports_register` console warning on governance meeting manager.
+**Verified Round 6 Session A (Administrator):** ✅ Meeting manager loads clean — Governance Meeting card, Readiness 80/100, Trainer Reports 50%, Actions Closed 100%, SSO Officer Report section renders. Zero `sso_reports_register` warnings.
+**Round 6 Session A (Governing Person):** ⚠️ Incomplete — rate limit hit before GP nav-click test. Must re-verify §3.2 via GP login.
 
 ---
 
@@ -542,16 +599,19 @@ CREATE POLICY "tenant isolation" ON public.sso_reports_register
 
 **Role:** Administrator (`admin@complyhub-seed.com`)
 **Checklist items:** 2.2 — CT Register "Log New Entry" form
-**Severity:** P2 | **Owner:** Carl | **Status:** ✅ Fixed (Round 5)
+**Severity:** P2 | **Owner:** Carl | **Status:** ❌ Regression (Round 6 Session A)
 
-**Expected:** "Responsible Role" dropdown shows available roles.
+**Expected:** "Responsible Role" dropdown shows exactly 6 options including Student Support Officer.
 **Actual Round 4:** Dropdown empty — `dd_org_internal_roles` table had 0 rows.
 
-**Fix applied:**
+**Fix applied (Round 5):**
 - `supabase/seed.sql` — 6 rows inserted into `dd_org_internal_roles` (CEO/MD, RTO Manager, Compliance Manager, Trainer/Assessor, Administration Officer, Student Support Officer) — commit `bd22281cc`
 - Rows applied directly to branch DB via `execute_sql`
 
 **Verified Round 5:** ✅ "Responsible Role" dropdown shows 6 options.
+**Round 6 Session A — REGRESSION:** ❌ Pre-flight DB query returns 5 rows (`content-range: 0-4/5`). Console: `Raw data from dd_org_internal_roles: Array(5)`. CT form dropdown shows only 5 options — Student Support Officer missing. Options present: CEO/Managing Director, RTO Manager, Compliance Manager, Trainer/Assessor, Administration Officer.
+
+**Next step:** Re-insert 6th row (`Student Support Officer`) into `dd_org_internal_roles` on branch DB and verify `seed.sql` includes all 6 rows.
 
 ---
 
@@ -571,6 +631,57 @@ CREATE POLICY "tenant isolation" ON public.sso_reports_register
 - Rows applied directly to branch DB via `execute_sql`
 
 **Verified Round 5:** ✅ "Status" dropdown shows 6 options.
+**Verified Round 6 Session A:** ✅ "Status" dropdown shows all 6: Pending Review, Under Review, Approved, Rejected, Withdrawn, Archived.
+
+---
+
+---
+
+## NEW-006
+
+**Role:** Administrator (`admin@complyhub-seed.com`)
+**Checklist items:** 2.7 — ComplyBot
+**Severity:** P2
+**Owner:** RJ
+**Status:** ⚠️ Open — new finding (Round 6 Session A)
+
+**Expected:** Console clean on `/complybot`.
+**Actual:** Red console error on page load: `Error fetching history: Object`. Chat interface renders correctly — no conversation history exists for seed user.
+
+**Root cause hypothesis:** Empty history state not handled gracefully — fetch failure logged as error instead of silent empty state.
+
+**Next step:** Confirm whether this is expected for a fresh seed user (close as by-design) or fix error handling in ComplyBot history fetch.
+
+**Console errors:**
+```
+[ERROR] Error fetching history (assets/ComplyBot-C3DegqLm.js:0:15222)
+```
+
+---
+
+---
+
+## NEW-007
+
+**Role:** Administrator (`admin@complyhub-seed.com`)
+**Checklist items:** 2.2 — Assessment Validation
+**Severity:** P2
+**Owner:** RJ
+**Status:** ❌ Open — new finding (Round 6 Session A)
+
+**Expected:** Console clean on `/dashboard/assessment-validation`.
+**Actual:** Page loads with "No validation data" message but 1 red console error on page load: `Error fetching validation progress: Object`.
+
+**What works:** Page renders without crash. Sub-tabs visible.
+
+**Root cause hypothesis:** Validation progress query fails when no seed validation data exists — error not suppressed for empty state.
+
+**Next step:** Investigate validation progress fetch — handle empty/no-data case without console error.
+
+**Console errors:**
+```
+[ERROR] Error fetching validation progress: Object (assets/index-CfRV3ACK.js:6:1112)
+```
 
 ---
 
