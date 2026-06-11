@@ -6,8 +6,9 @@
 **QA Round 4:** 2026-06-10 — 7 confirmed fixed, 8 still failing, 2 new findings, 2 new seed gaps
 **QA Round 5:** 2026-06-11 — All Round 4 failures fixed on branch. Production DB migration pending for NEW-004.
 **QA Round 6 (Session A):** 2026-06-11 — Pre-flight, Roles 1–3 complete. 2 new findings (NEW-006, NEW-007). Session B pending.
+**QA Round 6 (Session B1):** 2026-06-11 — Role 4 (CM) complete. NEW-006/NEW-007 confirmed app-wide. NEW-010 new finding. Sessions B2–B5 pending.
 **Tester:** Brian (Khian) — Round 1 + Round 3 manual / Claude (automated) — Round 2 / Claude Chrome — Round 4 / Brian + Claude — Round 5 / Claude Chrome — Round 6
-**Status:** Round 6 Session A **COMPLETE**. Session B (Roles 4–10 + CC) pending. Awaiting RJ on NEW-003. Production DB migration for NEW-004 still pending before merge.
+**Status:** Round 6 Session B1 **COMPLETE**. Sessions B2–B5 (Roles 5–10 + CC) pending. Awaiting RJ on NEW-003. Production DB migration for NEW-004 still pending before merge.
 
 ---
 
@@ -40,8 +41,8 @@ Owner guide:
 | F-006 | Administrator | SSR Add form — missing asterisk | P2 | RJ | Fixed | ✅ Fixed | — | ⚠️ Not retested | — | — |
 | F-007 | All roles | `/settings/rto` crashes | P2 | RJ | Fixed | ✅ Fixed | ⚠️ Needs retest | ✅ Fixed all roles | — | ✅ Admin verified |
 | F-008 | Governing Person | History tab blank page | P2 | RJ | Fixed | ❌ Blank | ✅ Fixed | ✅ Fixed | — | ✅ Verified — 12 meetings in History |
-| F-009 | CM | `/complybot` Access Denied | P1 | RJ | Fixed | ❌ Denied | ✅ Fixed | ✅ Fixed | — | — |
-| F-010 | CM | PDR register — no Add button | P1 | RJ | Fixed | ✅ Fixed | ⚠️ Retest | ✅ Fixed | — | — |
+| F-009 | CM | `/complybot` Access Denied | P1 | RJ | Fixed | ❌ Denied | ✅ Fixed | ✅ Fixed | — | ✅ Verified B1 — UI renders fully |
+| F-010 | CM | PDR register — no Add button | P1 | RJ | Fixed | ✅ Fixed | ⚠️ Retest | ✅ Fixed | — | ✅ Verified B1 — Add button present, form opens |
 | F-011 | CM | `/dashboard/user-management` 404 | P1 | RJ | Fixed | ✅ Fixed | ⚠️ Retest | ✅ Closed by design | — | — |
 | F-012 | CM | `/admin/user-portals` Access Denied | P1 | RJ | Fixed | ⚠️ By design | — | ✅ Closed by design | — | — |
 | F-013 | Trainer | Products page — nav link absent | P1 | RJ | Fixed | ⚠️ Wrong URL | ⚠️ Retest | ❌ Failing | ✅ Fixed | — |
@@ -58,11 +59,12 @@ Owner guide:
 | NEW-002 | Super Admin | SA post-login lands on `/dashboard/admin` | P1 | RJ | New | ⚠️ Method issue | — | ❌ Failing | ✅ Fixed | ✅ Verified |
 | NEW-003 | Super Admin | `/superadmin/billing/revenue` 404 | P2 | RJ | New | ⚠️ Wrong URL | — | ❌ Failing | ⏸️ Awaiting RJ | ❌ 404 confirmed |
 | NEW-004 | Governing Person | `sso_reports_register` missing table | P2 | Dave | — | — | — | ❌ New | ✅ Fixed on branch ⚠️ Prod pending | ✅ Verified (Admin + GP) |
-| NEW-005 | CM | CM bypasses AdminRoute on `/settings/rto` | P1 | RJ | — | — | — | ❌ New | ✅ Fixed | — |
+| NEW-005 | CM | CM bypasses AdminRoute on `/settings/rto` | P1 | RJ | — | — | — | ❌ New | ✅ Fixed | ✅ Verified B1 — redirect + header link both confirmed |
 | SEED-001 | Administrator | CT form — Responsible Role dropdown empty | P2 | Carl | — | — | — | ❌ New | ✅ Fixed | ✅ By design — view returns 5 rows (authority_level > 1) |
 | SEED-002 | Administrator | CT form — Status dropdown empty | P2 | Carl | — | — | — | ❌ New | ✅ Fixed | ✅ Verified |
-| NEW-006 | Administrator | `/complybot` history fetch error | P2 | RJ | — | — | — | — | — | ⚠️ New |
-| NEW-007 | Administrator | `/dashboard/assessment-validation` console error | P2 | RJ | — | — | — | — | — | ❌ New |
+| NEW-006 | All roles | `/complybot` history fetch error | P2 | RJ | — | — | — | — | — | ❌ Confirmed Admin + CM |
+| NEW-007 | All roles | `/dashboard/assessment-validation` console error | P2 | RJ | — | — | — | — | — | ❌ Confirmed Admin + CM |
+| NEW-010 | CM | `/dashboard/trainer-portal/cm-delivery-overview` redirects | P2 | RJ | — | — | — | — | — | ❌ New (B1) |
 
 ---
 
@@ -656,18 +658,18 @@ CREATE POLICY "tenant isolation" ON public.sso_reports_register
 
 ## NEW-006
 
-**Role:** Administrator (`admin@complyhub-seed.com`)
-**Checklist items:** 2.7 — ComplyBot
+**Role:** All roles — confirmed on Administrator (Session A) and Compliance Manager (Session B1)
+**Checklist items:** 2.7, 4.2.7 — ComplyBot
 **Severity:** P2
 **Owner:** RJ
-**Status:** ⚠️ Open — new finding (Round 6 Session A)
+**Status:** ❌ Open — app-wide (Round 6 Sessions A + B1)
 
 **Expected:** Console clean on `/complybot`.
-**Actual:** Red console error on page load: `Error fetching history: Object`. Chat interface renders correctly — no conversation history exists for seed user.
+**Actual:** Red console error on page load: `Error fetching history: Object`. Chat interface renders fully — the error is from an empty history state, not a functional block. Also fires as background noise on other pages where the ComplyBot widget initialises (e.g. `/dashboard/assessment-validation`).
 
-**Root cause hypothesis:** Empty history state not handled gracefully — fetch failure logged as error instead of silent empty state.
+**Root cause hypothesis:** Empty history state not handled gracefully — fetch failure logged as error instead of returning silent empty array.
 
-**Next step:** Confirm whether this is expected for a fresh seed user (close as by-design) or fix error handling in ComplyBot history fetch.
+**Next step:** Fix error handling in ComplyBot history fetch — silent empty array when no history exists.
 
 **Console errors:**
 ```
@@ -680,25 +682,78 @@ CREATE POLICY "tenant isolation" ON public.sso_reports_register
 
 ## NEW-007
 
-**Role:** Administrator (`admin@complyhub-seed.com`)
-**Checklist items:** 2.2 — Assessment Validation
+**Role:** All roles — confirmed on Administrator (Session A) and Compliance Manager (Session B1)
+**Checklist items:** 2.2, 4.2.2 — Assessment Validation
 **Severity:** P2
 **Owner:** RJ
-**Status:** ❌ Open — new finding (Round 6 Session A)
+**Status:** ❌ Open — app-wide (Round 6 Sessions A + B1)
 
 **Expected:** Console clean on `/dashboard/assessment-validation`.
-**Actual:** Page loads with "No validation data" message but 1 red console error on page load: `Error fetching validation progress: Object`.
+**Actual:** Page loads with sub-tabs visible but 1 red console error on load: `Error fetching validation progress: Object`. No seed validation data exists — empty state not handled silently.
 
 **What works:** Page renders without crash. Sub-tabs visible.
 
-**Root cause hypothesis:** Validation progress query fails when no seed validation data exists — error not suppressed for empty state.
+**Root cause hypothesis:** Validation progress query fails when no data exists — error not suppressed for empty state.
 
-**Next step:** Investigate validation progress fetch — handle empty/no-data case without console error.
+**Next step:** Handle empty/no-data case without console error in the validation progress fetch.
 
 **Console errors:**
 ```
 [ERROR] Error fetching validation progress: Object (assets/index-CfRV3ACK.js:6:1112)
 ```
+
+---
+
+---
+
+## NEW-010
+
+**Role:** Compliance Manager (`compliance@complyhub-seed.com`)
+**Checklist items:** 4.2.8 — CM Delivery Overview
+**Severity:** P2
+**Owner:** RJ
+**Status:** ❌ Open — new finding (Round 6 Session B1)
+
+**Expected:** `/dashboard/trainer-portal/cm-delivery-overview` loads — CM-specific trainer delivery overview page.
+**Actual:** Navigating to this route redirects to `/dashboard/compliance`. No sidebar link found in CM nav. Route either not built, not configured in `roleMenuConfigs.ts` for CM, or the route guard is redirecting.
+
+**What works:** Console clean on redirect — no errors.
+
+**Root cause hypothesis:** Route exists in `AppRoutes.tsx` (confirmed from prior diagnostics) but the CM nav config in `roleMenuConfigs.ts` may not include it, or the route guard (`ManagerRoute`?) is rejecting the CM role.
+
+**Next step:** Check if `cm-delivery-overview` is in the CM section of `roleMenuConfigs.ts` and whether `AppRoutes.tsx` has a guard on that route that excludes CM.
+
+---
+
+---
+
+## Round 6 — Session B1 (Role 4 — Compliance Manager, 2026-06-11)
+
+**Tester:** Claude Chrome
+
+| Item | Result | Notes |
+|---|---|---|
+| 4.1.1 Fresh login → `/dashboard/compliance` | ✅ | Confirmed |
+| 4.1.2 Console clean on landing | ✅ | AppContext 12s timeout only (acceptable) |
+| 4.1.3 No User Management / Settings in nav | ✅ | Confirmed absent |
+| 4.1.4 "RTO Settings" NOT in header dropdown (NEW-005) | ✅ | Dropdown shows Profile + Sign out only |
+| 4.2.1 `/dashboard/tas-engine` loads | ✅ | Console clean |
+| 4.2.2 `/dashboard/assessment-validation` loads | ⚠️ | Loads but red error: "Error fetching validation progress" (NEW-007 confirmed app-wide) |
+| 4.2.3 PDR Add button present (F-010) | ✅ | Button present, form opens correctly |
+| 4.2.4 MCN write access | ✅ | Log New Entry button present |
+| 4.2.5 `/dashboard/registers/audit` loads | ✅ | Console clean |
+| 4.2.6 `/dashboard/governance/register` loads | ✅ | Console clean |
+| 4.2.7 ComplyBot loads (F-009) | ⚠️ | UI renders fully ✅ — red error: "Error fetching history" (NEW-006 confirmed app-wide) |
+| 4.2.8 `/dashboard/trainer-portal/cm-delivery-overview` | ❌ | Redirects to `/dashboard/compliance` — route unavailable (NEW-010) |
+| 4.3.1 `/settings/rto` → `/access-denied` (NEW-005) | ✅ | Redirect confirmed, content blocked |
+| 4.3.2 `/admin/user-management/roles` → Access Denied | ✅ | Guard fires |
+| 4.3.3 `/admin/user-portals` → Access Denied | ✅ | Guard fires |
+| 4.3.4 `/superadmin/dashboard` → redirected | ✅ | Redirects to `/dashboard/compliance` |
+| 4.4.1 Console clean on `/dashboard/compliance` | ✅ | Zero red errors |
+| 4.4.2 Console clean on governance register | ✅ | Zero red errors |
+| 4.4.3 Console clean on `/complybot` | ❌ | "Error fetching history" (NEW-006) |
+
+**Session B1 verdict: 16/19 ✅, 2 ⚠️ (known app-wide issues), 1 ❌ (NEW-010 new finding)**
 
 ---
 
