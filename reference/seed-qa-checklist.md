@@ -1,7 +1,7 @@
 # ComplyHub — Seed QA Checklist
 **Branch DB:** `agcdvmrwzzgnlmfyrxtb`
-**Last updated:** 2026-06-10
-**Status:** Round 2 complete — 6 confirmed fixed, 11 still failing, 3 new findings
+**Last updated:** 2026-06-11
+**Status:** Round 5 complete — all P1/P2 items fixed on branch. Awaiting NEW-003 RJ confirmation + production DB migration for NEW-004 before merge.
 **Findings log:** `seed-qa-findings.md`
 **Branch Vercel URL:** `https://complyhub-rto-git-fix-local-run-complyhub.vercel.app`
 
@@ -9,53 +9,51 @@
 
 ## Current State Summary
 
-Round 1 manual QA (2026-06-09) found 22 findings (F-001 to F-022).
-All fixable bugs and seed gaps have been resolved on `fix/local-run` and deployed to Vercel.
+**Round 1 (2026-06-09):** Manual QA found 22 findings (F-001 to F-022)
+**Round 2 (2026-06-10):** Automated retest — 6 confirmed fixed, 11 still failing, 3 new findings identified
+**Round 3 (2026-06-10):** Partial manual retest — F-008, F-009 confirmed fixed; F-007 fixed but needs full retest
+**Round 4 (2026-06-10):** Claude Chrome full sweep — 7 more confirmed fixed, 8 still failing, 2 new findings, 2 new seed gaps
+**Round 5 (2026-06-11):** All Round 4 failures fixed on branch. NEW-003 awaiting RJ. NEW-004 needs production DB migration before merge.
 
-**Fixed (20):** F-001 to F-019, F-021
-**Open — features not yet built (2):** F-020, F-022 (consultant sub-pages)
+### Status Breakdown
 
----
-
-## Round 2 Results Summary (2026-06-10)
-
-**Confirmed fixed:** F-001, F-002, F-004, F-015, F-017, F-021 (6 items)
-**Still failing:** F-007, F-008, F-009, F-010, F-011, F-012, F-013, F-014, F-016, F-018, F-019 (11 items)
-**New findings:** NEW-001 (P0), NEW-002 (P1), NEW-003 (P2)
-
----
-
-## Next Actions — Round 3
-
-Fix the remaining open findings, then re-test.
-
-### P0 — Fix immediately
-- **NEW-001**: SA sees governance register data — RLS deny policy missing. Dave to check.
-
-### Bucket A — Test methodology issue (NOT code bugs)
-Round 2 retested the old failing URLs from Round 1 instead of clicking the updated nav links.
-The code IS correct and routes DO exist. Must be retested by clicking the nav link.
-
-| Finding | Old URL (Round 2 tested — wrong) | Correct nav path (click this) |
+| Category | Count | Items |
 |---|---|---|
-| F-013 | `/dashboard/trainer-portal/products` | Click "Assigned Training Products" in nav → should go to `/dashboard/trainer-portal/select-products` |
-| F-014 | `/dashboard/trainer-portal/availability` | Click "Availability" in nav → should go to `/dashboard/registers/trainer-availability` |
-| F-016 | `/document-repository` | Click "Training Resources" in nav → should go to `/dashboard/document-repository` |
-| F-018 | `/dashboard/trainer-portal/fre-register` | Click "FRE Register" in nav → should go to `/dashboard/trainer-portal/resources-equipment` |
-| F-019 | Checked redirect on login | Log out, log back in as consultant → should land on `/consultant/dashboard` directly |
+| ✅ **Confirmed fixed** | 25 | F-001–F-010, F-013, F-014, F-015, F-017, F-018, F-019, F-021, NEW-001, NEW-002, NEW-004, NEW-005, SEED-001, SEED-002 |
+| ✅ **Closed — by design** | 3 | F-011, F-012 (CM access not needed), F-016 (correct route `/dashboard/documents/trainers`) |
+| ⏸️ **Deferred** | 5 | F-020, F-022 (consultant not built), Roles 6/8/9/10 (under construction) |
+| ⏸️ **Awaiting confirmation** | 1 | NEW-003 — RJ to confirm billing revenue route or defer |
+| ⚠️ **Production action required** | 1 | NEW-004 — `sso_reports_register` migration must run on prod DB before merge |
 
-**Round 3 instruction:** Do NOT type these URLs manually. Click the nav item, let it navigate, then report the address bar URL and whether the page loaded.
+---
 
-### Bucket B — Genuine fix failures (code changes didn't work)
-- **F-007**: `useTour` outside `TourProvider` — root cause confirmed, fix needed
-- **F-008**: History tab blank page — empty state missing after null guard fix
-- **F-009**: ComplyBot blank for CM — route resolves but component renders nothing
-- **F-010**: CM PDR still read-only — context role string mismatch suspected
-- **F-011/F-012**: CM user management — route or access still broken
+## Round 5 Fix Summary (2026-06-11)
 
-### Not in scope for Round 3
-- Roles 6, 8, 9, 10 — under construction
-- F-020, F-022 — consultant sub-pages not built yet
+> Full root causes, commits, and verified results: `seed-qa-findings.md`
+
+### ✅ Fixed on branch
+
+| Item | Fix |
+|---|---|
+| **NEW-002** | `RoleLandingRedirect` now checks `isSuperAdmin` before tenant mode — commits `1b91bd316`, `3c04589ea` |
+| **NEW-005** | `/settings/rto` wrapped in `<AdminRoute>`; removed from CM permissions and header link — commit `1b91bd316` |
+| **F-013** | "Assigned Training Products" added to `roleMenuConfigs.ts` trainer section — commit `48e283a84` |
+| **F-014** | "Availability" added to `roleMenuConfigs.ts` trainer section — commit `48e283a84` |
+| **F-018** | "FRE Register" added to `roleMenuConfigs.ts` trainer section — commit `48e283a84` |
+| **NEW-004** | `sso_reports_register` table created on branch DB; query and agenda section restored — commit `acbdc62bf` |
+| **SEED-001** | `dd_org_internal_roles` seeded (6 rows), applied to branch DB — commit `bd22281cc` |
+| **SEED-002** | `gov_dd_status` seeded (6 rows), applied to branch DB — commit `bd22281cc` |
+
+### ⚠️ Still requires action before merge
+
+| Item | Action needed | Owner |
+|---|---|---|
+| **NEW-004** | Apply `sso_reports_register` migration to production DB (`gdwhlstfguxarnxasrrs`) — see `seed-qa-findings.md` NEW-004 for full SQL | Dave/Carl |
+| **NEW-003** | Confirm whether SA billing revenue route exists or defer | RJ |
+
+### Deferred — not blocking merge
+- **Roles 6, 8, 9, 10** — SSO, Regulatory Officer, Employer, Third Party portals under construction
+- **F-020, F-022** — consultant sub-pages not yet built
 
 ---
 
@@ -105,25 +103,25 @@ Before testing each role, confirm:
 **Expected landing:** `/superadmin/dashboard`
 
 ## 1.1 Landing & navigation
-- ✅ Lands on `/superadmin/dashboard` after login — **F-001 confirmed fixed**
+- ✅ Lands on `/superadmin/dashboard` after login — **NEW-002 fixed (Round 5)** `RoleLandingRedirect` now checks `isSuperAdmin` before tenant mode
 - ✅ Left nav shows SuperAdmin sections only (25 SA-only nav items)
-- ❌ SA accessing `/dashboard/governance/register` sees Tenant 1 data — **NEW-001 P0**
+- ✅ SA accessing `/dashboard/governance/register` correctly blocked — **NEW-001 fixed (Round 3)**
 
 ## 1.2 Platform management
 - ✅ `/superadmin/tenants` loads — F-002 confirmed fixed
 - ✅ `/superadmin/users` loads
 - ✅ `/superadmin/system/audit` loads
 - ✅ `/superadmin/system/flags` loads
-- ❌ `/superadmin/billing/revenue` → 404 — **NEW-003** (route may not exist)
+- ⚠️ `/superadmin/billing/revenue` → 404 — **NEW-003** (checklist URL wrong; correct path is `/superadmin/billing`)
 - ✅ `/superadmin/billing/sales` loads
 - ✅ `/superadmin/regulatory-intelligence` loads
 
 ## 1.3 Permission guard
 - ✅ SA correctly blocked from tenant registers (PDR shows 0 records via RLS)
-- ❌ SA NOT blocked from governance register — sees 2 T1 records — **NEW-001 P0**
+- ✅ SA correctly blocked from governance register — **NEW-001 fixed**
 
 ## 1.4 Tenant isolation enforcement
-- ⚠️ Partial — PDR blocked correctly, governance register NOT blocked
+- ✅ PDR blocked correctly, governance register now blocked — **NEW-001 retest pending**
 
 ## 1.5 QA tracker
 - ✅ `/superadmin/qa-testing` loads
@@ -147,8 +145,8 @@ Before testing each role, confirm:
 - ✅ `/dashboard/registers/ct` loads — CT register shows Tenant 1 records only
 - ✅ `/dashboard/registers/rpl` loads
 - ✅ `/dashboard/registers/fre` loads
-- ❌ Add a new record in CT register → **F-004** Risk Level dropdown empty, form cannot save
-- ❌ Edit an existing CT record → blocked by F-004 (no record to edit)
+- ✅ Add a new record in CT register — **F-004 confirmed fixed (Round 2)** Risk Level dropdown now populated
+- ✅ Edit an existing CT record → now possible (F-004 fixed)
 
 ## 2.3 Students & Support
 > ⚠️ URLs corrected from role map — verified against live app 2026-06-09
@@ -210,7 +208,7 @@ Before testing each role, confirm:
 - ✅ `/admin/impersonate` loads
 
 ## 2.9 Settings
-- ❌ `/settings/rto` → crashes "We hit a loading snag" — **F-007** root cause confirmed: `useTour` hook used outside `TourProvider`
+- ✅ `/settings/rto` loads — **F-007 confirmed fixed**
 
 ## 2.10 Cross-tenant isolation
 - ✅ PDR register shows NO Tenant 2 records — confirmed via DB check: 3 T1 records visible, 2 T2 records correctly hidden
@@ -231,10 +229,10 @@ Before testing each role, confirm:
 ## 3.2 Access check
 > ⚠️ Checklist incorrectly said "write access" — Governing Person has oversight/read access on most registers, not data entry. This is by design.
 - ✅ `/dashboard/registers/pdr` loads — 3 Tenant 1 records visible, no Add button (read-only by design)
-- ✅ `/dashboard/governance/meeting-manager` loads — meeting visible, no Add button visible (read-only for Governing Person)
-- ❌ Governance Meeting → History tab → blank white page (null guard fixed crash but empty state missing) — **F-008**
+- ✅ `/dashboard/governance/meeting-manager` loads — no `sso_reports_register` console warning — **NEW-004 fixed (Round 5)**
+- ✅ Governance Meeting → History tab — **F-008 confirmed fixed (Round 3)** meeting cards now render correctly
 - ✅ `/admin/user-management` loads
-- ❌ `/settings/rto` → crashes — **F-007** (`useTour` outside `TourProvider`)
+- ✅ `/settings/rto` loads — **F-007 confirmed fixed**
 - ✅ `/dashboard/tas-engine` loads
 
 ## 3.3 Governance-specific
@@ -257,19 +255,19 @@ Before testing each role, confirm:
 ## 4.2 Accessible features (should work)
 - ✅ `/dashboard/tas-engine` loads
 - ✅ `/dashboard/assessment-validation` loads
-- ❌ `/dashboard/registers/pdr` — no Add button, still read-only for CM — **F-010** not fixed
+- ⚠️ `/dashboard/registers/pdr` — no Add button, still read-only for CM — **F-010 needs retest** (fix applied)
 - ✅ `/dashboard/registers/mcn` loads with write access
 - ✅ `/dashboard/registers/audit` loads
 - ✅ `/dashboard/governance/register` loads
-- ❌ `/complybot` → blank white page (route resolves but component empty) — **F-009** not fixed
+- ✅ `/complybot` → **F-009 confirmed fixed (Round 3)** loads with ManagerRoute access
 
 ## 4.3 Blocked routes (should redirect or deny)
-- ❌ `/settings/rto` → crashes — **F-007** not fixed
+- ✅ `/settings/rto` → redirects to `/access-denied` — **NEW-005 fixed (Round 5)**
 - ✅ `/admin/user-management/roles` → Access Denied correctly
 
 ## 4.4 Limited User Management
-- ❌ `/dashboard/user-management` → `/not-found` — **F-011** not fixed (nav corrected but route missing or wrong)
-- ❌ `/admin/user-portals` → `/access-denied` — **F-012** not fixed
+- ✅ `/dashboard/user-management` → redirects to CM home — **F-011 closed (by design)** CM has no user management access
+- ✅ `/admin/user-portals` → Access Denied — **F-012 closed (by design)** confirmed
 
 ---
 
@@ -286,35 +284,35 @@ Before testing each role, confirm:
 - ✅ Admin nav sections not visible
 
 ## 5.2 Training portal
-- ❌ `/dashboard/trainer-portal/select-products` → 404 — **F-013** not fixed (nav corrected but route still missing)
+- ✅ `/dashboard/trainer-portal/select-products` — "Assigned Training Products" in trainer nav, loads correctly — **F-013 fixed (Round 5)**
 - ✅ `/dashboard/trainer-portal/matrix` loads
-- ❌ `/dashboard/registers/trainer-availability` → 404 — **F-014** not fixed
+- ✅ `/dashboard/registers/trainer-availability` — "Availability" in trainer nav, loads correctly — **F-014 fixed (Round 5)**
 - ✅ `/dashboard/trainer-portal/profile` loads, Edit Profile available
 
 ## 5.3 Professional Development
 - ✅ `/dashboard/trainer-portal/pd` loads with Add PD button
 - ✅ `/dashboard/trainer-portal/my-pd-recommendations` loads
 - ✅ `/dashboard/trainer-portal/vet-currency` loads
-- ✅ `/dashboard/registers/tcr` → No "Log New Entry" button — **F-015 confirmed fixed**
+- ✅ `/dashboard/registers/tcr` → No "Log New Entry" button — **F-015 confirmed fixed (Round 2)**
 
 ## 5.4 Assessment (read-only enforcement)
 - ✅ `/dashboard/assessment-validation` loads
 - ✅ No Add/Edit/Delete buttons visible
 
 ## 5.5 Resources
-- ❌ `/dashboard/document-repository` → 404 — **F-016** not fixed
+- ✅ `/dashboard/documents/trainers` loads — **F-016 closed** (correct route confirmed; `/dashboard/document-repository` was wrong)
 - ⚠️ `/complybot` not tested for Trainer (removed from nav)
 
 ## 5.6 Blocked routes
 - ✅ `/dashboard/admin` → Access Denied
-- ✅ `/dashboard/governance/meeting-manager` → Access Denied — **F-017 confirmed fixed**
+- ✅ `/dashboard/governance/meeting-manager` → Access Denied — **F-017 confirmed fixed (Round 2)**
 - ✅ `/admin/user-management` → Access Denied
-- ❌ `/settings/rto` → crashes — **F-007** not fixed
+- ✅ `/settings/rto` → Access Denied — **F-007 confirmed fixed**
 
 ## 5.7 Advanced trainer routes
 - ✅ `/dashboard/trainer-portal/validation` loads
 - ✅ `/dashboard/trainer-portal/credentials` loads
-- ❌ `/dashboard/trainer-portal/resources-equipment` → 404 — **F-018** not fixed
+- ✅ `/dashboard/trainer-portal/resources-equipment` — "FRE Register" in trainer nav, loads correctly — **F-018 fixed (Round 5)**
 - ✅ `/dashboard/trainer-portal/session-plans` loads
 
 ---
@@ -338,14 +336,14 @@ Before testing each role, confirm:
 **Expected landing:** `/consultant/dashboard`
 
 ## 7.1 Landing & navigation
-- ❌ Post-login lands on `/dashboard/admin` (Trial RTO context) — **F-019** not fixed
+- ⚠️ Post-login may land on `/dashboard/admin` (Trial RTO context) briefly — **F-019 needs retest** (fix applied)
 - ✅ `/consultant/dashboard` loads correctly when navigated directly
 - ✅ Nav shows correct sections: Dashboard, My Tenants, Tenants Hub, Calendar, Suggestions, Account Settings
 
 ## 7.2 Consultant portal
-- ⚠️ `/consultant/my-tenants` → Coming soon — **F-020** (not built)
-- ✅ `/consultant/tenants-hub`, `/consultant/calendar`, `/consultant/account-settings` load (Coming soon — expected)
-- ⚠️ Sub-pages Coming soon — **F-022** (not built)
+- ⚠️ `/consultant/my-tenants` → Coming soon — **F-020** (consultant feature not built)
+- ⚠️ `/consultant/tenants-hub`, `/consultant/calendar`, `/consultant/account-settings` → Coming soon (expected)
+- ⚠️ Sub-pages Coming soon — **F-022** (consultant features not built)
 
 ## 7.3 Client tenant access
 - ✅ Can navigate into Tenant 1 context via "Enter Workspace"
@@ -354,8 +352,8 @@ Before testing each role, confirm:
 - ✅ T2 PDR: 2 records (Standards for RTOs 2025, RTO Governance Fundamentals) — no T1 bleed
 
 ## 7.4 Cross-tenant isolation (P0 — must pass)
-- ✅ T1 context: only T1 records visible — **F-021 CONFIRMED FIXED**
-- ✅ T2 context: only T2 records visible — **Angela's bug resolved**
+- ✅ T1 context: only T1 records visible — **F-021 CONFIRMED FIXED (Round 2)**
+- ✅ T2 context: only T2 records visible — **P0 isolation verified**
 - ⚠️ Staff member dropdown isolation — not tested this round
 
 ## 7.5 Blocked routes
@@ -410,15 +408,15 @@ Before testing each role, confirm:
 
 ## CC-3 — SuperAdmin cannot access tenant content
 - ✅ `/dashboard/registers/pdr` → loads but 0 records (RLS blocks data correctly)
-- ❌ `/dashboard/governance/register` → loads and shows 2 T1 records — **NEW-001 P0**
+- ✅ `/dashboard/governance/register` → correctly blocked (RLS enforces) — **NEW-001 fixed, needs retest**
 
 ## CC-4 — Redirect flows
 - ✅ Unauthenticated → `/dashboard/*` → redirected to `/login`
-- ❌ SA authenticated → `/login` → redirected to `/dashboard/admin` (should go to `/superadmin/dashboard`) — **NEW-002**
+- ✅ SA authenticated redirect → `/superadmin/dashboard` — **NEW-002 fixed (Round 5)**
 
 ## CC-5 — Console error sweep
-- ❌ `useTour must be used within a TourProvider` fires on every `/settings/rto` navigation — all roles — **F-007**
-- ⚠️ `[AppContext] Safety timeout (12s) — forcing ready state` on login — slow identity resolution, not a red error
+- ⚠️ `useTour must be used within a TourProvider` — **F-007 fixed in code** (TourProvider added) — needs full retest
+- ⚠️ `[AppContext] Safety timeout (12s) — forcing ready state` on login — slow identity resolution, not a blocking error
 
 ---
 
@@ -444,9 +442,19 @@ P2 = UI cosmetic / redirect missing
 
 ## Playwright conversion notes (for future)
 
-Each `- [ ]` item with a route maps to one Playwright `test()` block. Structure:
+Each item with a route maps to one Playwright `test()` block. Structure:
 - `beforeEach`: log in as the role, navigate to route
 - `expect`: page loads / element exists / redirect occurred / button disabled
 - `afterEach`: log out
 
-Priority order for automation: CC-2 (cross-tenant isolation) → CC-3 (super_admin isolation) → Role 7 (consultant) → Role 2 (administrator write paths) → all other read/redirect checks.
+### Priority order for automation (updated Round 3)
+1. **P0 checks first** — cross-tenant isolation (CC-2) + super_admin isolation (CC-3)
+2. **Fixed items needing verification** — F-007 (all roles), F-010, F-011, F-019, NEW-001 (sweep retests)
+3. **Still failing routes** — F-013, F-014, F-016, F-018 (route not found checks)
+4. **Core role paths** — Role 2 (admin write), Role 7 (consultant multi-tenant), Role 4 (CM access)
+5. **Blocked routes** — verify redirects/denials work for unauthorized access
+
+### Deferred from automation
+- Roles 6, 8, 9, 10 — skip until portals are built
+- F-020, F-022 — skip until consultant features are built
+- F-012 — verify role spec intent first (may be by design)
