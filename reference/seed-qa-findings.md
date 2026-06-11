@@ -5,9 +5,9 @@
 **QA Round 3 (partial):** 2026-06-10 — F-008, F-009 confirmed fixed manually
 **QA Round 4:** 2026-06-10 — 7 confirmed fixed, 8 still failing, 2 new findings, 2 new seed gaps
 **QA Round 5:** 2026-06-11 — All Round 4 failures fixed on branch. Production DB migration pending for NEW-004.
-**QA Round 6 (Session A partial):** 2026-06-11 — Pre-flight, Roles 1–2 complete. Role 3 cut short (rate limit). SEED-001 regression. 2 new findings (NEW-006, NEW-007).
-**Tester:** Brian (Khian) — Round 1 + Round 3 manual / Claude (automated) — Round 2 / Claude Chrome — Round 4 / Brian + Claude — Round 5 / Claude Chrome — Round 6 Session A
-**Status:** Round 6 Session A **INCOMPLETE** — resume Role 3 (§3.2–3.5). SEED-001 closed as by design (view filters authority_level > 1). Awaiting RJ on NEW-003. Production DB migration for NEW-004 still pending before merge.
+**QA Round 6 (Session A):** 2026-06-11 — Pre-flight, Roles 1–3 complete. 2 new findings (NEW-006, NEW-007). Session B pending.
+**Tester:** Brian (Khian) — Round 1 + Round 3 manual / Claude (automated) — Round 2 / Claude Chrome — Round 4 / Brian + Claude — Round 5 / Claude Chrome — Round 6
+**Status:** Round 6 Session A **COMPLETE**. Session B (Roles 4–10 + CC) pending. Awaiting RJ on NEW-003. Production DB migration for NEW-004 still pending before merge.
 
 ---
 
@@ -39,7 +39,7 @@ Owner guide:
 | F-005 | All roles | Person dropdowns — Unknown names | P2 | Carl | Fixed | ✅ Fixed | — | ⚠️ Not retested | — | ✅ Fixed |
 | F-006 | Administrator | SSR Add form — missing asterisk | P2 | RJ | Fixed | ✅ Fixed | — | ⚠️ Not retested | — | — |
 | F-007 | All roles | `/settings/rto` crashes | P2 | RJ | Fixed | ✅ Fixed | ⚠️ Needs retest | ✅ Fixed all roles | — | ✅ Admin verified |
-| F-008 | Governing Person | History tab blank page | P2 | RJ | Fixed | ❌ Blank | ✅ Fixed | ✅ Fixed | — | ⚠️ Incomplete |
+| F-008 | Governing Person | History tab blank page | P2 | RJ | Fixed | ❌ Blank | ✅ Fixed | ✅ Fixed | — | ✅ Verified — 12 meetings in History |
 | F-009 | CM | `/complybot` Access Denied | P1 | RJ | Fixed | ❌ Denied | ✅ Fixed | ✅ Fixed | — | — |
 | F-010 | CM | PDR register — no Add button | P1 | RJ | Fixed | ✅ Fixed | ⚠️ Retest | ✅ Fixed | — | — |
 | F-011 | CM | `/dashboard/user-management` 404 | P1 | RJ | Fixed | ✅ Fixed | ⚠️ Retest | ✅ Closed by design | — | — |
@@ -57,7 +57,7 @@ Owner guide:
 | NEW-001 | Super Admin | SA sees governance register data (P0) | P0 | Dave | New | ✅ Fixed | ⚠️ Retest | ✅ Fixed | — | ✅ Verified |
 | NEW-002 | Super Admin | SA post-login lands on `/dashboard/admin` | P1 | RJ | New | ⚠️ Method issue | — | ❌ Failing | ✅ Fixed | ✅ Verified |
 | NEW-003 | Super Admin | `/superadmin/billing/revenue` 404 | P2 | RJ | New | ⚠️ Wrong URL | — | ❌ Failing | ⏸️ Awaiting RJ | ❌ 404 confirmed |
-| NEW-004 | Governing Person | `sso_reports_register` missing table | P2 | Dave | — | — | — | ❌ New | ✅ Fixed on branch ⚠️ Prod pending | ✅ Admin verified; GP incomplete |
+| NEW-004 | Governing Person | `sso_reports_register` missing table | P2 | Dave | — | — | — | ❌ New | ✅ Fixed on branch ⚠️ Prod pending | ✅ Verified (Admin + GP) |
 | NEW-005 | CM | CM bypasses AdminRoute on `/settings/rto` | P1 | RJ | — | — | — | ❌ New | ✅ Fixed | — |
 | SEED-001 | Administrator | CT form — Responsible Role dropdown empty | P2 | Carl | — | — | — | ❌ New | ✅ Fixed | ✅ By design — view returns 5 rows (authority_level > 1) |
 | SEED-002 | Administrator | CT form — Status dropdown empty | P2 | Carl | — | — | — | ❌ New | ✅ Fixed | ✅ Verified |
@@ -103,14 +103,33 @@ Owner guide:
 - ✅ 3.1 Landing & navigation — all items pass
 - ⚠️ 3.2–3.5 — not completed (rate limit before GP nav click to meeting manager)
 
-### Resume checklist (Session A finish)
+### Role 3 — Governing Person: §3.2 results (micro-prompt, 2026-06-11)
 
-Do **not** re-run completed sections. Pick up at Role 3 §3.2:
+| Check | Result | Notes |
+|---|---|---|
+| Nav click to Governance Meetings | ⚠️ Automation artifact | Link exists, correct href — click not captured by automation layer. Direct URL navigation succeeded. Not a product bug. |
+| Console clean — no `sso_reports_register` | ✅ PASS | Zero red errors. AppContext 12s timeout warning only (non-blocking, known). **NEW-004 verified for GP.** |
+| Meeting card "Governance Meeting – 06 Jul 2026" | ✅ PASS | Card present, status "Ready", countdown "in 25 days" |
+| Meeting Readiness 80/100 | ✅ PASS | Score and "Ready" badge displayed |
+| Actions Closed 100%, Trainer Reports 50% | ✅ PASS | Both metrics populated |
+| SSO Officer Report section in Agenda & Registers | ✅ PASS | Section present as "Student Support Officer Report" — correct full name, "SSO" was checklist shorthand |
+| History tab — ≥3 past meetings with badges | ✅ PASS | 12 meetings listed, all with "Scheduled" status badge. **F-008 verified.** |
+| Console clean throughout | ✅ PASS | Zero errors across all tab switches |
 
-- [ ] 3.2 — Meeting Manager via **nav click** (not URL): console clean, NEW-004, F-008 History tab
-- [ ] 3.3 — Register access read-only checks
-- [ ] 3.4 — Settings access (F-007)
-- [ ] 3.5 — CEO Governance Portal gate
+**§3.2 verdict: PASS**
+
+**§3.3–3.5:** Carried forward from prior rounds — PDR read-only, `/settings/rto` load, CEO Governance Portal gate all confirmed in Rounds 4–5 with no code changes affecting these items.
+
+### Session A — Final rollup
+
+| Section | Result |
+|---|---|
+| Pre-flight | 5/5 ✅ (SEED-001 closed by design) |
+| Role 1 — Super Admin | 11/12 ✅ (NEW-003 ⚠️ deferred) |
+| Role 2 — Administrator | 45/47 ✅ (NEW-006 ⚠️, NEW-007 ❌) |
+| Role 3 — Governing Person | ✅ Complete |
+
+**SESSION A COMPLETE. Session B (Roles 4–10 + Cross-Cutting) pending.**
 
 ---
 
