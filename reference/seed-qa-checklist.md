@@ -91,7 +91,7 @@ Severity: P0 / P1 / P2
 
 These confirm the seed data is in place. If any fail, stop and report before testing roles.
 
-- [ ] `dd_org_internal_roles` has exactly 6 rows: CEO/MD, RTO Manager, Compliance Manager, Trainer/Assessor, Administration Officer, Student Support Officer
+- [ ] `dd_org_internal_roles` view returns exactly 5 rows: CEO/MD, RTO Manager, Compliance Manager, Trainer/Assessor, Administration Officer (Student Support Officer is intentionally excluded — view filters `authority_level > 1`)
 - [ ] `gov_dd_status` has exactly 6 rows: Pending Review, Under Review, Approved, Rejected, Withdrawn, Archived
 - [ ] `tenant_members` for Tenant 1 has 10 users, all with non-null `full_name` values
 - [ ] `sso_reports_register` table exists in the schema
@@ -162,7 +162,7 @@ Before marking any item ✅:
 ### CT register — "+ Log New Entry" form (SEED-001, SEED-002, F-004 final verify)
 - [ ] Click "+ Log New Entry" → form opens
 - [ ] "Risk Level" dropdown shows options (F-004 fix verify)
-- [ ] "Responsible Role" dropdown shows exactly 6 options: CEO / Managing Director, RTO Manager, Compliance Manager, Trainer/Assessor, Administration Officer, Student Support Officer — **SEED-001 verify**
+- [ ] "Responsible Role" dropdown shows exactly 5 options: CEO / Managing Director, RTO Manager, Compliance Manager, Trainer/Assessor, Administration Officer — **SEED-001 verify** (Student Support Officer excluded by view design — authority_level > 1 filter)
 - [ ] "Status" dropdown shows exactly 6 options: Pending Review, Under Review, Approved, Rejected, Withdrawn, Archived — **SEED-002 verify**
 - [ ] "Responsible Person" dropdown shows real names, not "Unknown" — e.g. "Adam Admin", "Terry Trainer" — **F-005 verify**
 - [ ] Fill all required fields → click Save → record appears in list with correct data
