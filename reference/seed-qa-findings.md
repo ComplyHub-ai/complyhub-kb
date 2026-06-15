@@ -8,8 +8,11 @@
 **QA Round 6 (Session A):** 2026-06-11 — Pre-flight, Roles 1–3 complete. 2 new findings (NEW-006, NEW-007). Session B pending.
 **QA Round 6 (Session B1):** 2026-06-11 — Role 4 (CM) complete. NEW-006/NEW-007 confirmed app-wide. NEW-010 new finding. Sessions B2–B5 pending.
 **QA Round 6 (Session B2):** 2026-06-15 — Role 5 (Trainer) complete. F-013/014/018/015 verified. NEW-011, NEW-012 new findings. NEW-007 confirmed app-wide. Sessions B3–B5 pending.
+**QA Round 6 (Session B3):** Skipped — Roles 6, 8, 9, 10 are under construction.
+**QA Round 6 (Session B4):** 2026-06-15 — Role 7 (Consultant) complete. F-019, F-021 verified. P0 cross-tenant isolation ALL CLEAR. NEW-013 new finding. Session B5 pending.
+**QA Round 6 (Session B5):** 2026-06-15 — Cross-Cutting scenarios complete. ⛔ P0 REGRESSION — NEW-014: SA can read Tenant 1 PDR records. Round 6 COMPLETE but branch must NOT merge until NEW-014 is resolved.
 **Tester:** Brian (Khian) — Round 1 + Round 3 manual / Claude (automated) — Round 2 / Claude Chrome — Round 4 / Brian + Claude — Round 5 / Claude Chrome — Round 6
-**Status:** Round 6 Session B2 **COMPLETE**. Sessions B3–B5 (Roles 6–10 + CC) pending. Awaiting RJ on NEW-003, NEW-012. Production DB migration for NEW-004 still pending before merge.
+**Status:** ⛔ Round 6 **COMPLETE** with P0 blocker (NEW-014). Branch must NOT merge until SA PDR RLS is fixed. Awaiting RJ on NEW-003, NEW-012. Production DB migration for NEW-004 still pending.
 
 ---
 
@@ -52,9 +55,9 @@ Owner guide:
 | F-016 | Trainer | Document repository — wrong URL | P1 | RJ | Fixed | ⚠️ Wrong URL | ⚠️ Retest | ✅ Closed by design | — | — |
 | F-017 | Trainer | Governance Meeting Manager unblocked | P1 | RJ | Fixed | ✅ Fixed | — | — | — | ⚠️ Guard fires correctly but wrong redirect target — see NEW-012 |
 | F-018 | Trainer | FRE register — nav link absent | P1 | RJ | Fixed | ⚠️ Wrong URL | ⚠️ Retest | ❌ Failing | ✅ Fixed | ✅ Verified B2 — nav click works |
-| F-019 | Consultant | Post-login wrong landing | P1 | RJ | Fixed | ⚠️ Retest | ⚠️ Retest | ✅ Fixed | — | — |
+| F-019 | Consultant | Post-login wrong landing | P1 | RJ | Fixed | ⚠️ Retest | ⚠️ Retest | ✅ Fixed | — | ✅ Verified B4 |
 | F-020 | Consultant | `/consultant/my-tenants` Coming soon | P1 | RJ | Open | ⚠️ Deferred | — | ⚠️ Deferred | ⏸️ Deferred | — |
-| F-021 | Consultant | T2 PDR cross-tenant leak (P0) | P0 | RJ | Fixed | ✅ Fixed | — | — | — | — |
+| F-021 | Consultant | T2 PDR cross-tenant leak (P0) | P0 | RJ | Fixed | ✅ Fixed | — | — | — | ✅ Verified B4 — P0 ALL CLEAR |
 | F-022 | Consultant | Consultant sub-pages Coming soon | P1 | RJ | Open | ⚠️ Deferred | — | ⚠️ Deferred | ⏸️ Deferred | — |
 | NEW-001 | Super Admin | SA sees governance register data (P0) | P0 | Dave | New | ✅ Fixed | ⚠️ Retest | ✅ Fixed | — | ✅ Verified |
 | NEW-002 | Super Admin | SA post-login lands on `/dashboard/admin` | P1 | RJ | New | ⚠️ Method issue | — | ❌ Failing | ✅ Fixed | ✅ Verified |
@@ -68,6 +71,8 @@ Owner guide:
 | NEW-010 | CM | `/dashboard/trainer-portal/cm-delivery-overview` redirects | P2 | RJ | — | — | — | — | — | ❌ New (B1) |
 | NEW-011 | Trainer | `/dashboard/trainer-portal/assessment-decisions` console error | P2 | RJ | — | — | — | — | — | ❌ New (B2) |
 | NEW-012 | Trainer | F-017 wrong redirect target — goes to trainer dashboard not `/access-denied` | P2 | RJ | — | — | — | — | — | ⚠️ New (B2) |
+| NEW-013 | Consultant | "Enter Workspace" for Consultant-role tenant does not switch context | P2 | RJ | — | — | — | — | — | ⚠️ New (B4) — P0 isolation intact |
+| NEW-014 | Super Admin | SA can read Tenant 1 PDR records — RLS not blocking PDR table | P0 | Dave | — | — | — | — | — | ⛔ P0 NEW (B5) — DO NOT MERGE |
 
 ---
 
@@ -774,6 +779,140 @@ CREATE POLICY "tenant isolation" ON public.sso_reports_register
 **Next step:** Update `ManagerRoute` redirect target from `/not-authorized` to `/access-denied` for consistency, or ensure `/not-authorized` renders the Access Denied component.
 
 **Console errors:** None — clean (guard log only).
+
+---
+
+---
+
+## NEW-013
+
+**Role:** Consultant (`consultant@complyhub-seed.com`)
+**Checklist items:** 7.3, 7.5 — Tenant context switching
+**Severity:** P2
+**Owner:** RJ
+**Status:** ⚠️ Open — new finding (Round 6 Session B4)
+
+**Expected:** Clicking "Enter Workspace" for Seed RTO Pty Ltd (Consultant role) enters T1 context — equivalent to how "Enter Workspace" for Trial RTO (Administrator role) navigates to `/dashboard/admin`.
+
+**Actual:** Clicking "Enter Workspace" for Seed RTO Pty Ltd (where Connie has Consultant role, not Administrator) does nothing — no navigation, no network request, no state change. After previously entering T2, T2 context persists. PDR at `/dashboard/registers/pdr` continues showing T2 records. The only way to return to T1 was via direct navigation in a fresh context.
+
+**What works:** P0 isolation is fully intact — no cross-tenant data bleed detected. T2 data correctly shows 2 T2 records only. T1 data correctly shows 3 T1 records only. The data scoping is correct; only the workspace-switch UX is broken for non-Admin tenant roles.
+
+**Root cause hypothesis:** The "Enter Workspace" button's handler likely checks the tenant role before navigating. When the role is "Consultant" (not "Administrator"), the handler may not know which dashboard to navigate to, so it silently does nothing. Administrator roles have a clear landing (`/dashboard/admin`) but Consultant does not resolve to a tenant dashboard.
+
+**Next step:** Check the "Enter Workspace" button handler in the consultant portfolio component — ensure it handles the Consultant role by navigating to the appropriate tenant context (or the consultant's tenant view).
+
+**Console errors:** None — clean during button click.
+
+---
+
+---
+
+## ⛔ NEW-014 — P0 CRITICAL
+
+**Role:** Super Admin (`superadmin@complyhub.ai`)
+**Checklist items:** CC-3, 1.3
+**Severity:** P0 — cross-tenant data leak
+**Owner:** Dave
+**Status:** ⛔ Open — P0 regression (Round 6 Session B5) — **DO NOT MERGE until fixed**
+
+**Expected:** SA navigating to `/dashboard/registers/pdr` → 0 records. RLS must block super_admin from all tenant data.
+
+**Actual:** SA sees 3 Tenant 1 PDR records: TAE40122, Assessment Design Masterclass, Industry Currency (all Jane Trainer / T1). Console confirms SA session (`🚀 Onboarding Trigger: Skipping — user is super admin`). SA user ID `20000000-0000-0000-0000-000000000001` confirmed. SA also sees "+ Log New Entry" button on the PDR page — potential write access.
+
+**Contrast with NEW-001 (governance register):** `/dashboard/governance/register` correctly returns 0 records for SA (NEW-001 fix holds). The RLS fix that protected `governance_items` was NOT extended to the PDR/professional development table. Inconsistent RLS — one table is protected, the other is not.
+
+**Root cause hypothesis:** The `pdr_records` (or `professional_development`) table's RLS SELECT policy does not include a super_admin exclusion clause. The governance register fix added a deny policy for super_admin, but this same pattern was not applied across all tenant-scoped tables.
+
+**Fix required:** Add a super_admin exclusion to the RLS SELECT policy on the PDR table, mirroring the deny policy applied to `governance_items` for NEW-001. Dave to identify the exact table name and apply the same pattern.
+
+**Console errors:** None — clean response but returns wrong data.
+
+---
+
+---
+
+## Round 6 — Session B5 (Cross-Cutting Scenarios, 2026-06-15)
+
+**Tester:** Claude Chrome
+
+| Item | Result | Notes |
+|---|---|---|
+| CC-1: T1 no trial banner (active) | ✅ | Admin dashboard shows Active / Growth / Monthly / renewal 31 Dec 2027 |
+| CC-1: T2 trialing visible, registers not blocked | ✅ | Confirmed in B4 — 563 days trial remaining |
+| CC-2: T1 PDR = 3 records, zero T2 bleed | ✅ | Confirmed |
+| CC-2: T2 PDR = 2 records, zero T1 bleed | ✅ | Confirmed in B4 |
+| CC-2: T1 CT register = 0 records | ✅ | No CT data seeded — correct |
+| CC-2: Governance register T1 only | ✅ | 0 records (no governance data seeded — correct) |
+| CC-3: SA → PDR → 0 records (P0) | ❌ P0 | SA sees 3 T1 PDR records — **NEW-014** |
+| CC-3: SA → governance register → 0 records | ✅ | NEW-001 fix holds |
+| CC-4: Unauthenticated → /dashboard/admin → /login | ✅ | Redirect confirmed |
+| CC-4: SA fresh login → /superadmin/dashboard (NEW-002) | ✅ | Confirmed |
+| CC-4: CM → /settings/rto → /access-denied (NEW-005) | ✅ | Redirect confirmed, content blocked |
+| CC-4: Trainer → /dashboard/admin → Access Denied | ✅ | Confirmed in B2 |
+| CC-5: Admin landing — console clean | ✅ | Zero red errors |
+| CC-5: CM landing — console clean | ✅ | Zero red errors |
+| CC-5: SA landing — console clean | ✅ | Zero red errors |
+| CC-5: meeting-manager — no sso_reports_register warning (NEW-004) | ✅ | Confirmed |
+| CC-5: /settings/rto (Admin) — no useTour error (F-007) | ✅ | Clean |
+| CC-6: CT "Responsible Role" → 5 options (SEED-001) | ✅ | Administration Officer, CEO/MD, Compliance Manager, RTO Manager, Trainer/Assessor |
+| CC-6: CT "Status" → 6 options (SEED-002) | ✅ | All 6 confirmed |
+| CC-6: Person pickers → real names (F-005) | ✅ | 9 real names confirmed |
+| CC-6: Risk Level dropdown shows options (F-004) | ✅ | Critical, High, Low, Medium |
+
+**Session B5 verdict: 20/21 ✅, 1 ❌ P0 (NEW-014)**
+
+---
+
+## Round 6 — COMPLETE ROUND SUMMARY
+
+| Session | Roles | Result |
+|---|---|---|
+| A | Pre-flight + Roles 1–3 | ✅ Complete — 2 new findings (NEW-006, NEW-007) |
+| B1 | Role 4 — CM | ✅ Complete — 1 new finding (NEW-010) |
+| B2 | Role 5 — Trainer | ✅ Complete — 2 new findings (NEW-011, NEW-012) |
+| B3 | Roles 6, 8, 9, 10 | ⏸️ Skipped — under construction |
+| B4 | Role 7 — Consultant | ✅ Complete — P0 ALL CLEAR, 1 new finding (NEW-013) |
+| B5 | Cross-Cutting | ⛔ P0 found — NEW-014 (SA reads PDR data) |
+
+**⛔ ROUND 6 COMPLETE — BRANCH BLOCKED FROM MERGE**
+Blocker: NEW-014 (P0) — SA can read Tenant 1 PDR records. Dave must apply SA exclusion RLS policy to PDR table before this branch can merge to production.
+
+---
+
+---
+
+## Round 6 — Session B4 (Role 7 — Consultant, 2026-06-15)
+
+**Tester:** Claude Chrome
+
+| Item | Result | Notes |
+|---|---|---|
+| 7.1 F-019: Fresh login → `/consultant/dashboard` | ✅ | No `/dashboard/admin` detour |
+| 7.1 Console clean on landing | ✅ | Zero red errors |
+| 7.1 Nav: all 6 sections present | ✅ | Dashboard, My Tenants, Tenants Hub, Calendar, Suggestions, Account Settings |
+| 7.1 Client portfolio shows Seed RTO engagement | ✅ | 1 engagement + 1 workspace visible |
+| 7.2 `/consultant/my-tenants` → Coming soon | ✅ | Expected — F-020 deferred |
+| 7.2 `/consultant/tenants-hub` → Coming soon | ✅ | Expected |
+| 7.3 Enter T1 workspace (Seed RTO) | ⚠️ | Button non-functional for Consultant role — NEW-013. T1 confirmed via direct nav. |
+| 7.3 T1 PDR: exactly 3 records | ✅ | TAE40122, Assessment Design Masterclass, Industry Currency confirmed |
+| 7.3 T1 PDR: zero T2 records | ✅ | No T2 records present |
+| 7.3 T1 CT register: 0 records | ✅ | Confirmed |
+| 7.3 Console clean in T1 context | ✅ | No errors |
+| 7.4 Enter T2 workspace (Trial RTO) | ✅ | Navigated to `/dashboard/admin` in T2 context |
+| 7.4 P0: T2 PDR: exactly 2 records | ✅ | Standards for RTOs 2025 + RTO Governance Fundamentals confirmed |
+| 7.4 P0: T2 PDR: zero T1 records | ✅ | **P0 PASS** — No T1 bleed |
+| 7.4 T2 "trialing" banner visible | ✅ | "Your trial is active — 563 days left" |
+| 7.4 Console clean in T2 context | ✅ | No errors |
+| 7.5 T1 isolation: 3 records, no T2 bleed | ✅ | Confirmed |
+| 7.5 T2 isolation: 2 records, no T1 bleed | ✅ | **P0 PASS** |
+| 7.5 Context switch T2→T1 | ⚠️ | NEW-013 — can't re-enter T1 via button after T2; not a data leak |
+| 7.5 Staff dropdowns: tenant-scoped only | ✅ (partial) | Register data confirmed; form dropdown test inconclusive |
+| 7.6 `/superadmin/dashboard` → redirected | ✅ | Redirects to `/consultant/dashboard` |
+| 7.6 `/superadmin/tenants` → redirected | ✅ | Redirects to `/consultant/dashboard` |
+
+**Session B4 verdict: 20/22 ✅, 2 ⚠️ (NEW-013 — same issue both times), 0 ❌**
+**P0 STATUS: ALL CLEAR — No cross-tenant data bleed in either direction.**
 
 ---
 

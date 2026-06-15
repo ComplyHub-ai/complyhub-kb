@@ -492,7 +492,7 @@ Before marking any item ✅:
 - [ ] `[AppContext] Safety timeout (12s)` — if it appears, note it but it is not a blocking error
 
 ## CC-6 — Person picker and dropdown integrity
-- [ ] CT register "Responsible Role" dropdown (Admin) → 6 options with correct labels — **SEED-001 verify**
+- [ ] CT register "Responsible Role" dropdown (Admin) → 5 options with correct labels (Student Support Officer excluded by design — authority_level > 1) — **SEED-001 verify**
 - [ ] CT register "Status" dropdown (Admin) → 6 options with correct labels — **SEED-002 verify**
 - [ ] Any form with "Responsible Person" picker → shows real names (e.g. "Adam Admin"), not "Unknown" — **F-005 verify**
 
