@@ -12,8 +12,9 @@
 **QA Round 6 (Session B4):** 2026-06-15 — Role 7 (Consultant) complete. F-019, F-021 verified. P0 cross-tenant isolation ALL CLEAR. NEW-013 new finding. Session B5 pending.
 **QA Round 6 (Session B5):** 2026-06-15 — Cross-Cutting scenarios complete. ⛔ P0 REGRESSION — NEW-014: SA can read Tenant 1 PDR records. Round 6 COMPLETE but branch must NOT merge until NEW-014 is resolved.
 **Post-Round 6 fixes (2026-06-15):** NEW-006, NEW-007, NEW-010 fixed and smoke-tested by Brian. NEW-010 required 4 commits — root causes: wrong sidebar component for CM, missing role key normalisation, wrong route guard.
+**Post-Round 6 continuation (2026-06-16):** NEW-011, NEW-012, NEW-013 fixed and smoke-tested by Brian. NEW-013 required 2 core fixes (stale JWT + Consultant landing check) + 3 secondary fixes (sidebar components + config). All 5 commits pushed and verified on Vercel preview.
 **Tester:** Brian (Khian) — Round 1 + Round 3 manual / Claude (automated) — Round 2 / Claude Chrome — Round 4 / Brian + Claude — Round 5 / Claude Chrome — Round 6 / Brian — Post-Round 6 smoke
-**Status:** ⛔ P0 blocker (NEW-014) still open — Dave must apply SA exclusion RLS to PDR table before merge. NEW-006 ✅ NEW-007 ✅ NEW-010 ✅ fixed post-Round 6. Awaiting RJ on NEW-003, NEW-012. Production DB migration for NEW-004 still pending.
+**Status:** ⛔ P0 blocker (NEW-014) still open — Dave must apply SA exclusion RLS to PDR table before merge. NEW-006 ✅ NEW-007 ✅ NEW-010 ✅ NEW-011 ✅ NEW-012 ✅ NEW-013 ✅ fixed post-Round 6. Awaiting RJ on NEW-003. Production DB migration for NEW-004 still pending.
 
 ---
 
@@ -70,9 +71,9 @@ Owner guide:
 | NEW-006 | All roles | `/complybot` history fetch error | P2 | RJ | — | — | — | — | — | ✅ Fixed post-R6 |
 | NEW-007 | All roles | `/dashboard/assessment-validation` console error | P2 | RJ | — | — | — | — | — | ✅ Fixed post-R6 |
 | NEW-010 | CM | `/dashboard/trainer-portal/cm-delivery-overview` redirects | P2 | RJ | — | — | — | — | — | ✅ Fixed post-R6 |
-| NEW-011 | Trainer | `/dashboard/trainer-portal/assessment-decisions` console error | P2 | RJ | — | — | — | — | — | ❌ New (B2) |
-| NEW-012 | Trainer | F-017 wrong redirect target — goes to trainer dashboard not `/access-denied` | P2 | RJ | — | — | — | — | — | ⚠️ New (B2) |
-| NEW-013 | Consultant | "Enter Workspace" for Consultant-role tenant does not switch context | P2 | RJ | — | — | — | — | — | ⚠️ New (B4) — P0 isolation intact |
+| NEW-011 | Trainer | `/dashboard/trainer-portal/assessment-decisions` console error | P2 | RJ | — | — | — | — | — | ✅ Fixed post-R6 |
+| NEW-012 | Trainer | F-017 wrong redirect target — goes to trainer dashboard not `/access-denied` | P2 | RJ | — | — | — | — | — | ✅ Fixed post-R6 |
+| NEW-013 | Consultant | "Enter Workspace" for Consultant-role tenant does not switch context | P2 | RJ | — | — | — | — | — | ✅ Fixed post-R6 |
 | NEW-014 | Super Admin | SA can read Tenant 1 PDR records — RLS not blocking PDR table | P0 | Dave | — | — | — | — | — | ⛔ P0 NEW (B5) — DO NOT MERGE |
 
 ---
@@ -747,21 +748,17 @@ Four separate issues compounded:
 **Checklist items:** 5.2 — Assessment Decisions
 **Severity:** P2
 **Owner:** RJ
-**Status:** ❌ Open — new finding (Round 6 Session B2)
+**Status:** ✅ Fixed (post-Round 6, 2026-06-16)
 
 **Expected:** Console clean on `/dashboard/trainer-portal/assessment-decisions`.
 **Actual:** Page renders "No Assessment Tools Available" state correctly, but red console error fires on load.
 
-**What works:** Page renders without crash. Empty state displayed correctly.
+**Root cause (confirmed):** `src/pages/trainer-portal/assessment-decisions.tsx` line ~159 used `console.error('Error fetching trainer units:', error)` instead of structured logger when the units fetch failed on empty state.
 
-**Root cause hypothesis:** Trainer units fetch fails when no assessment data exists for seed trainer — error not suppressed for empty state.
+**Fix applied:**
+- `src/pages/trainer-portal/assessment-decisions.tsx` — replaced `console.error` with `logger.warn` per CLAUDE.md rules — commit `85ad2742c`
 
-**Next step:** Handle empty/no-data case without console error in the trainer units fetch, consistent with fix needed for NEW-007.
-
-**Console errors:**
-```
-[ERROR] Error fetching trainer units: Object (assessment-decisions-Bw1NVzcZ.js:0:3046)
-```
+**Verified post-Round 6:** ✅ Brian — no "Error fetching trainer units" console error on Assessment Decisions page load. Empty state renders cleanly.
 
 ---
 
@@ -773,18 +770,21 @@ Four separate issues compounded:
 **Checklist items:** 5.7 — Blocked Routes (F-017)
 **Severity:** P2
 **Owner:** RJ
-**Status:** ⚠️ Open — new finding (Round 6 Session B2)
+**Status:** ✅ Fixed (post-Round 6, 2026-06-16)
 
 **Expected:** Trainer navigating directly to `/dashboard/governance/meeting-manager` → shown `/access-denied` page (consistent with other blocked routes).
-**Actual:** `ManagerRoute` guard fires correctly (`❌ ManagerRoute: Access denied, redirecting to /not-authorized`) but the final destination is `/dashboard/trainer-portal/dashboard` — not `/access-denied`. The guard targets `/not-authorized` which silently falls through to the trainer dashboard instead of rendering an explicit Access Denied screen.
+**Actual:** `ManagerRoute` guard fires correctly but the final destination is `/dashboard/trainer-portal/dashboard` — not `/access-denied`. The guard targets `/not-authorized` which silently falls through to the trainer dashboard instead of rendering an explicit Access Denied screen.
 
-**What works:** Content is blocked — trainer cannot see governance meeting data. This is not a security issue.
+**Root cause (confirmed):** `ManagerRoute` and batch of other role guards all used `/not-authorized` as redirect target, inconsistent with the app-wide `/access-denied` standard used by `AdminRoute`, `StudentRoute`, `AuditorRoute`, etc. The `/not-authorized` path falls back to dashboard instead of showing an explicit access denied page.
 
-**Inconsistency:** All other blocked routes for trainer (`/dashboard/admin`, `/admin/user-management`, `/settings/rto`) correctly land on `/access-denied`. Only `ManagerRoute` uses a different redirect target (`/not-authorized`).
+**Fix applied (batch):**
+- `src/routes/guards/ManagerRoute.tsx` — changed `<Navigate to="/not-authorized" replace />` → `<Navigate to="/access-denied" replace />` — commit `85ad2742c`
+- `src/routes/guards/TrainerRouteWrapper.tsx` — same change, also updated console.log message — commit `85ad2742c`
+- `src/routes/guards/AuditorRoute.tsx` — same change — commit `85ad2742c`
+- `src/routes/guards/RegulatoryOfficerRoute.tsx` — same change — commit `85ad2742c`
+- `src/routes/guards/StudentRoute.tsx` — same change — commit `85ad2742c`
 
-**Next step:** Update `ManagerRoute` redirect target from `/not-authorized` to `/access-denied` for consistency, or ensure `/not-authorized` renders the Access Denied component.
-
-**Console errors:** None — clean (guard log only).
+**Verified post-Round 6:** ✅ Brian — Trainer direct nav to `/dashboard/governance/meeting-manager` lands on explicit `/access-denied` page (not trainer dashboard).
 
 ---
 
@@ -796,19 +796,33 @@ Four separate issues compounded:
 **Checklist items:** 7.3, 7.5 — Tenant context switching
 **Severity:** P2
 **Owner:** RJ
-**Status:** ⚠️ Open — new finding (Round 6 Session B4)
+**Status:** ✅ Fixed (post-Round 6, 2026-06-16)
 
-**Expected:** Clicking "Enter Workspace" for Seed RTO Pty Ltd (Consultant role) enters T1 context — equivalent to how "Enter Workspace" for Trial RTO (Administrator role) navigates to `/dashboard/admin`.
+**Expected:** Clicking "Enter Workspace" for Seed RTO Pty Ltd (Consultant role) enters T1 context — AppContext updates and nav shows correct tenant. PDR register shows T1 data.
 
-**Actual:** Clicking "Enter Workspace" for Seed RTO Pty Ltd (where Connie has Consultant role, not Administrator) does nothing — no navigation, no network request, no state change. After previously entering T2, T2 context persists. PDR at `/dashboard/registers/pdr` continues showing T2 records. The only way to return to T1 was via direct navigation in a fresh context.
+**Actual Round 6 B4:** Clicking "Enter Workspace" for Seed RTO Pty Ltd (where Connie has Consultant role, not Administrator) does nothing — no navigation, no network request, no state change. T2 context persists.
 
-**What works:** P0 isolation is fully intact — no cross-tenant data bleed detected. T2 data correctly shows 2 T2 records only. T1 data correctly shows 3 T1 records only. The data scoping is correct; only the workspace-switch UX is broken for non-Admin tenant roles.
+**Root cause (confirmed):**
+Two separate issues:
+1. **AppContext `switchToTenant` stale JWT bug:** `switchResult.contextSnapshot` (the context returned by `switch_to_tenant` RPC) was being discarded in favour of a new `get_my_app_context` RPC call. If `sync-jwt-tenant` edge function was non-blocking and had not completed before the re-fetch ran, the JWT was stale and returned incorrect tenant context. Symptom: context appeared unchanged despite RPC succeeding.
+2. **RoleLandingRedirect missing Consultant check:** Post-login routing in `RoleLandingRedirect` checked active-tenant role before checking if user was a Consultant. Consultants whose `active_tenant_id` pointed to an Administrator workspace (e.g. T2) would land on `/dashboard/admin` instead of `/consultant/dashboard`. On subsequent workspace switch, the same issue occurred.
 
-**Root cause hypothesis:** The "Enter Workspace" button's handler likely checks the tenant role before navigating. When the role is "Consultant" (not "Administrator"), the handler may not know which dashboard to navigate to, so it silently does nothing. Administrator roles have a clear landing (`/dashboard/admin`) but Consultant does not resolve to a tenant dashboard.
+**Fix applied (3 commits):**
+- `src/lib/setActiveTenant.ts` — added `contextSnapshot?: Record<string, unknown>` to return type and returned `contextSnapshot: result` (the raw `switch_to_tenant` response) — commit `85ad2742c`
+- `src/contexts/AppContext.tsx` `switchToTenant` (lines 290–322) — replaced `get_my_app_context` re-fetch with direct use of `switchResult.contextSnapshot` to avoid stale JWT window — commit `85ad2742c`
+- `src/routes/RoleLandingRedirect.tsx` — added `isConsultant && activeTenantRole !== 'Consultant'` check before active-tenant branch to ensure Consultants always land on `/consultant/dashboard` regardless of `active_tenant_id` — commit `ee8153199`
 
-**Next step:** Check the "Enter Workspace" button handler in the consultant portfolio component — ensure it handles the Consultant role by navigating to the appropriate tenant context (or the consultant's tenant view).
+**Secondary fixes also applied:**
+- `src/components/layout/RoleSidebar.tsx` — removed CM and Consultant from `admin` case so they route to `EnhancedRoleSidebar` — commit `85ad2742c`
+- `src/config/roleMenuConfigs.ts` — added `consultant` config entry and normalisation for `'Consultant'` role string — commit `85ad2742c`
+- `src/layouts/ConsultantSidebar.tsx` — added `Bot` icon import and ComplyBot link to Tools section — commit `541514e14`
 
-**Console errors:** None — clean during button click.
+**Verified post-Round 6:** ✅ Brian — all steps confirmed:
+1. Consultant login lands on `/consultant/dashboard` (not admin)
+2. Enter Workspace → T1 (Consultant) works, PDR shows T1 records
+3. Enter Workspace → T2 (Administrator) works, PDR shows T2 records
+4. ComplyBot link appears in Tools section
+5. No stale context on workspace switch
 
 ---
 
