@@ -11,8 +11,9 @@
 **QA Round 6 (Session B3):** Skipped — Roles 6, 8, 9, 10 are under construction.
 **QA Round 6 (Session B4):** 2026-06-15 — Role 7 (Consultant) complete. F-019, F-021 verified. P0 cross-tenant isolation ALL CLEAR. NEW-013 new finding. Session B5 pending.
 **QA Round 6 (Session B5):** 2026-06-15 — Cross-Cutting scenarios complete. ⛔ P0 REGRESSION — NEW-014: SA can read Tenant 1 PDR records. Round 6 COMPLETE but branch must NOT merge until NEW-014 is resolved.
-**Tester:** Brian (Khian) — Round 1 + Round 3 manual / Claude (automated) — Round 2 / Claude Chrome — Round 4 / Brian + Claude — Round 5 / Claude Chrome — Round 6
-**Status:** ⛔ Round 6 **COMPLETE** with P0 blocker (NEW-014). Branch must NOT merge until SA PDR RLS is fixed. Awaiting RJ on NEW-003, NEW-012. Production DB migration for NEW-004 still pending.
+**Post-Round 6 fixes (2026-06-15):** NEW-006, NEW-007, NEW-010 fixed and smoke-tested by Brian. NEW-010 required 4 commits — root causes: wrong sidebar component for CM, missing role key normalisation, wrong route guard.
+**Tester:** Brian (Khian) — Round 1 + Round 3 manual / Claude (automated) — Round 2 / Claude Chrome — Round 4 / Brian + Claude — Round 5 / Claude Chrome — Round 6 / Brian — Post-Round 6 smoke
+**Status:** ⛔ P0 blocker (NEW-014) still open — Dave must apply SA exclusion RLS to PDR table before merge. NEW-006 ✅ NEW-007 ✅ NEW-010 ✅ fixed post-Round 6. Awaiting RJ on NEW-003, NEW-012. Production DB migration for NEW-004 still pending.
 
 ---
 
@@ -66,9 +67,9 @@ Owner guide:
 | NEW-005 | CM | CM bypasses AdminRoute on `/settings/rto` | P1 | RJ | — | — | — | ❌ New | ✅ Fixed | ✅ Verified B1 — redirect + header link both confirmed |
 | SEED-001 | Administrator | CT form — Responsible Role dropdown empty | P2 | Carl | — | — | — | ❌ New | ✅ Fixed | ✅ By design — view returns 5 rows (authority_level > 1) |
 | SEED-002 | Administrator | CT form — Status dropdown empty | P2 | Carl | — | — | — | ❌ New | ✅ Fixed | ✅ Verified |
-| NEW-006 | All roles | `/complybot` history fetch error | P2 | RJ | — | — | — | — | — | ❌ Confirmed Admin + CM |
-| NEW-007 | All roles | `/dashboard/assessment-validation` console error | P2 | RJ | — | — | — | — | — | ❌ Confirmed Admin + CM + Trainer |
-| NEW-010 | CM | `/dashboard/trainer-portal/cm-delivery-overview` redirects | P2 | RJ | — | — | — | — | — | ❌ New (B1) |
+| NEW-006 | All roles | `/complybot` history fetch error | P2 | RJ | — | — | — | — | — | ✅ Fixed post-R6 |
+| NEW-007 | All roles | `/dashboard/assessment-validation` console error | P2 | RJ | — | — | — | — | — | ✅ Fixed post-R6 |
+| NEW-010 | CM | `/dashboard/trainer-portal/cm-delivery-overview` redirects | P2 | RJ | — | — | — | — | — | ✅ Fixed post-R6 |
 | NEW-011 | Trainer | `/dashboard/trainer-portal/assessment-decisions` console error | P2 | RJ | — | — | — | — | — | ❌ New (B2) |
 | NEW-012 | Trainer | F-017 wrong redirect target — goes to trainer dashboard not `/access-denied` | P2 | RJ | — | — | — | — | — | ⚠️ New (B2) |
 | NEW-013 | Consultant | "Enter Workspace" for Consultant-role tenant does not switch context | P2 | RJ | — | — | — | — | — | ⚠️ New (B4) — P0 isolation intact |
@@ -670,19 +671,17 @@ CREATE POLICY "tenant isolation" ON public.sso_reports_register
 **Checklist items:** 2.7, 4.2.7 — ComplyBot
 **Severity:** P2
 **Owner:** RJ
-**Status:** ❌ Open — app-wide (Round 6 Sessions A + B1)
+**Status:** ✅ Fixed (post-Round 6, 2026-06-15)
 
 **Expected:** Console clean on `/complybot`.
 **Actual:** Red console error on page load: `Error fetching history: Object`. Chat interface renders fully — the error is from an empty history state, not a functional block. Also fires as background noise on other pages where the ComplyBot widget initialises (e.g. `/dashboard/assessment-validation`).
 
-**Root cause hypothesis:** Empty history state not handled gracefully — fetch failure logged as error instead of returning silent empty array.
+**Root cause (confirmed):** `ConversationHistoryPanel.tsx` mounts on the `/complybot` page and queries the deprecated `compliance_bot_logs` table on mount — firing `console.error` before the user opens ComplyBot. A prior fix targeted `ComplyBotWidget.tsx` (wrong file — that component's `isOpen` guard was correct but didn't cover this separate panel).
 
-**Next step:** Fix error handling in ComplyBot history fetch — silent empty array when no history exists.
+**Fix applied:**
+- `src/components/ComplianceIntelligence/ConversationHistoryPanel.tsx` — replaced `console.error` with `logger.warn` per CLAUDE.md rules. UI behaviour unchanged — component already returns `[]` on error — commit `05dff7c22`
 
-**Console errors:**
-```
-[ERROR] Error fetching history (assets/ComplyBot-C3DegqLm.js:0:15222)
-```
+**Verified post-Round 6:** ✅ Brian — no "Error fetching history" on `/complybot` page load before clicking anything.
 
 ---
 
@@ -694,21 +693,19 @@ CREATE POLICY "tenant isolation" ON public.sso_reports_register
 **Checklist items:** 2.2, 4.2.2, 5.5 — Assessment Validation
 **Severity:** P2
 **Owner:** RJ
-**Status:** ❌ Open — app-wide (Round 6 Sessions A + B1 + B2)
+**Status:** ✅ Fixed (post-Round 6, 2026-06-15)
 
 **Expected:** Console clean on `/dashboard/assessment-validation`.
 **Actual:** Page loads with sub-tabs visible but 1 red console error on load: `Error fetching validation progress: Object`. No seed validation data exists — empty state not handled silently.
 
 **What works:** Page renders without crash. Sub-tabs visible.
 
-**Root cause hypothesis:** Validation progress query fails when no data exists — error not suppressed for empty state.
+**Root cause (confirmed):** Actions fetch fired even when no validations existed — empty state not handled silently.
 
-**Next step:** Handle empty/no-data case without console error in the validation progress fetch.
+**Fix applied:**
+- Skip actions fetch when no validations exist — commit `74e6dcae0`
 
-**Console errors:**
-```
-[ERROR] Error fetching validation progress: Object (assets/index-CfRV3ACK.js:6:1112)
-```
+**Verified post-Round 6:** ✅ Brian — no "Error fetching validation progress" for CM or Trainer. Page renders clean with "No validation data" empty state.
 
 ---
 
@@ -720,16 +717,25 @@ CREATE POLICY "tenant isolation" ON public.sso_reports_register
 **Checklist items:** 4.2.8 — CM Delivery Overview
 **Severity:** P2
 **Owner:** RJ
-**Status:** ❌ Open — new finding (Round 6 Session B1)
+**Status:** ✅ Fixed (post-Round 6, 2026-06-15) — required 4 commits
 
 **Expected:** `/dashboard/trainer-portal/cm-delivery-overview` loads — CM-specific trainer delivery overview page.
-**Actual:** Navigating to this route redirects to `/dashboard/compliance`. No sidebar link found in CM nav. Route either not built, not configured in `roleMenuConfigs.ts` for CM, or the route guard is redirecting.
+**Actual:** Navigating to this route redirects to `/dashboard/compliance`. No sidebar link found in CM nav.
 
-**What works:** Console clean on redirect — no errors.
+**Root cause (full chain, confirmed):**
+Four separate issues compounded:
+1. Route was nested inside `TrainerRoute` which explicitly denies CM.
+2. CM was routed to `AdminSidebar` (reads `adminSidebarConfig.ts`) — not `EnhancedRoleSidebar` (reads `roleMenuConfigs.ts`) — so the nav item was invisible.
+3. `getMenuConfig()` had no normalisation for `'Compliance Manager'` (display name with space) → fell back to trainer config, showing trainer nav instead of CM nav.
+4. The route guard was `AdminRoute` which does not include CM in its allow list.
 
-**Root cause hypothesis:** Route exists in `AppRoutes.tsx` (confirmed from prior diagnostics) but the CM nav config in `roleMenuConfigs.ts` may not include it, or the route guard (`ManagerRoute`?) is rejecting the CM role.
+**Fix applied (4 commits):**
+- `src/AppRoutes.tsx` + `src/config/roleMenuConfigs.ts` — added route before trainer-portal block + added "Delivery Overview" to CM VET Workforce section — commit `0793375dd`
+- `src/components/layout/RoleSidebar.tsx` — removed CM from `admin` case so it routes to `EnhancedRoleSidebar` — commit `33047bb74`
+- `src/config/roleMenuConfigs.ts` — added `'Compliance Manager'` → `'compliance-manager'` normalisation in `getMenuConfig`; also fixed `'Student'` → `'student'` and `'Regulatory Officer'` → `'auditor'` — commit `616cd71c2`
+- `src/AppRoutes.tsx` — swapped `AdminRoute` for `ManagerRoute` on `cm-delivery-overview` (ManagerRoute explicitly allows CM) — commit `de6a3f47f`
 
-**Next step:** Check if `cm-delivery-overview` is in the CM section of `roleMenuConfigs.ts` and whether `AppRoutes.tsx` has a guard on that route that excludes CM.
+**Verified post-Round 6:** ✅ Brian — all smoke checks pass: "Delivery Overview" visible under VET Workforce in CM nav, page loads without redirect or Access Denied, all other CM nav sections present, search and expand/collapse work, console clean.
 
 ---
 
