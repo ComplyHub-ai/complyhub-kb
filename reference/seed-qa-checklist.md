@@ -325,15 +325,15 @@ Before marking any item ✅:
 - [ ] No Admin Dashboard nav items visible
 
 ## 5.2 My Training section — nav item verification
-> All 8 items below must be present in the "My Training" nav section. Click each one.
+> All 7 items below must be present in the "My Training" nav section. Click each one.
+> Note: "FRE Register" and "Resources & Equipment" are the same page — only one nav item exists.
 - [ ] "My TAS Assignments" → `/dashboard/trainer-portal/tas` loads
 - [ ] "Assessment Validation" → loads
 - [ ] "Session Plans" → `/dashboard/trainer-portal/session-plans` loads
 - [ ] "Assessment Decisions" → `/dashboard/trainer-portal/assessment-decisions` loads
 - [ ] "Assigned Training Products" → `/dashboard/trainer-portal/select-products` loads — **F-013 verify**
 - [ ] "Availability" → `/dashboard/registers/trainer-availability` loads — **F-014 verify**
-- [ ] "FRE Register" → `/dashboard/trainer-portal/resources-equipment` loads — **F-018 verify**
-- [ ] "Resources & Equipment" nav item → `/dashboard/trainer-portal/resources-equipment` loads (same page as FRE)
+- [ ] "FRE Register" → `/dashboard/trainer-portal/resources-equipment` loads (page heading: "Resources & Equipment") — **F-018 verify**
 
 ## 5.3 My Profile section
 - [ ] "My Profile & Credentials" → `/dashboard/trainer-portal/profile` loads, Edit Profile available

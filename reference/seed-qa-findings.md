@@ -7,8 +7,9 @@
 **QA Round 5:** 2026-06-11 — All Round 4 failures fixed on branch. Production DB migration pending for NEW-004.
 **QA Round 6 (Session A):** 2026-06-11 — Pre-flight, Roles 1–3 complete. 2 new findings (NEW-006, NEW-007). Session B pending.
 **QA Round 6 (Session B1):** 2026-06-11 — Role 4 (CM) complete. NEW-006/NEW-007 confirmed app-wide. NEW-010 new finding. Sessions B2–B5 pending.
+**QA Round 6 (Session B2):** 2026-06-15 — Role 5 (Trainer) complete. F-013/014/018/015 verified. NEW-011, NEW-012 new findings. NEW-007 confirmed app-wide. Sessions B3–B5 pending.
 **Tester:** Brian (Khian) — Round 1 + Round 3 manual / Claude (automated) — Round 2 / Claude Chrome — Round 4 / Brian + Claude — Round 5 / Claude Chrome — Round 6
-**Status:** Round 6 Session B1 **COMPLETE**. Sessions B2–B5 (Roles 5–10 + CC) pending. Awaiting RJ on NEW-003. Production DB migration for NEW-004 still pending before merge.
+**Status:** Round 6 Session B2 **COMPLETE**. Sessions B3–B5 (Roles 6–10 + CC) pending. Awaiting RJ on NEW-003, NEW-012. Production DB migration for NEW-004 still pending before merge.
 
 ---
 
@@ -45,12 +46,12 @@ Owner guide:
 | F-010 | CM | PDR register — no Add button | P1 | RJ | Fixed | ✅ Fixed | ⚠️ Retest | ✅ Fixed | — | ✅ Verified B1 — Add button present, form opens |
 | F-011 | CM | `/dashboard/user-management` 404 | P1 | RJ | Fixed | ✅ Fixed | ⚠️ Retest | ✅ Closed by design | — | — |
 | F-012 | CM | `/admin/user-portals` Access Denied | P1 | RJ | Fixed | ⚠️ By design | — | ✅ Closed by design | — | — |
-| F-013 | Trainer | Products page — nav link absent | P1 | RJ | Fixed | ⚠️ Wrong URL | ⚠️ Retest | ❌ Failing | ✅ Fixed | — |
-| F-014 | Trainer | Availability page — nav link absent | P1 | RJ | Fixed | ⚠️ Wrong URL | ⚠️ Retest | ❌ Failing | ✅ Fixed | — |
-| F-015 | Trainer | TCR write access leak | P1 | RJ | Fixed | ✅ Fixed | — | — | — | — |
+| F-013 | Trainer | Products page — nav link absent | P1 | RJ | Fixed | ⚠️ Wrong URL | ⚠️ Retest | ❌ Failing | ✅ Fixed | ✅ Verified B2 — nav click works |
+| F-014 | Trainer | Availability page — nav link absent | P1 | RJ | Fixed | ⚠️ Wrong URL | ⚠️ Retest | ❌ Failing | ✅ Fixed | ✅ Verified B2 — nav click works |
+| F-015 | Trainer | TCR write access leak | P1 | RJ | Fixed | ✅ Fixed | — | — | — | ✅ Verified B2 — no Add button |
 | F-016 | Trainer | Document repository — wrong URL | P1 | RJ | Fixed | ⚠️ Wrong URL | ⚠️ Retest | ✅ Closed by design | — | — |
-| F-017 | Trainer | Governance Meeting Manager unblocked | P1 | RJ | Fixed | ✅ Fixed | — | — | — | — |
-| F-018 | Trainer | FRE register — nav link absent | P1 | RJ | Fixed | ⚠️ Wrong URL | ⚠️ Retest | ❌ Failing | ✅ Fixed | — |
+| F-017 | Trainer | Governance Meeting Manager unblocked | P1 | RJ | Fixed | ✅ Fixed | — | — | — | ⚠️ Guard fires correctly but wrong redirect target — see NEW-012 |
+| F-018 | Trainer | FRE register — nav link absent | P1 | RJ | Fixed | ⚠️ Wrong URL | ⚠️ Retest | ❌ Failing | ✅ Fixed | ✅ Verified B2 — nav click works |
 | F-019 | Consultant | Post-login wrong landing | P1 | RJ | Fixed | ⚠️ Retest | ⚠️ Retest | ✅ Fixed | — | — |
 | F-020 | Consultant | `/consultant/my-tenants` Coming soon | P1 | RJ | Open | ⚠️ Deferred | — | ⚠️ Deferred | ⏸️ Deferred | — |
 | F-021 | Consultant | T2 PDR cross-tenant leak (P0) | P0 | RJ | Fixed | ✅ Fixed | — | — | — | — |
@@ -63,8 +64,10 @@ Owner guide:
 | SEED-001 | Administrator | CT form — Responsible Role dropdown empty | P2 | Carl | — | — | — | ❌ New | ✅ Fixed | ✅ By design — view returns 5 rows (authority_level > 1) |
 | SEED-002 | Administrator | CT form — Status dropdown empty | P2 | Carl | — | — | — | ❌ New | ✅ Fixed | ✅ Verified |
 | NEW-006 | All roles | `/complybot` history fetch error | P2 | RJ | — | — | — | — | — | ❌ Confirmed Admin + CM |
-| NEW-007 | All roles | `/dashboard/assessment-validation` console error | P2 | RJ | — | — | — | — | — | ❌ Confirmed Admin + CM |
+| NEW-007 | All roles | `/dashboard/assessment-validation` console error | P2 | RJ | — | — | — | — | — | ❌ Confirmed Admin + CM + Trainer |
 | NEW-010 | CM | `/dashboard/trainer-portal/cm-delivery-overview` redirects | P2 | RJ | — | — | — | — | — | ❌ New (B1) |
+| NEW-011 | Trainer | `/dashboard/trainer-portal/assessment-decisions` console error | P2 | RJ | — | — | — | — | — | ❌ New (B2) |
+| NEW-012 | Trainer | F-017 wrong redirect target — goes to trainer dashboard not `/access-denied` | P2 | RJ | — | — | — | — | — | ⚠️ New (B2) |
 
 ---
 
@@ -682,11 +685,11 @@ CREATE POLICY "tenant isolation" ON public.sso_reports_register
 
 ## NEW-007
 
-**Role:** All roles — confirmed on Administrator (Session A) and Compliance Manager (Session B1)
-**Checklist items:** 2.2, 4.2.2 — Assessment Validation
+**Role:** All roles — confirmed on Administrator (Session A), Compliance Manager (Session B1), Trainer (Session B2)
+**Checklist items:** 2.2, 4.2.2, 5.5 — Assessment Validation
 **Severity:** P2
 **Owner:** RJ
-**Status:** ❌ Open — app-wide (Round 6 Sessions A + B1)
+**Status:** ❌ Open — app-wide (Round 6 Sessions A + B1 + B2)
 
 **Expected:** Console clean on `/dashboard/assessment-validation`.
 **Actual:** Page loads with sub-tabs visible but 1 red console error on load: `Error fetching validation progress: Object`. No seed validation data exists — empty state not handled silently.
@@ -722,6 +725,98 @@ CREATE POLICY "tenant isolation" ON public.sso_reports_register
 **Root cause hypothesis:** Route exists in `AppRoutes.tsx` (confirmed from prior diagnostics) but the CM nav config in `roleMenuConfigs.ts` may not include it, or the route guard (`ManagerRoute`?) is rejecting the CM role.
 
 **Next step:** Check if `cm-delivery-overview` is in the CM section of `roleMenuConfigs.ts` and whether `AppRoutes.tsx` has a guard on that route that excludes CM.
+
+---
+
+---
+
+## NEW-011
+
+**Role:** Trainer/Assessor (`trainer@complyhub-seed.com`)
+**Checklist items:** 5.2 — Assessment Decisions
+**Severity:** P2
+**Owner:** RJ
+**Status:** ❌ Open — new finding (Round 6 Session B2)
+
+**Expected:** Console clean on `/dashboard/trainer-portal/assessment-decisions`.
+**Actual:** Page renders "No Assessment Tools Available" state correctly, but red console error fires on load.
+
+**What works:** Page renders without crash. Empty state displayed correctly.
+
+**Root cause hypothesis:** Trainer units fetch fails when no assessment data exists for seed trainer — error not suppressed for empty state.
+
+**Next step:** Handle empty/no-data case without console error in the trainer units fetch, consistent with fix needed for NEW-007.
+
+**Console errors:**
+```
+[ERROR] Error fetching trainer units: Object (assessment-decisions-Bw1NVzcZ.js:0:3046)
+```
+
+---
+
+---
+
+## NEW-012
+
+**Role:** Trainer/Assessor (`trainer@complyhub-seed.com`)
+**Checklist items:** 5.7 — Blocked Routes (F-017)
+**Severity:** P2
+**Owner:** RJ
+**Status:** ⚠️ Open — new finding (Round 6 Session B2)
+
+**Expected:** Trainer navigating directly to `/dashboard/governance/meeting-manager` → shown `/access-denied` page (consistent with other blocked routes).
+**Actual:** `ManagerRoute` guard fires correctly (`❌ ManagerRoute: Access denied, redirecting to /not-authorized`) but the final destination is `/dashboard/trainer-portal/dashboard` — not `/access-denied`. The guard targets `/not-authorized` which silently falls through to the trainer dashboard instead of rendering an explicit Access Denied screen.
+
+**What works:** Content is blocked — trainer cannot see governance meeting data. This is not a security issue.
+
+**Inconsistency:** All other blocked routes for trainer (`/dashboard/admin`, `/admin/user-management`, `/settings/rto`) correctly land on `/access-denied`. Only `ManagerRoute` uses a different redirect target (`/not-authorized`).
+
+**Next step:** Update `ManagerRoute` redirect target from `/not-authorized` to `/access-denied` for consistency, or ensure `/not-authorized` renders the Access Denied component.
+
+**Console errors:** None — clean (guard log only).
+
+---
+
+---
+
+## Round 6 — Session B2 (Role 5 — Trainer/Assessor, 2026-06-15)
+
+**Tester:** Claude Chrome
+
+| Item | Result | Notes |
+|---|---|---|
+| 5.1 Landing → `/dashboard/trainer-portal/dashboard` | ✅ | Confirmed |
+| 5.1 Console clean on landing | ✅ | Zero red errors |
+| 5.1 Trainer-specific nav only (no Governance/Students/Settings/Admin) | ✅ | All admin sections absent |
+| 5.2 My TAS Assignments — nav click | ✅ | Loads correctly |
+| 5.2 Assessment Validation — nav click | ⚠️ | Loads, red error NEW-007 (app-wide known) |
+| 5.2 Session Plans — nav click | ✅ | Loads correctly |
+| 5.2 Assessment Decisions — nav click | ⚠️ | Loads, red error NEW-011 |
+| 5.2 Assigned Training Products (F-013) — nav click | ✅ | Loads correctly — F-013 verified |
+| 5.2 Availability (F-014) — nav click | ✅ | Loads correctly — F-014 verified |
+| 5.2 FRE Register (F-018) — nav click | ✅ | Loads correctly — F-018 verified |
+| 5.2 "Resources & Equipment" as separate 8th nav item | ❌ | Not present — checklist error, FRE Register = Resources & Equipment page. Closed as by-design. |
+| 5.3 My Profile & Credentials — Edit Profile visible | ✅ | Confirmed |
+| 5.3 Professional Development — Add PD Record visible | ✅ | Confirmed |
+| 5.4 my-pd-recommendations loads | ✅ | Console clean |
+| 5.4 vet-currency loads | ✅ | Console clean |
+| 5.4 F-015 — TCR loads, no Add button | ✅ | Read-only confirmed |
+| 5.5 Assessment Validation loads | ✅ | No add/edit/delete buttons |
+| 5.5 Console clean on assessment-validation | ❌ | NEW-007 (app-wide) |
+| 5.6 /dashboard/documents/trainers loads | ✅ | Console clean |
+| 5.6 /dashboard/trainer-portal/validation loads | ✅ | Console clean |
+| 5.6 /dashboard/trainer-portal/credentials loads | ✅ | Console clean |
+| 5.7 /dashboard/admin → Access Denied | ✅ | /access-denied confirmed |
+| 5.7 F-017 — meeting-manager blocked | ⚠️ | Guard fires, but redirects to trainer dashboard not /access-denied — NEW-012 |
+| 5.7 /admin/user-management → Access Denied | ✅ | /access-denied confirmed |
+| 5.7 /settings/rto → Access Denied | ✅ | /access-denied confirmed |
+| 5.8 Console clean on trainer portal dashboard | ✅ | Clean |
+| 5.8 Console clean on select-products | ✅ | Clean |
+| 5.8 Console clean on trainer-availability | ✅ | Clean |
+| 5.8 Console clean on resources-equipment | ✅ | Clean |
+| 5.8 Console clean on assessment-decisions | ❌ | NEW-011 |
+
+**Session B2 verdict: 25/31 ✅, 3 ⚠️ (NEW-007 app-wide, NEW-011, NEW-012), 2 ❌ (NEW-007, NEW-011 console errors), 1 closed by design (Resources & Equipment checklist item)**
 
 ---
 
