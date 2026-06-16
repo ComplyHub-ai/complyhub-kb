@@ -13,8 +13,10 @@
 **QA Round 6 (Session B5):** 2026-06-15 — Cross-Cutting scenarios complete. ⛔ P0 REGRESSION — NEW-014: SA can read Tenant 1 PDR records. Round 6 COMPLETE but branch must NOT merge until NEW-014 is resolved.
 **Post-Round 6 fixes (2026-06-15):** NEW-006, NEW-007, NEW-010 fixed and smoke-tested by Brian. NEW-010 required 4 commits — root causes: wrong sidebar component for CM, missing role key normalisation, wrong route guard.
 **Post-Round 6 continuation (2026-06-16):** NEW-011, NEW-012, NEW-013 fixed and smoke-tested by Brian. NEW-013 required 2 core fixes (stale JWT + Consultant landing check) + 3 secondary fixes (sidebar components + config). All 5 commits pushed and verified on Vercel preview.
+**Post-Round 6 P0 fix (2026-06-16):** NEW-014 fixed on branch DB by Dave — removed `sec.is_super_admin()` bypass from all four `pdr_register` RLS policies. Smoke-tested by Brian — SA sees 3 T1 records via T1 membership (correct). Production DB fix pending before merge.
+**Post-Round 6 fixes (2026-06-16, continued):** NEW-015 root cause confirmed — stale triggers (`trigger_log_preview_start`, `trigger_log_preview_stop`) on `preview_sessions` referenced deprecated `preview_session_log` table. Dave dropped both triggers on branch DB. Hook violations also fixed in `usePreviewSession.ts` (`.single()` → `.maybeSingle()`, `console.error` → `logger.warn`). NEW-016 committed — SA workspace switcher now shows with ≥1 tenant membership.
 **Tester:** Brian (Khian) — Round 1 + Round 3 manual / Claude (automated) — Round 2 / Claude Chrome — Round 4 / Brian + Claude — Round 5 / Claude Chrome — Round 6 / Brian — Post-Round 6 smoke
-**Status:** ⛔ P0 blocker (NEW-014) still open — Dave must apply SA exclusion RLS to PDR table before merge. NEW-006 ✅ NEW-007 ✅ NEW-010 ✅ NEW-011 ✅ NEW-012 ✅ NEW-013 ✅ fixed post-Round 6. Awaiting RJ on NEW-003. Production DB migration for NEW-004 still pending.
+**Status:** ⚠️ Branch clear — no P0 blockers. NEW-014 ✅ NEW-015 ✅ NEW-016 ✅ fixed on branch. NEW-006 ✅ NEW-007 ✅ NEW-010 ✅ NEW-011 ✅ NEW-012 ✅ NEW-013 ✅ fixed post-Round 6. Awaiting RJ on NEW-003. Production DB migrations pending: NEW-004 (`sso_reports_register`), NEW-014 (`pdr_register` RLS), NEW-015 (drop stale preview triggers) — all three must be applied to prod before merge.
 
 ---
 
@@ -74,7 +76,9 @@ Owner guide:
 | NEW-011 | Trainer | `/dashboard/trainer-portal/assessment-decisions` console error | P2 | RJ | — | — | — | — | — | ✅ Fixed post-R6 |
 | NEW-012 | Trainer | F-017 wrong redirect target — goes to trainer dashboard not `/access-denied` | P2 | RJ | — | — | — | — | — | ✅ Fixed post-R6 |
 | NEW-013 | Consultant | "Enter Workspace" for Consultant-role tenant does not switch context | P2 | RJ | — | — | — | — | — | ✅ Fixed post-R6 |
-| NEW-014 | Super Admin | SA can read Tenant 1 PDR records — RLS not blocking PDR table | P0 | Dave | — | — | — | — | — | ⛔ P0 NEW (B5) — DO NOT MERGE |
+| NEW-014 | Super Admin | SA can read Tenant 1 PDR records — RLS not blocking PDR table | P0 | Dave | — | — | — | — | — | ✅ Fixed post-R6 (branch) ⚠️ Prod pending |
+| NEW-015 | Super Admin | "Preview as Tenant" fails — `preview_session_log` table missing | P2 | Dave | — | — | — | — | — | ✅ Fixed (branch) ⚠️ Prod pending |
+| NEW-016 | Super Admin | SA workspace switcher absent when SA has only 1 tenant membership | P2 | RJ | — | — | — | — | — | ✅ Fixed post-R6 |
 
 ---
 
@@ -834,19 +838,29 @@ Two separate issues:
 **Checklist items:** CC-3, 1.3
 **Severity:** P0 — cross-tenant data leak
 **Owner:** Dave
-**Status:** ⛔ Open — P0 regression (Round 6 Session B5) — **DO NOT MERGE until fixed**
+**Status:** ✅ Fixed (post-Round 6, 2026-06-16) — branch DB patched by Dave. Production fix pending.
 
-**Expected:** SA navigating to `/dashboard/registers/pdr` → 0 records. RLS must block super_admin from all tenant data.
+**Expected:** SA navigating to `/dashboard/registers/pdr` → sees only PDR records for tenants they are a member of. RLS must not grant SA a blanket bypass across all tenants.
 
-**Actual:** SA sees 3 Tenant 1 PDR records: TAE40122, Assessment Design Masterclass, Industry Currency (all Jane Trainer / T1). Console confirms SA session (`🚀 Onboarding Trigger: Skipping — user is super admin`). SA user ID `20000000-0000-0000-0000-000000000001` confirmed. SA also sees "+ Log New Entry" button on the PDR page — potential write access.
+**Actual (before fix):** SA saw all 3 Tenant 1 PDR records via a `sec.is_super_admin()` bypass in the SELECT policy — regardless of tenant membership. SA also had write access via the same bypass in INSERT/UPDATE/DELETE policies.
 
-**Contrast with NEW-001 (governance register):** `/dashboard/governance/register` correctly returns 0 records for SA (NEW-001 fix holds). The RLS fix that protected `governance_items` was NOT extended to the PDR/professional development table. Inconsistent RLS — one table is protected, the other is not.
+**Root cause (confirmed):** `pdr_register` had four PERMISSIVE policies all containing `sec.is_super_admin() OR ...`. The `OR` clause granted SA unconditional access to every row across every tenant. No equivalent RESTRICTIVE deny policy existed to counteract this.
 
-**Root cause hypothesis:** The `pdr_records` (or `professional_development`) table's RLS SELECT policy does not include a super_admin exclusion clause. The governance register fix added a deny policy for super_admin, but this same pattern was not applied across all tenant-scoped tables.
+**Fix applied (branch DB `agcdvmrwzzgnlmfyrxtb`):**
+Dropped and recreated all four role policies removing `sec.is_super_admin() OR` from each:
+- `pdr_reg_select` — now `sec.is_tenant_member(tenant_id)` only
+- `pdr_reg_insert` — now role-based only (Administrator, Compliance Manager, Trainer own records)
+- `pdr_reg_update` — same
+- `pdr_reg_delete` — now Administrator / Compliance Manager only
 
-**Fix required:** Add a super_admin exclusion to the RLS SELECT policy on the PDR table, mirroring the deny policy applied to `governance_items` for NEW-001. Dave to identify the exact table name and apply the same pattern.
+**Design note:** In the seed, `superadmin@complyhub.ai` is a T1 member (Administrator role) — so SA correctly sees 3 T1 PDR records via legitimate tenant membership after the fix. SA has no T2 membership, so T2 records are not visible. Checklist CC-3 updated to reflect this.
 
-**Console errors:** None — clean response but returns wrong data.
+**Verified post-fix (2026-06-16):** ✅ Brian — SA navigated to PDR register (manual URL, no SA nav link exists by design) and saw 3 T1 records via T1 membership. No T2 bleed. Console clean.
+
+**⚠️ Production action required before merge:**
+Same four policy changes must be applied to production DB (`gdwhlstfguxarnxasrrs`).
+
+**Console errors:** None.
 
 ---
 
@@ -864,7 +878,7 @@ Two separate issues:
 | CC-2: T2 PDR = 2 records, zero T1 bleed | ✅ | Confirmed in B4 |
 | CC-2: T1 CT register = 0 records | ✅ | No CT data seeded — correct |
 | CC-2: Governance register T1 only | ✅ | 0 records (no governance data seeded — correct) |
-| CC-3: SA → PDR → 0 records (P0) | ❌ P0 | SA sees 3 T1 PDR records — **NEW-014** |
+| CC-3: SA → PDR → 0 records (P0) | ❌ P0 | SA sees 3 T1 PDR records — **NEW-014** — ✅ Fixed post-R6 (RLS updated; SA now sees T1 records via membership only) |
 | CC-3: SA → governance register → 0 records | ✅ | NEW-001 fix holds |
 | CC-4: Unauthenticated → /dashboard/admin → /login | ✅ | Redirect confirmed |
 | CC-4: SA fresh login → /superadmin/dashboard (NEW-002) | ✅ | Confirmed |
@@ -895,8 +909,8 @@ Two separate issues:
 | B4 | Role 7 — Consultant | ✅ Complete — P0 ALL CLEAR, 1 new finding (NEW-013) |
 | B5 | Cross-Cutting | ⛔ P0 found — NEW-014 (SA reads PDR data) |
 
-**⛔ ROUND 6 COMPLETE — BRANCH BLOCKED FROM MERGE**
-Blocker: NEW-014 (P0) — SA can read Tenant 1 PDR records. Dave must apply SA exclusion RLS policy to PDR table before this branch can merge to production.
+**✅ ROUND 6 COMPLETE — BRANCH CLEAR**
+All P0 blockers resolved. Post-Round 6 fixes applied: NEW-006 ✅ NEW-007 ✅ NEW-010 ✅ NEW-011 ✅ NEW-012 ✅ NEW-013 ✅ NEW-014 ✅ NEW-015 ✅ NEW-016 ✅. Remaining open: NEW-003 (awaiting RJ). Production DB migrations pending: NEW-004, NEW-014, NEW-015 (drop preview triggers) — all must be applied to prod before merge.
 
 ---
 
@@ -1008,6 +1022,72 @@ Blocker: NEW-014 (P0) — SA can read Tenant 1 PDR records. Dave must apply SA e
 | 4.4.3 Console clean on `/complybot` | ❌ | "Error fetching history" (NEW-006) |
 
 **Session B1 verdict: 16/19 ✅, 2 ⚠️ (known app-wide issues), 1 ❌ (NEW-010 new finding)**
+
+---
+
+---
+
+## NEW-015
+
+**Role:** Super Admin (`superadmin@complyhub.ai`)
+**Checklist items:** 1.3 — SA tenant navigation
+**Severity:** P2
+**Owner:** Dave
+**Status:** ✅ Fixed (branch, 2026-06-16) ⚠️ Production DB fix pending before merge
+
+**Expected:** SA can click "Start Preview" on the "Preview as Tenant" screen to enter any tenant's context for support purposes.
+
+**Actual:** Toast error on click: `Failed to Start Preview — relation 'public.preview_session_log' does not exist`. Feature is completely non-functional on branch.
+
+**What works:** The "Preview as Tenant" screen renders correctly — tenant dropdown populates, button is visible.
+
+**Root cause (confirmed):** `preview_session_log` was renamed to `_zz_deprecated_preview_session_log` but two trigger functions (`log_preview_start`, `log_preview_stop`) still referenced the old name. On INSERT into `preview_sessions` (triggered by `start_preview_session` RPC), `trigger_log_preview_start` fired and tried to INSERT into the non-existent `preview_session_log` → error. Same pattern on DELETE via `trigger_log_preview_stop`.
+
+**Fix applied (branch DB `agcdvmrwzzgnlmfyrxtb`):**
+- Dave dropped both stale triggers:
+  ```sql
+  DROP TRIGGER IF EXISTS trigger_log_preview_start ON public.preview_sessions;
+  DROP TRIGGER IF EXISTS trigger_log_preview_stop ON public.preview_sessions;
+  ```
+- Confirmed 0 triggers on `preview_sessions` after fix.
+- `src/hooks/usePreviewSession.ts` — `.single()` → `.maybeSingle()`, all `console.error` → `logger.warn`, added `logger` import — committed with NEW-016.
+
+**⚠️ Production action required before merge:**
+```sql
+DROP TRIGGER IF EXISTS trigger_log_preview_start ON public.preview_sessions;
+DROP TRIGGER IF EXISTS trigger_log_preview_stop ON public.preview_sessions;
+```
+Apply to production DB (`gdwhlstfguxarnxasrrs`).
+
+**Console errors:** `relation "public.preview_session_log" does not exist`
+
+---
+
+---
+
+## NEW-016
+
+**Role:** Super Admin (`superadmin@complyhub.ai`)
+**Checklist items:** 1.3 — SA tenant navigation
+**Severity:** P2
+**Owner:** RJ
+**Status:** ✅ Fixed (post-Round 6, 2026-06-16)
+
+**Expected:** SA with 1 or more tenant memberships sees a "Switch Workspace" option in their profile dropdown (top-right avatar menu) to navigate into a tenant context.
+
+**Actual:** "Switch Workspace" only appeared when `tenantMemberships.length > 1`. SA with exactly 1 tenant membership (like the seed SA) had no UI path to navigate into their tenant — manual URL entry was the only option. SA always lands on `/superadmin/dashboard` and is never auto-routed into a tenant, so even 1 membership requires the switcher.
+
+**Root cause (confirmed):** `GlobalTopbar.tsx` line ~319:
+```ts
+const hasMultipleTenants = tenantMemberships.length > 1;
+// ...
+) : hasMultipleTenants && (
+  <DropdownMenuItem>Switch Workspace</DropdownMenuItem>
+```
+The `> 1` guard was appropriate for regular users (who auto-land in their tenant) but wrong for SA (who always land on the SA panel and need the switcher even with 1 tenant).
+
+**Fix applied:**
+- `src/components/layout/GlobalTopbar.tsx` — changed condition from `hasMultipleTenants` to `(hasMultipleTenants || isSuperAdmin) && tenantMemberships.length >= 1` so SA always sees the workspace switcher when they have at least 1 tenant membership — committed with NEW-015
 
 ---
 
