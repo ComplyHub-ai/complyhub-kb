@@ -16,7 +16,7 @@
 **Post-Round 6 P0 fix (2026-06-16):** NEW-014 fixed on branch DB by Dave — removed `sec.is_super_admin()` bypass from all four `pdr_register` RLS policies. Smoke-tested by Brian — SA sees 3 T1 records via T1 membership (correct). Production DB fix pending before merge.
 **Post-Round 6 fixes (2026-06-16, continued):** NEW-015 root cause confirmed — stale triggers (`trigger_log_preview_start`, `trigger_log_preview_stop`) on `preview_sessions` referenced deprecated `preview_session_log` table. Dave dropped both triggers on branch DB. Hook violations also fixed in `usePreviewSession.ts` (`.single()` → `.maybeSingle()`, `console.error` → `logger.warn`). NEW-016 committed — SA workspace switcher now shows with ≥1 tenant membership.
 **Tester:** Brian (Khian) — Round 1 + Round 3 manual / Claude (automated) — Round 2 / Claude Chrome — Round 4 / Brian + Claude — Round 5 / Claude Chrome — Round 6 / Brian — Post-Round 6 smoke
-**Status:** ⚠️ Branch clear — no P0 blockers. NEW-014 ✅ NEW-015 ✅ NEW-016 ✅ fixed on branch. NEW-006 ✅ NEW-007 ✅ NEW-010 ✅ NEW-011 ✅ NEW-012 ✅ NEW-013 ✅ fixed post-Round 6. Awaiting RJ on NEW-003. Production DB migrations pending: NEW-004 (`sso_reports_register`), NEW-014 (`pdr_register` RLS), NEW-015 (drop stale preview triggers) — all three must be applied to prod before merge.
+**Status:** ✅ Branch clear — no P0 blockers. All Round 6 findings resolved or deferred. NEW-003 ⏸️ deferred (same issue exists on main — feature not built). Production DB migrations pending: NEW-004 (`sso_reports_register`), NEW-014 (`pdr_register` RLS), NEW-015 (drop stale preview triggers) — all three must be applied to prod before merge.
 
 ---
 
@@ -65,7 +65,7 @@ Owner guide:
 | F-022 | Consultant | Consultant sub-pages Coming soon | P1 | RJ | Open | ⚠️ Deferred | — | ⚠️ Deferred | ⏸️ Deferred | — |
 | NEW-001 | Super Admin | SA sees governance register data (P0) | P0 | Dave | New | ✅ Fixed | ⚠️ Retest | ✅ Fixed | — | ✅ Verified |
 | NEW-002 | Super Admin | SA post-login lands on `/dashboard/admin` | P1 | RJ | New | ⚠️ Method issue | — | ❌ Failing | ✅ Fixed | ✅ Verified |
-| NEW-003 | Super Admin | `/superadmin/billing/revenue` 404 | P2 | RJ | New | ⚠️ Wrong URL | — | ❌ Failing | ⏸️ Awaiting RJ | ❌ 404 confirmed |
+| NEW-003 | Super Admin | `/superadmin/billing/revenue` 404 | P2 | RJ | New | ⚠️ Wrong URL | — | ❌ Failing | ⏸️ Deferred | ⏸️ Deferred — same issue on main, feature not built |
 | NEW-004 | Governing Person | `sso_reports_register` missing table | P2 | Dave | — | — | — | ❌ New | ✅ Fixed on branch ⚠️ Prod pending | ✅ Verified (Admin + GP) |
 | NEW-005 | CM | CM bypasses AdminRoute on `/settings/rto` | P1 | RJ | — | — | — | ❌ New | ✅ Fixed | ✅ Verified B1 — redirect + header link both confirmed |
 | SEED-001 | Administrator | CT form — Responsible Role dropdown empty | P2 | Carl | — | — | — | ❌ New | ✅ Fixed | ✅ By design — view returns 5 rows (authority_level > 1) |
@@ -531,14 +531,13 @@ Consultant sub-pages all show "Coming soon". Not blocking merge.
 
 **Role:** Super Admin (`superadmin@complyhub.ai`)
 **Checklist items:** 1.2
-**Severity:** P2 | **Owner:** RJ | **Status:** ⏸️ Awaiting RJ confirmation
+**Severity:** P2 | **Owner:** RJ | **Status:** ⏸️ Deferred — feature not built (confirmed same issue on main)
 
 **Expected:** A super admin billing revenue page exists.
 **Actual:** `/superadmin/billing/revenue` → 404. `/superadmin/billing/sales` works.
 
-**Action needed from RJ:** Confirm whether a revenue route exists at a different path, or if it has not been built yet. If not built, close as deferred.
-
-**Round 6 Session A:** ❌ Still 404 — navigates to `/not-found`. Console clean. Recorded as-is per instructions.
+**Round 6 Session A:** ❌ Still 404 — navigates to `/not-found`. Console clean.
+**2026-06-16:** Confirmed same 404 exists on main — route not built. Closing as deferred, not a branch regression.
 
 ---
 
@@ -910,7 +909,7 @@ Same four policy changes must be applied to production DB (`gdwhlstfguxarnxasrrs
 | B5 | Cross-Cutting | ⛔ P0 found — NEW-014 (SA reads PDR data) |
 
 **✅ ROUND 6 COMPLETE — BRANCH CLEAR**
-All P0 blockers resolved. Post-Round 6 fixes applied: NEW-006 ✅ NEW-007 ✅ NEW-010 ✅ NEW-011 ✅ NEW-012 ✅ NEW-013 ✅ NEW-014 ✅ NEW-015 ✅ NEW-016 ✅. Remaining open: NEW-003 (awaiting RJ). Production DB migrations pending: NEW-004, NEW-014, NEW-015 (drop preview triggers) — all must be applied to prod before merge.
+All P0 blockers resolved. Post-Round 6 fixes applied: NEW-006 ✅ NEW-007 ✅ NEW-010 ✅ NEW-011 ✅ NEW-012 ✅ NEW-013 ✅ NEW-014 ✅ NEW-015 ✅ NEW-016 ✅. NEW-003 ⏸️ deferred (same issue on main — feature not built). Production DB migrations pending: NEW-004, NEW-014, NEW-015 (drop preview triggers) — all must be applied to prod before merge.
 
 ---
 

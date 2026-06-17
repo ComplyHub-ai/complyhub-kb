@@ -474,10 +474,10 @@ Before marking any item ✅:
 - [ ] CT register: T1 admin sees 0 records (correct), T2 consultant sees 0 records (correct)
 - [ ] Governance register: T1 admin sees T1 records only
 
-## CC-3 — SuperAdmin cannot access tenant content
-- [ ] SA → `/dashboard/registers/pdr` → 0 records (RLS blocks)
-- [ ] SA → `/dashboard/governance/register` → 0 records (RLS blocks) — **NEW-001 verify**
-- [ ] Console clean on both — no RLS error messages, just empty results
+## CC-3 — SuperAdmin can only access tenant content they are a member of
+- [ ] SA → `/dashboard/registers/pdr` → shows only records for tenants SA is a member of. In seed: 3 T1 records (TAE40122, Assessment Design Masterclass, Industry Currency) — **NEW-014 verify**. Zero T2 records (SA has no T2 membership).
+- [ ] SA → `/dashboard/governance/register` → 0 records (no governance data seeded — correct) — **NEW-001 verify**
+- [ ] Console clean on both — no RLS error messages
 
 ## CC-4 — Redirect flows
 - [ ] Unauthenticated → `/dashboard/admin` → redirected to `/login`
