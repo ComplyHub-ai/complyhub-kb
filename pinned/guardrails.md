@@ -52,3 +52,17 @@ Two parallel workflows are active — do not confuse them:
 
 **Workflow 2 — Branch work with Carl on `fix/local-run`**
 `rto-compass-hub/fix/local-run` allows edits and commits. All code changes on this branch must follow the rules in `rto-compass-hub/CLAUDE.md` (Carl's file) — that file is authoritative for all code decisions. Do not create guardrails or patterns that conflict with it.
+
+## Database migrations
+
+Every migration must be accompanied by a rollback plan before it is considered complete. No exceptions.
+
+A rollback plan is one of:
+- A down migration file (e.g. `YYYYMMDDHHMMSS_rollback_<slug>.sql`) that reverses the up migration exactly — drops added columns, restores dropped columns, reverts function changes
+- An explicit written rollback procedure documented in the PR description or a companion note, for cases where a SQL rollback is not possible (e.g. destructive data transforms, irreversible enum changes)
+
+**What counts as a migration:** any file in `supabase/migrations/` — schema changes, RLS policy changes, function definitions, index additions, data backfills.
+
+**Why:** Supabase migrations are applied in strict timestamp order and cannot be unapplied automatically. A migration with no rollback plan leaves the team with no safe recovery path if the migration causes a production incident. This was reinforced during PR #36 review where a missing `config.toml` entry and a type mismatch were caught — the same discipline applies to the database layer.
+
+**At review time:** if a PR contains a migration file and no rollback plan is present, flag it as a blocker before approving.
