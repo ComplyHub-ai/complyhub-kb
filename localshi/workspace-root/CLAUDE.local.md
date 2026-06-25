@@ -1,0 +1,332 @@
+# CLAUDE.local.md — Brian (Khian) Personal Workspace Config
+
+> This file is personal to Brian (Khian) and is not committed to any repo.
+> It covers workspace layout, session rituals, and role-specific behaviour only.
+
+
+---
+
+## My role on this team
+
+- **Brian (Khian)** — junior developer / infrastructure assistant
+- **Carl** — infrastructure lead (owns `rto-compass-hub/CLAUDE.md`, CI guardrails, config.toml, edge function structure)
+- **RJ** — app engineering lead (owns frontend patterns, hooks, component architecture)
+- **Dave** — database lead
+- **Angela** — product and regulatory
+
+My job is to assist Carl and RJ. When in doubt about a pattern, check `rto-compass-hub/CLAUDE.md` but khian can do any one of the roles as long as it is done thorougly and all matters are accounted for. 
+---
+
+## Workspace layout
+
+```
+c:\Users\brian\complyhubworkspace\
+├── CLAUDE.local.md        ← this file (personal, not committed)
+├── AGENTS.md              ← Codex entry point
+├── complyhub-kb/          ← team KB (full read/write access)
+│   ├── audit/             ← audit trail
+│   ├── pinned/            ← shared rules — always load first
+│   ├── reference/         ← fetch on demand
+│   ├── codebase-state/    ← as-shipped codebase snapshots
+│   └── handoffs/          ← scenario procedures
+└── rto-compass-hub/       ← codebase
+    ├── CLAUDE.md          ← Carl's rules — authoritative for all code decisions
+    ├── src/               ← React + TypeScript frontend (Vite)
+    ├── supabase/          ← Edge Functions, migrations, config.toml
+    └── .github/workflows/ ← CI guardrails
+```
+
+---
+
+## GitHub repos
+
+| Alias | Org | Repo |
+|---|---|---|
+| `complyhub-kb` | `ComplyHub-ai` | `complyhub-kb` |
+| `<codebase>` | `ComplyHub-ai` | `rto-compass-hub` |
+
+---
+
+## Write permissions
+
+| Repo / Folder | My access |
+|---|---|
+| `complyhub-kb/` | Full — read, write, commit, push (including `main`) |
+| `complyhub-kb/audit/` | Full — same as above |
+| `rto-compass-hub/` on `main` | Read-only — fetch and pull only, never edit or commit |
+| `rto-compass-hub/` on any `feat/*` or `fix/*` branch | Edits and commits allowed — all new work goes through a branch + PR |
+| `rto-compass-hub/` on any `cursor/*` branch | Edits and commits allowed — for PR review workflow only |
+
+---
+
+New workflow (effective 22 June 2026, per Carl):
+- All new work starts by creating a fresh branch off `main`
+- Branch naming: `fix/description` for bug fixes, `feat/description` for features
+- Changes are made on that branch, then a PR is opened against `main`
+- Pushing a branch automatically creates a Vercel preview URL for QA
+- Never edit `main` directly
+
+Branch DB workflow (effective 25 June 2026):
+- When a branch includes a migration, Supabase automatically creates a branch DB and runs migrations against it
+- QA for migration branches must be done against the branch DB, not production
+- Confirm branch DB shows no `MIGRATIONS_FAILED` before merging
+- After merging to `main`, migrations must be applied to production manually — they are NOT auto-applied on merge
+- Branches without migrations still use production DB for QA (no branch DB is created)
+
+---
+
+## PR review + fix workflow
+
+This is the approved workflow for clearing open branches into `main`. Carl has approved edits and commits on PR branches.
+
+**Steps per PR:**
+1. Agent reviews the PR diff + dry-run merge against current `main`
+2. Plain English verdict and issues presented to Brian
+3. Brian decides: fix on branch / close / escalate to Carl
+4. If fixing: `git checkout [branch] && git pull`
+5. Make edits, verify thoroughly, present full diff to Brian
+6. Brian says "commit it" → commit
+7. Brian says "push it" → push
+8. Brian approves PR on GitHub and merges to `main`
+9. Verify merge landed on `main`, branch deleted
+10. Update `phase1-verdicts-partial.md` with final verdict
+11. `git checkout main && git pull` before next PR
+
+**Rules:**
+- Never edit `main` directly — all changes go through PR branches
+- Never commit or push without Brian's explicit words
+- Brian can merge approved PRs to `main` directly
+- After each merge, verify on `main` before moving to the next PR
+- All verdicts saved to `localshi/merging_work/phase1-verdicts-partial.md`
+
+---
+
+## Session start (mandatory first action)
+
+1. `cd complyhub-kb && git pull --ff-only && cd ..`
+2. `cd rto-compass-hub && git fetch && git pull && cd ..`
+3. Report latest commits in both repos after pulling
+
+If any pull fails: **STOP and report.** Do not resolve conflicts autonomously — escalate to Carl.
+
+Full session protocol: `complyhub-kb/pinned/session-protocol.md`
+
+---
+
+## Trigger phrases → actions
+
+**"go to main and get latest repo"**
+```powershell
+Set-Location "c:\Users\brian\complyhubworkspace\rto-compass-hub"
+git checkout main
+git pull
+```
+
+**"create a branch for [name]"** (or "start a new branch" / "new branch for this work")
+```powershell
+Set-Location "c:\Users\brian\complyhubworkspace\rto-compass-hub"
+git checkout main
+git pull
+git checkout -b [branch-name]
+# e.g. git checkout -b feat/suggestion-intake
+```
+
+**"go to branch [name]"** (or "switch to branch [name]")
+```powershell
+Set-Location "c:\Users\brian\complyhubworkspace\rto-compass-hub"
+git checkout [branch-name]
+git pull
+```
+
+**"what are the conflicts of the new repo in our branch"** (or "check conflicts" / "any issues with latest commits")
+1. `git checkout main && git pull` — get latest main
+2. `git checkout [active-branch]`
+3. `git merge main --no-commit --no-ff` — dry-run merge
+4. Report any conflicts; also inspect changed `package.json` for new/changed deps that could break local run
+5. `git merge --abort` — leave branch clean after the check
+
+**"start local dev"** (or "run locally" / "start the app")
+```powershell
+Set-Location "c:\Users\brian\complyhubworkspace\rto-compass-hub"
+git checkout [active-branch]
+$env:NODE_OPTIONS="--max-old-space-size=8192"
+npm install
+npm run dev
+# App runs at http://localhost:8080
+```
+
+**"stop local dev"** (or "stop the server" / "kill the dev server")
+- If running in foreground: Ctrl+C in the terminal
+- If running in background: `Get-Process -Name "node" | Stop-Process -Force`
+
+**"build for vercel"** (or "test production build" / "run build")
+```powershell
+Set-Location "c:\Users\brian\complyhubworkspace\rto-compass-hub"
+$env:NODE_OPTIONS="--max-old-space-size=8192"
+npm run build
+npm run preview
+```
+
+---
+
+## Supabase
+
+| Name | Project ID | Region | Notes |
+|---|---|---|---|
+| ComplyHub Production | `gdwhlstfguxarnxasrrs` | ap-southeast-2 | Used by all branches — no branch DB isolation |
+
+MCP server configured in `.mcp.json` (PAT-authenticated; not committed to git).
+
+**Project ID selection rule:** Always use `gdwhlstfguxarnxasrrs`. All branches — feature, fix, and main — point at production. No branch DBs are created automatically. Verified 25 June 2026.
+
+**Supabase access is READ-ONLY.** Never call write operations:
+`apply_migration`, `execute_sql` (writes), `create_branch`, `delete_branch`, `merge_branch`, `reset_branch`, `rebase_branch`, `pause_project`, `create_project`, `deploy_edge_function`.
+
+When I say `check database` (or equivalent):
+1. Identify target tables/views/feature area
+2. Inspect relevant schema first (columns, types, relationships)
+3. Run focused read-only checks to validate the issue
+4. Summarise findings and likely root cause
+5. Recommend the smallest safe fix path — do not execute writes
+
+Always use MCP server `supabase` for database tasks.
+Default project follows the active branch rule above. Do not switch projects unless I explicitly name another.
+Do not use MCP server `supabase-unicorn` unless I explicitly ask for it.
+
+Response format for `check database`:
+- What was checked
+- Key findings
+- Likely root cause
+- Recommended next step
+
+---
+
+## Code change protocol (branch work)
+
+> ⛔ **NEVER RUN `git commit` OR `git push` UNLESS BRIAN EXPLICITLY SAYS SO.**
+> - **Commit words:** "commit it", "commit that", "go ahead and commit", "commit now"
+> - **Push words:** "push it", "go ahead and push", "push now"
+> "yes", "do it", "approved", "make the fix", "apply it" — NONE of these mean commit or push. They only mean make the file edit.
+> If in doubt: make the edit, stop, tell Brian what was changed, and WAIT for explicit commit instruction.
+> Approving an edit ≠ approving a commit. Approving a commit ≠ approving a push. These are THREE separate gates.
+
+**New branch workflow (effective 22 June 2026):**
+
+Every piece of work — bug fix, new feature, migration — follows this flow:
+
+1. **Create a branch off `main`** — `git checkout main && git pull && git checkout -b feat/or/fix-description`
+2. **Diagnose first** — read the relevant files, check the DB if needed, understand the root cause fully before touching anything
+3. **Write the plan in plain English** — what is the problem, why it happens, what the fix is, what files change, what could break
+4. **Present to Brian for review** — get explicit approval before making edits
+5. **Make the change** — one focused commit per logical fix
+6. **Commit, then stop** — tell Brian in plain English what was committed, then WAIT for explicit push instruction
+7. **Push ONLY when Brian says so** — then open a PR against `main`
+8. **Vercel creates a preview URL automatically on push** — QA is done on that preview against the production DB
+9. **Brian merges the PR** once QA passes
+
+Never push speculatively. Never fix-and-push in one motion. Approving a fix ≠ approving a commit. Approving a commit ≠ approving a push. These are THREE separate gates.
+
+> ⛔ **ALWAYS run the plan by Brian BEFORE making any change — even to local staging files, even outside the repo.** Describe what you intend to change, which file, and why. Wait for explicit approval before touching anything.
+
+### Branch verification — mandatory before every commit and push
+
+> ⛔ **BEFORE running `git commit` OR `git push`, always run `git branch --show-current` first.**
+> Confirm the output matches the expected feature branch (e.g. `fix/survey-public-link-routing`).
+> If it shows `main` or any unexpected branch — **STOP immediately. Do not commit or push. Report to Brian and resolve the branch state first.**
+> Session resets can silently revert the checkout to `main` without warning. Never assume the branch is correct — verify it every time.
+
+---
+
+## Session boundary branch re-confirm
+
+At the start of any session where there is active branch work in progress (i.e. a `fix/*` or `feat/*` branch exists locally or on the remote), run `git branch --show-current` before doing anything else — before reading files, before diagnosing, before any command. Report the active branch to Brian at the top of the session so it is visible and agreed before work begins. Do not rely on memory from a previous session — the checkout may have silently reset to `main`.
+
+---
+
+## Plain English — always, not on request
+
+After any technical audit, diagnosis, or fix explanation, always provide a plain English version without waiting for Brian to ask. No jargon, no file paths, no code snippets — just what happened, why, and what was done about it, as if explaining to a non-developer. Technical detail goes first for the record; plain English summary follows immediately after.
+
+---
+
+## DB data-state check — standard diagnosis step
+
+For any bug report involving data not loading, links not working, or content appearing missing: query the relevant database rows early in the diagnosis — before theorising about code causes. The actual data state (status, token, expiry, flags) resolves most hypotheses in a single step and avoids chasing the wrong fix. Use the Supabase MCP server (read-only) as the first investigative tool, not the last.
+
+---
+
+## Post-merge checklist (mandatory after every PR merge)
+
+After Brian merges a PR and the branch is deleted, always complete these steps before moving on:
+
+1. `git checkout main && git pull` — confirm the fix commit is on main, report the commit hash
+2. Confirm the branch is gone from remote (`git ls-remote --heads origin <branch>` returns empty)
+3. Delete the local branch if it still exists (`git branch -D <branch>`)
+4. Write an audit log entry in `complyhub-kb/audit/` covering: what was fixed, root cause, files changed, PR number, and date
+5. Commit and push the audit entry to `complyhub-kb` main
+
+Do not consider the work done until the audit log is updated.
+
+---
+
+## My guardrails (personal, non-conflicting with Carl's)
+
+These are additional behavioural rules for how Claude should assist me specifically. They do not override or replace anything in `rto-compass-hub/CLAUDE.md`.
+
+- **Always check Carl's CLAUDE.md first** before suggesting any code pattern, file structure, or database change.
+- **Flag before acting** on anything that touches `main`, CI config, `config.toml`, or `supabase/migrations/`. These are Carl's domain — surface the intent and ask me to confirm before proceeding.
+- **Do not create new guardrail files** inside `rto-compass-hub/` without me explicitly asking, and only after confirming with Carl that they don't conflict.
+- **Never commit or push** to `main` in `rto-compass-hub/`.
+- **When I ask "what should I do next"**, check `rto-compass-hub/TODO.md` and `rto-compass-hub/.lovable/plan.md` for current task context before suggesting anything.
+- **Escalate, don't improvise.** If a task looks like it requires architectural judgement, surface the options and flag it for Carl or RJ rather than picking one.
+- **Always give UI-based navigation instructions.** When telling Brian to test or navigate the platform, describe the click path (e.g. "click Registers in the left nav, then Professional Development") — not raw URLs. Include the URL only as a fallback.
+
+---
+
+## Diagnosis discipline (learned from NEW-013 multi-attempt failure)
+
+These rules apply to every bug fix, not just QA findings. Violating them is how a fix lands in the wrong file and wastes iterations.
+
+1. **Trace the execution path from the user action, not from the plausible-looking file.** Start at the button click / route load / login event and follow the code forward to the actual decision point. Do not start at the file you expect is responsible.
+
+2. **Grep callers before editing any function.** If you cannot see the function being called from the right place, you have not found the right fix target. (`routeAfterLogin` looked correct but was only called from `ResetPassword` — not normal login.)
+
+3. **For switch/case blocks or arrays of roles — audit every entry.** When fixing one case, read every other case in the same block. Ask: does each entry have a corresponding config? This is how the Consultant sidebar bug was missed when fixing CM's case.
+
+4. **For a directory of similar files — check all files for the same pattern.** When fixing one guard, grep all guards in the same folder for the same wrong value before reporting the BRC as clean.
+
+5. **For context-switching bugs — query the DB early.** Check `profiles.active_tenant_id` and `tenant_members` for the affected user before theorising. The actual DB state resolves hypotheses in one step.
+
+---
+
+## Schema drift — Lovable legacy (context as of 25 June 2026)
+
+Before June 2026, Lovable applied database changes directly to the production DB without creating migration files. This left 3,608 migration version records in production with no corresponding `.sql` files in the repo. Branch DBs hit `MIGRATIONS_FAILED` because they start fresh and can't find those versions.
+
+**Status:** Lovable is no longer in use. All migrations now go through files + branch DB testing.
+
+**Known drift fixed:** Migration `20260624000100_gap_fill_tenants_schema_drift.sql` adds 10 columns to `public.tenants` that were applied directly to production via Lovable and were missing from the baseline:
+- `cricos_provider_code`, `lms_name`, `llnd_provider`, `llnd_assessment_instrument`
+- `english_evidence_policy` (jsonb), `acsf_defaults` (jsonb), `delivery_sites` (jsonb)
+- `funding_streams` (text[]), `trainer_pd_review_cadence`, `parent_consultant_org_id` (uuid)
+
+**Rule going forward:** If a branch DB migration fails with `column X does not exist`, check whether that column exists in production but has no migration file. If so, add a gap-fill migration (`ADD COLUMN IF NOT EXISTS`) before the failing migration and document it in `supabase/migrations/CLAUDE.md`.
+
+## Pre-push verification agent (future consideration)
+
+CI only fires when targeting `main` — it is silent when pushing to `fix/local-run`. A verification agent on the branch could catch Carl's guardrail violations (missing `config.toml` entry, `.single()` usage, hook over 150 lines, etc.) before CI ever sees the code. Not redundant with Husky or CI — fills the gap between local commit and PR. Revisit when branch work volume picks up.
+
+---
+
+## Entry docs (load order)
+
+| Priority | Path | Purpose |
+|---|---|---|
+| 1 | `rto-compass-hub/CLAUDE.md` | Carl's code rules — authoritative |
+| 2 | `complyhub-kb/pinned/guardrails.md` | Write rules, entity routing, confidentiality |
+| 3 | `complyhub-kb/pinned/session-protocol.md` | Session ritual, token efficiency |
+| 4 | `complyhub-kb/pinned/conventions.md` | Tech conventions, RLS, Edge Function patterns |
+| 5 | `complyhub-kb/pinned/decisions.md` | Architectural decisions log |
+| 6 | `complyhub-kb/README.md` | KB orientation |
+| on demand | `complyhub-kb/handoffs/` | Scenario procedures |
+| on demand | `complyhub-kb/reference/` | Deep reference docs |
