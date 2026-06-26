@@ -82,7 +82,7 @@ This is the approved workflow for clearing open branches into `main`. Carl has a
 **Steps per PR:**
 1. Agent reviews the PR diff + dry-run merge against current `main`
 2. Plain English verdict and issues presented to Brian
-3. Brian decides: fix on branch / close / escalate to Carl
+3. Brian decides: fix on branch / close / defer
 4. If fixing: `git checkout [branch] && git pull`
 5. Make edits, verify thoroughly, present full diff to Brian
 6. Brian says "commit it" → commit
@@ -107,7 +107,7 @@ This is the approved workflow for clearing open branches into `main`. Carl has a
 2. `cd rto-compass-hub && git fetch && git pull && cd ..`
 3. Report latest commits in both repos after pulling
 
-If any pull fails: **STOP and report.** Do not resolve conflicts autonomously — escalate to Carl.
+If any pull fails: **STOP and report to Brian.** Do not resolve conflicts autonomously.
 
 Full session protocol: `complyhub-kb/pinned/session-protocol.md`
 
@@ -179,15 +179,21 @@ MCP server configured in `.mcp.json` (PAT-authenticated; not committed to git).
 
 **Project ID selection rule:** Always use `gdwhlstfguxarnxasrrs`. All branches — feature, fix, and main — point at production. No branch DBs are created automatically. Verified 25 June 2026.
 
-**Supabase access is READ-ONLY.** Never call write operations:
-`apply_migration`, `execute_sql` (writes), `create_branch`, `delete_branch`, `merge_branch`, `reset_branch`, `rebase_branch`, `pause_project`, `create_project`, `deploy_edge_function`.
+**Default Supabase access is READ-ONLY.** For diagnosis, schema inspection, and data checks, only use read operations.
 
-When I say `check database` (or equivalent):
+**Write operations allowed when Brian explicitly says to deploy migrations:**
+- `apply_migration` — allowed when Brian says "apply the migration" or "deploy to production"
+- `execute_sql` (writes) — allowed when Brian explicitly asks for a data fix or manual SQL
+
+**Never use without explicit discussion — these are destructive:**
+`create_branch`, `delete_branch`, `merge_branch`, `reset_branch`, `rebase_branch`, `pause_project`, `create_project`, `deploy_edge_function`
+
+When Brian says `check database` (or equivalent):
 1. Identify target tables/views/feature area
 2. Inspect relevant schema first (columns, types, relationships)
 3. Run focused read-only checks to validate the issue
 4. Summarise findings and likely root cause
-5. Recommend the smallest safe fix path — do not execute writes
+5. Recommend the smallest safe fix path — do not execute writes unless Brian explicitly approves
 
 Always use MCP server `supabase` for database tasks.
 Default project follows the active branch rule above. Do not switch projects unless I explicitly name another.
@@ -249,6 +255,48 @@ After any technical audit, diagnosis, or fix explanation, always provide a plain
 
 ---
 
+## Never assume — always verify
+
+Never rely on memory, prior session context, or past observations as ground truth. Always verify against the current state:
+
+- File content → Read the file
+- DB state → Query via MCP
+- Migration status → `list_migrations` against production
+- Branch → `git branch --show-current`
+- Config → Read `config.toml`, not memory
+
+If something could have changed since it was last observed, treat it as unknown until verified. Memory is context, not fact.
+
+---
+
+## Trace the full flow — never hand off mid-chain
+
+When diagnosing a bug or tracing a feature, follow the execution path all the way to the end before reporting findings. Do not stop at a plausible-looking file or function and hand the problem back with "this is probably where it is." That approach misses bugs and adds unnecessary work hours.
+
+The complete trace means:
+- User action → component → hook → RPC/edge function → DB function → return value → UI render
+- Follow every branch of the chain that could affect the outcome
+- Confirm each step is actually called in the right context (grep callers, don't assume)
+- Only report findings once the full path is traced and the root cause is confirmed, not suspected
+
+If the trace is genuinely blocked (e.g., missing source, external service), state exactly where it stops and why — not just "it might be here."
+
+---
+
+## Never run `npm run build`
+
+`npm run build` hangs Brian's workstation. Do not run it for any reason — not for verification, not for pre-push checks, not to confirm a fix compiles.
+
+To verify code correctness without a full build, use:
+```powershell
+npm run type-check   # TypeScript errors only — fast
+npm run lint         # ESLint — fast
+```
+
+If both pass, the change is safe to commit and push. Build verification happens on Vercel automatically after push — that is the build gate, not the local machine.
+
+---
+
 ## DB data-state check — standard diagnosis step
 
 For any bug report involving data not loading, links not working, or content appearing missing: query the relevant database rows early in the diagnosis — before theorising about code causes. The actual data state (status, token, expiry, flags) resolves most hypotheses in a single step and avoids chasing the wrong fix. Use the Supabase MCP server (read-only) as the first investigative tool, not the last.
@@ -262,23 +310,18 @@ After Brian merges a PR and the branch is deleted, always complete these steps b
 1. `git checkout main && git pull` — confirm the fix commit is on main, report the commit hash
 2. Confirm the branch is gone from remote (`git ls-remote --heads origin <branch>` returns empty)
 3. Delete the local branch if it still exists (`git branch -D <branch>`)
-4. Write an audit log entry in `complyhub-kb/audit/` covering: what was fixed, root cause, files changed, PR number, and date
-5. Commit and push the audit entry to `complyhub-kb` main
-
-Do not consider the work done until the audit log is updated.
+Do not write KB audit entries automatically. Only write to `complyhub-kb/audit/` if Brian explicitly asks for it.
 
 ---
 
-## My guardrails (personal, non-conflicting with Carl's)
+## My guardrails
 
-These are additional behavioural rules for how Claude should assist me specifically. They do not override or replace anything in `rto-compass-hub/CLAUDE.md`.
-
-- **Always check Carl's CLAUDE.md first** before suggesting any code pattern, file structure, or database change.
-- **Flag before acting** on anything that touches `main`, CI config, `config.toml`, or `supabase/migrations/`. These are Carl's domain — surface the intent and ask me to confirm before proceeding.
-- **Do not create new guardrail files** inside `rto-compass-hub/` without me explicitly asking, and only after confirming with Carl that they don't conflict.
+- **Always check `rto-compass-hub/CLAUDE.md` first** before suggesting any code pattern, file structure, or database change.
+- **Confirm with Brian before acting** on anything that touches `main`, CI config, `config.toml`, or `supabase/migrations/` — surface intent and wait for explicit approval.
+- **Do not create new guardrail files** inside `rto-compass-hub/` without Brian explicitly asking.
 - **Never commit or push** to `main` in `rto-compass-hub/`.
-- **When I ask "what should I do next"**, check `rto-compass-hub/TODO.md` and `rto-compass-hub/.lovable/plan.md` for current task context before suggesting anything.
-- **Escalate, don't improvise.** If a task looks like it requires architectural judgement, surface the options and flag it for Carl or RJ rather than picking one.
+- **When Brian asks "what should I do next"**, check `rto-compass-hub/TODO.md` and `rto-compass-hub/.lovable/plan.md` for current task context before suggesting anything.
+- **Present options, don't hand off.** If a task requires architectural judgement, surface the options and tradeoffs to Brian — do not defer to Carl, RJ, Dave, or anyone else. Brian works across all roles and makes the call.
 - **Always give UI-based navigation instructions.** When telling Brian to test or navigate the platform, describe the click path (e.g. "click Registers in the left nav, then Professional Development") — not raw URLs. Include the URL only as a fallback.
 
 ---
@@ -296,6 +339,34 @@ These rules apply to every bug fix, not just QA findings. Violating them is how 
 4. **For a directory of similar files — check all files for the same pattern.** When fixing one guard, grep all guards in the same folder for the same wrong value before reporting the BRC as clean.
 
 5. **For context-switching bugs — query the DB early.** Check `profiles.active_tenant_id` and `tenant_members` for the affected user before theorising. The actual DB state resolves hypotheses in one step.
+
+---
+
+## Migration archive — never read
+
+`supabase/migrations/_archive/` contains 3,600+ historical Lovable-era files. They do not run. Never read, grep, or reference them when diagnosing migration failures. When investigating any migration issue, only look at files directly in `supabase/migrations/` (not subdirectories). Always verify the actual file before drawing conclusions — do not rely on memory about what migrations exist.
+
+---
+
+## Migration discipline — preventing drift (effective 26 June 2026)
+
+The repo and the production database are independent. Merging to `main` only updates files — it never touches the database. Applying to production is always a separate manual step.
+
+### The only safe flow
+
+1. Write the `.sql` file on a branch
+2. Push → branch DB confirms green (no `MIGRATIONS_FAILED`)
+3. Merge PR to `main`
+4. **Apply to production immediately** via MCP `apply_migration` — never defer
+5. Verify the DB object changed in production
+
+### If anyone applies directly to production
+
+Write a reconciliation migration capturing the exact change. Merge it before any new branch work touches that schema area. This is what happened with Angela's 26 June fixes — failure to do this caused branch DB failures across the whole PR.
+
+### Branch DB + seed.sql
+
+Branch DBs run: baseline → migrations → `seed.sql`. The `seed.sql` is live and configured in `config.toml` under `[db.seed]`. It uses hardcoded tenant UUIDs so QA accounts exist on every branch DB. If a migration adds a column that `seed.sql` references and the baseline doesn't have it, the seed step fails. Always check `seed.sql` when adding columns to seeded tables.
 
 ---
 
