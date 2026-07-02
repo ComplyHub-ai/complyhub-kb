@@ -66,12 +66,26 @@ New workflow (effective 22 June 2026, per Carl):
 - Pushing a branch automatically creates a Vercel preview URL for QA
 - Never edit `main` directly
 
-Branch DB workflow (effective 25 June 2026):
-- When a branch includes a migration, Supabase automatically creates a branch DB and runs migrations against it
-- QA for migration branches must be done against the branch DB, not production
-- Confirm branch DB shows no `MIGRATIONS_FAILED` before merging
-- After merging to `main`, migrations must be applied to production manually — they are NOT auto-applied on merge
-- Branches without migrations still use production DB for QA (no branch DB is created)
+Branch DB workflow (effective 30 June 2026 — clarified by Brian):
+
+**Migration branch flow (sequential — do not skip or reorder):**
+1. Write the `.sql` migration file on the branch
+2. Commit → push → open PR against `main`
+3. Supabase detects the new migration file and automatically creates a branch DB, runs all migrations against it
+4. Confirm branch DB shows no `MIGRATIONS_FAILED` before doing any QA
+5. QA is done against the branch DB (not production)
+6. Merge the PR to `main` — this lands the `.sql` file in the repo only; it does NOT touch the production DB
+7. Manually apply the migration to production via MCP `apply_migration` immediately after merge — never defer
+8. Verify the DB object changed in production
+
+**Non-migration branch flow:**
+- No branch DB is created — QA runs against production DB
+- No manual apply step needed after merge
+
+**Key rules:**
+- Merging to `main` never auto-applies migrations to production — always a separate manual step
+- Never do production QA for migration branches — always use the branch DB
+- Apply to production immediately after merge — never leave it pending
 
 ---
 
@@ -207,6 +221,41 @@ Response format for `check database`:
 
 ---
 
+## Vercel (MCP — added 02 July 2026)
+
+Vercel MCP is registered at **user scope** in `C:\Users\brian\.claude.json` (HTTP transport, OAuth — no token in any repo file). It persists across restarts. If tools ever stop loading, run `claude mcp get vercel` to confirm it is Connected, then restart Claude Code.
+
+| Name | ID | Notes |
+|---|---|---|
+| Team | `team_oUNjuuI0xecWTumBWDTNZuEm` (slug `complyhub`) | The only team |
+| Project | `prj_PWwpFRTBB4i4RAni8diFr7YaFk89` (`complyhub-rto`) | Node 22.x |
+
+**Domains on this project:** `rto.complyhub.ai` (production), `complyhub-rto.vercel.app`, `complyhub-rto-git-main-complyhub.vercel.app`.
+
+**Production truth (verified 02 July 2026):** Merging a PR to `main` fires a Vercel **production** deploy that serves `rto.complyhub.ai` — this happens automatically, no manual publish. This is the GitHub path and is intentional. (The Lovable/staging path is separate — Lovable publishes via the `staging` branch and requires its own publish action. `staging` and `main` were synced yesterday.)
+
+**Branch preview URL pattern (deterministic):** `complyhub-rto-git-<branch-slug>-complyhub.vercel.app` where `<branch-slug>` is the branch name with `/` and other non-alphanumerics turned into `-` (long slugs get a hash suffix — confirm via `list_deployments` when unsure).
+
+**Vercel access is READ-ONLY by default.** Use `list_deployments`, `get_deployment`, `get_deployment_build_logs`, `get_runtime_errors`, `get_runtime_logs`, `get_project` freely for diagnosis.
+
+**Never use without Brian explicitly saying "deploy to Vercel":**
+- `deploy_to_vercel` — triggers a real deployment. Gated exactly like Supabase `apply_migration`.
+
+### Trigger phrases → actions
+
+**"check the deploy"** (or "did the build pass" / "is it deployed")
+1. `list_deployments` for the project, filter to the active branch (`meta.githubCommitRef`)
+2. Report `state` (READY / BUILDING / ERROR / CANCELED), target, and commit message
+3. If `ERROR` → pull `get_deployment_build_logs` and report the actual failing lines
+
+**"get the preview url"** (or "what's the preview link")
+- Return the Ready preview deployment URL for the active branch (or the `complyhub-rto-git-<branch>-complyhub.vercel.app` alias). Only hand over a URL once its `state` is READY.
+
+**"check runtime errors"** (or "any production errors" / "check the logs")
+- `get_runtime_errors` / `get_runtime_logs` on the production deployment. Use as a first-look tool for production bug reports, alongside the DB data-state check.
+
+---
+
 ## Code change protocol (branch work)
 
 > ⛔ **NEVER RUN `git commit` OR `git push` UNLESS BRIAN EXPLICITLY SAYS SO.**
@@ -295,6 +344,8 @@ npm run lint         # ESLint — fast
 
 If both pass, the change is safe to commit and push. Build verification happens on Vercel automatically after push — that is the build gate, not the local machine.
 
+**Read the Vercel build result via MCP — don't just wait.** After a push, use `list_deployments` (filter to the branch) to check the deploy `state`, and if it shows `ERROR`, pull `get_deployment_build_logs` and report the actual failing lines. This replaces "wait and check the dashboard" — I can now confirm the build gate result directly. See the `## Vercel` section for trigger phrases.
+
 ---
 
 ## DB data-state check — standard diagnosis step
@@ -310,6 +361,7 @@ After Brian merges a PR and the branch is deleted, always complete these steps b
 1. `git checkout main && git pull` — confirm the fix commit is on main, report the commit hash
 2. Confirm the branch is gone from remote (`git ls-remote --heads origin <branch>` returns empty)
 3. Delete the local branch if it still exists (`git branch -D <branch>`)
+4. **Confirm the Vercel production deploy went Ready** — `list_deployments`, find the newest `target: production` deploy matching the merge commit SHA, confirm `state: READY`. If it errored, pull `get_deployment_build_logs`. This catches a broken production build (on `rto.complyhub.ai`) immediately rather than on next visit.
 Do not write KB audit entries automatically. Only write to `complyhub-kb/audit/` if Brian explicitly asks for it.
 
 ---
@@ -322,7 +374,7 @@ Do not write KB audit entries automatically. Only write to `complyhub-kb/audit/`
 - **Never commit or push** to `main` in `rto-compass-hub/`.
 - **When Brian asks "what should I do next"**, check `rto-compass-hub/TODO.md` and `rto-compass-hub/.lovable/plan.md` for current task context before suggesting anything.
 - **Present options, don't hand off.** If a task requires architectural judgement, surface the options and tradeoffs to Brian — do not defer to Carl, RJ, Dave, or anyone else. Brian works across all roles and makes the call.
-- **Always give UI-based navigation instructions.** When telling Brian to test or navigate the platform, describe the click path (e.g. "click Registers in the left nav, then Professional Development") — not raw URLs. Include the URL only as a fallback.
+- **Always give UI-based navigation instructions.** When telling Brian to test or navigate the platform, describe the click path (e.g. "click Registers in the left nav, then Professional Development") — not raw URLs. Include the URL only as a fallback. Always reference `complyhub-kb/reference/ui-navigation.md` for the correct sidebar structure and click paths — do not guess or describe sidebar colours. Note that this file reflects the Administrator role view only; state role caveats when relevant.
 
 ---
 
@@ -339,6 +391,8 @@ These rules apply to every bug fix, not just QA findings. Violating them is how 
 4. **For a directory of similar files — check all files for the same pattern.** When fixing one guard, grep all guards in the same folder for the same wrong value before reporting the BRC as clean.
 
 5. **For context-switching bugs — query the DB early.** Check `profiles.active_tenant_id` and `tenant_members` for the affected user before theorising. The actual DB state resolves hypotheses in one step.
+
+6. **Before routing any previously-unrouted component — cross-reference every DB field name used in the component against `src/types/` and the actual schema.** A feature parity check (does it have the right columns, the right form?) does NOT substitute for a field-name correctness check (are the actual property names correct?). This step is mandatory when the file has `// @ts-nocheck` on line 1 — TypeScript cannot catch mismatches, so the cross-reference must be done manually. Failure to do this was the root cause of the MCN register white screen (PR #98 route switch, July 2026): `change_title`, `description_of_change`, `submitted_to_asqa`, and `date_of_change` were used throughout `mcn/index.tsx` but none of them exist on `MCNRegister` — the correct fields are `title`, `change_description`, `date_submitted`, and `change_date`.
 
 ---
 
@@ -382,6 +436,28 @@ Before June 2026, Lovable applied database changes directly to the production DB
 - `funding_streams` (text[]), `trainer_pd_review_cadence`, `parent_consultant_org_id` (uuid)
 
 **Rule going forward:** If a branch DB migration fails with `column X does not exist`, check whether that column exists in production but has no migration file. If so, add a gap-fill migration (`ADD COLUMN IF NOT EXISTS`) before the failing migration and document it in `supabase/migrations/CLAUDE.md`.
+
+---
+
+## Baseline-first migration rule (effective 01 July 2026)
+
+When a DB change is needed and the situation supports it, prefer editing the baseline (`supabase/migrations/00000000000000_baseline.sql`) over creating a new migration file. Each situation differs — use judgement:
+
+**Edit the baseline when:**
+- The column or object doesn't exist anywhere yet (new feature, not yet in production)
+- The change is purely additive (new column, new table, new function) with no risk of conflicting with existing migration files
+- The table's `CREATE TABLE` already exists in the baseline — just add the column there
+- No existing migration file creates or references the same object
+
+**Create a new migration file when:**
+- The object already exists in production — the baseline won't re-run against production, so you still need an `ALTER TABLE` applied manually after merge
+- The change modifies an existing object (ALTER TABLE on a table already in the baseline)
+- The baseline doesn't contain a `CREATE TABLE` for the affected table (Lovable-era drift — table was created directly in production)
+- Risk of conflict with another migration in the chain is high
+
+**Key caveat:** Editing the baseline only covers branch DBs. Production always requires a separate manual `apply_migration` step after the PR merges. Never assume baseline changes flow through to production automatically.
+
+**Watch for redundancies:** Before adding anything to the baseline, check whether an existing migration file already handles it (`IF NOT EXISTS` guards prevent errors, but clean code avoids dead declarations).
 
 ## Pre-push verification agent (future consideration)
 

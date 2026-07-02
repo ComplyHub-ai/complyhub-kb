@@ -102,11 +102,13 @@ Things to inspect manually after a merge check:
 
 ---
 
-## Test a production build (Vercel simulation)
+## Test a production build (Vercel simulation — optional, slow)
+
+> Only run this when you explicitly need to simulate Vercel output locally.
+> Do NOT run as part of the pre-push flow — the pre-push hook uses incremental type-check + lint instead.
 
 ```powershell
 cd rto-compass-hub
-git checkout fix/local-run
 $env:NODE_OPTIONS="--max-old-space-size=8192"
 npm run build
 npm run preview
