@@ -38,6 +38,62 @@ c:\Users\brian\complyhubworkspace\
 
 ---
 
+## Parallel worktree workflow (added 08 July 2026)
+
+When Brian has multiple independent tasks queued up (e.g. several bug fixes), a second `git worktree` can be spun up so two branches are worked on at the same time in two separate VS Code windows — no stashing, no switching, no risk of one branch's edits landing on the other.
+
+**This is a repeatable, on-demand workflow — not tied to any fixed branch name.** Create one whenever there's a genuine second task ready to go; tear it down once that task's PR is merged.
+
+**Common case: active dev in one worktree, PR review in the other.** The two worktrees don't have to both be Brian's own fresh work — one can stay on an in-progress `fix/*`/`feat/*` branch while the second checks out whatever's being reviewed (a colleague's branch, a `cursor/*` PR branch). This avoids stashing or switching out of active work just to review, test, or fix a PR — follow the normal `## PR review + fix workflow` rules in that second worktree, entirely independent of what's checked out in the first.
+
+**Layout — always a sibling folder inside `complyhubworkspace`, never elsewhere:**
+
+```
+c:\Users\brian\complyhubworkspace\
+├── CLAUDE.local.md          ← shared — found automatically by both windows (upward directory lookup)
+├── AGENTS.md                ← shared
+├── complyhub-kb\             ← shared — reachable by absolute or relative path from either worktree
+├── rto-compass-hub\          ← primary worktree (main checkout)
+└── rto-compass-hub-<slug>\   ← secondary worktree, e.g. rto-compass-hub-2 or rto-compass-hub-fix2
+```
+
+Keeping the new worktree nested inside `complyhubworkspace` (as a sibling of `rto-compass-hub`, not a folder elsewhere on disk) is what makes `CLAUDE.local.md` and `complyhub-kb` work automatically in the second window — no duplication or copying needed for those.
+
+**Creation steps:**
+```powershell
+Set-Location "c:\Users\brian\complyhubworkspace\rto-compass-hub"
+git checkout main
+git pull
+git worktree add ..\rto-compass-hub-<slug> -b fix/or/feat-branch-name
+```
+Then open a second VS Code window rooted directly at `rto-compass-hub-<slug>` (not the `complyhubworkspace` root — opening the root would show both `rto-compass-hub` folders nested together, which is cluttered though not broken).
+
+**Considerations every time one of these is created:**
+- **`npm install` is required separately in the new worktree** — `node_modules` is never shared between worktrees (it's build output, not something to copy — `npm install` regenerates it, same as `dist/`, `.husky/_/`, `tsconfig.tsbuildinfo`).
+- **`rto-compass-hub/.env` must be copied manually into the new worktree.** It's gitignored (holds the live `VITE_SUPABASE_URL` / publishable key) and `git worktree` only carries tracked files, so it will NOT appear automatically. `.env.example` exists as a template but has no real values — copy the actual `.env` from the primary `rto-compass-hub` folder. Without it, `npm run dev` won't connect to Supabase.
+- **`.mcp.json` does NOT need copying.** It lives at the `complyhubworkspace` root (outside `rto-compass-hub` entirely, not part of that git repo), so it's already visible to every worktree automatically — confirmed 08 July 2026 (an earlier version of this doc wrongly assumed it lived inside `rto-compass-hub` and was gitignored there).
+- **`.cursor/mcp.json`** (Cursor-side Supabase MCP config, separate from the root `.mcp.json` above) — check whether it exists in the primary worktree before assuming it needs copying. As of 08 July 2026 it doesn't exist yet (only the `.cursor/mcp.json.example` template does); if RJ/Carl ever populate a real one, copy it the same way as `.env`.
+- **Local dev servers**: if running `npm run dev` in both worktrees at once, they need different ports — Vite will usually auto-bump the port if 8080 is taken, but confirm rather than assume.
+- **`complyhub-kb` needs nothing at all.** It's a fully separate git repo at the `complyhubworkspace` root (not nested inside `rto-compass-hub`), has no `.gitignore` and no hidden files — confirmed 08 July 2026. Both worktrees already point at the exact same single copy; there is no duplication concept to manage here.
+- **Only one worktree can have a given branch checked out at a time — this includes `main`.** If a second worktree finishes its task and its VS Code window is left on (or manually switched to) `main`, the primary `rto-compass-hub` folder (or any other worktree) will be BLOCKED from checking out `main` until that second worktree either checks out something else or is removed. This caused real confusion on 08 July 2026 — a session working in the primary folder couldn't switch back to `main` for routine cleanup because the finished `rto-compass-hub-staging-sync` worktree was still parked on it. **Rule: the moment a worktree's task is merged, remove the worktree (`git worktree remove ..\rto-compass-hub-<slug>`) — don't just leave it "parked" on `main` or any other branch "to be safe."** A removed worktree holds no branch lock at all.
+
+**If a worktree finishes and immediately needs its NEXT task (not ready to be removed yet):** do not check out local `main` in it at all — the primary `rto-compass-hub` folder normally lives on `main` by default (session-start ritual), so a second worktree trying to also land on `main` will hit this same block from the other direction. Branch directly off `origin/main` instead, skipping the local `main` checkout entirely:
+```powershell
+git fetch origin
+git checkout -b feat/next-thing origin/main
+```
+This never checks out local `main` in that worktree, so it can never collide with wherever the primary or any other worktree currently sits.
+- All the usual per-branch rules still apply independently in each worktree: branch verification before commit/push, never edit `main` directly, PR review + fix workflow, migration discipline, etc. Treat each worktree as its own fully independent branch workflow — the only thing shared is the underlying git history and the root-level docs/KB.
+
+**Teardown (after that branch's PR is merged):**
+```powershell
+Set-Location "c:\Users\brian\complyhubworkspace\rto-compass-hub"
+git worktree remove ..\rto-compass-hub-<slug>
+```
+Never just delete the worktree folder manually — `git worktree remove` keeps the main repo's worktree metadata clean. If it refuses due to uncommitted changes, resolve those first (report to Brian, don't discard silently).
+
+---
+
 ## GitHub repos
 
 | Alias | Org | Repo |
@@ -144,6 +200,30 @@ git pull
 git checkout -b [branch-name]
 # e.g. git checkout -b feat/suggestion-intake
 ```
+
+**"set up a worktree for [branch]"** (or "spin up a second branch to work in parallel" / "worktree for [task]") — for a NEW branch off `main`:
+```powershell
+Set-Location "c:\Users\brian\complyhubworkspace\rto-compass-hub"
+git checkout main
+git pull
+git worktree add ..\rto-compass-hub-[slug] -b [branch-name]
+```
+
+**"open a worktree for PR review of [branch]"** (or "review this PR in a worktree") — for an EXISTING branch (someone else's PR, a `cursor/*` branch):
+```powershell
+Set-Location "c:\Users\brian\complyhubworkspace\rto-compass-hub"
+git fetch origin
+git worktree add ..\rto-compass-hub-[slug] [existing-branch-name]
+```
+
+Either way: tell Brian to open a new VS Code window rooted at `rto-compass-hub-[slug]`, and flag the `.env` copy + `npm install` steps (`.mcp.json` at the workspace root is already shared, no copy needed). Full considerations: `## Parallel worktree workflow` above.
+
+**"remove the worktree for [branch]"** (or "tear down the worktree" / "close out the parallel branch")
+```powershell
+Set-Location "c:\Users\brian\complyhubworkspace\rto-compass-hub"
+git worktree remove ..\rto-compass-hub-[slug]
+```
+Only after that branch's PR is merged. If it refuses due to uncommitted changes, stop and report to Brian rather than forcing it.
 
 **"go to branch [name]"** (or "switch to branch [name]")
 ```powershell
@@ -256,6 +336,20 @@ Vercel MCP is registered at **user scope** in `C:\Users\brian\.claude.json` (HTT
 
 ---
 
+## GitHub Actions billing outage — active as of 07 July 2026
+
+Every GitHub Actions job on `rto-compass-hub` is currently failing in ~2 seconds with: *"The job was not started because recent account payments have failed or your spending limit needs to be increased."* This is an org-level billing issue on `ComplyHub-ai`, not a code problem. It means `deploy-edge-functions.yml` and `deploy-mcp-function.yml` (and every other workflow) are not running at all — merges to `main` are not auto-deploying edge functions right now.
+
+**I cannot see or fix this** — it needs `admin:org` GitHub access. An org Owner (Carl) needs to check **Settings → Billing and plans** on the `ComplyHub-ai` org (`https://github.com/organizations/ComplyHub-ai/settings/billing`) and either update the payment method or raise the Actions spending limit.
+
+**Workaround while this is unresolved:** manually deploy the affected function(s) to production via the Supabase MCP `deploy_edge_function` tool, using the exact file content already committed on `main` — never anything uncommitted.
+
+**Why this is safe, not another drift incident:** GitHub Actions has no memory of a prior version — every run deploys whatever is currently on `main`. As long as a manual deploy pushes exactly what's already committed, git and production stay in sync, so a later Actions run (once billing is fixed) just redeploys the same code — a no-op, not a regression. **This stops being safe the moment anyone deploys something to production that was never committed to git first** — that recreates the exact drift pattern documented in `stagingTomainjuly7.md`. Rule for the duration of the outage: commit to `main` first, always, then manually deploy exactly that committed content.
+
+**Remove this section once Carl confirms the billing issue is resolved and a real `deploy-edge-functions.yml` run goes green.**
+
+---
+
 ## Code change protocol (branch work)
 
 > ⛔ **NEVER RUN `git commit` OR `git push` UNLESS BRIAN EXPLICITLY SAYS SO.**
@@ -345,6 +439,33 @@ npm run lint         # ESLint — fast
 If both pass, the change is safe to commit and push. Build verification happens on Vercel automatically after push — that is the build gate, not the local machine.
 
 **Read the Vercel build result via MCP — don't just wait.** After a push, use `list_deployments` (filter to the branch) to check the deploy `state`, and if it shows `ERROR`, pull `get_deployment_build_logs` and report the actual failing lines. This replaces "wait and check the dashboard" — I can now confirm the build gate result directly. See the `## Vercel` section for trigger phrases.
+
+---
+
+## Unit tests — default expectation for logic changes (effective 03 July 2026)
+
+When making a bug fix, feature addition, or any code change on a branch in `rto-compass-hub` that involves real logic (mutations, hooks, conditional behaviour), write or update a unit test alongside it — not just run the existing suite passively. The test must specifically prove the change works and would fail if the fix were reverted (e.g. simulate the exact race condition or edge case being fixed), not just re-assert existing behaviour.
+
+**Add a test when:**
+- Fixing a bug in logic — a mutation, a hook, a race condition, a conditional branch (add a test that fails without the fix and passes with it)
+- Adding a new feature with real behaviour to verify (a new mutation, a new derived value, a new gate/condition)
+
+**Don't force a test when:**
+- The change is pure UI text/wording (e.g. fixing a misleading alert message) — nothing logical to assert
+- The change is a database migration or RLS policy widening — this is verified by the branch DB check instead, not a unit test (mocked Supabase calls can't catch a real RLS rejection)
+- The change is config-only (`config.toml`, env vars, CI workflow tweaks)
+
+Forcing a test onto a change that doesn't have real logic produces a low-value test that exists just to "check the box" — use judgement, matching what a proper case-by-case review would produce, not a mechanical one-test-per-commit rule.
+
+**Know the limits — this does not replace database-level verification:**
+- Unit tests here run against a *mocked* Supabase client — no real database, no real RLS. A test can pass 100% clean while a real permission check would still reject the request in production (this is exactly what happened with a Governing Person RLS gap that no unit test could have caught — only the branch database check surfaced it). Passing unit tests is not proof a feature works end-to-end; still confirm real behaviour on the branch DB / preview before merge.
+- Mocks are maintenance debt, not a one-time cost. When the shape of a query chain changes (e.g. reordering an update before a delete), any test mocking that chain needs updating too, or it fails for the wrong reason. Budget for this when touching code that already has test coverage.
+
+**Mechanics:**
+- Before pushing, run the relevant test file(s) locally (`npx vitest run <path>`) — in addition to `npm run type-check` and `npm run lint`, not a replacement for either
+- **Watch for `html/` collateral damage:** Vitest's HTML report generator can overwrite files under `html/` (the app's real build output directory) as a side effect of `npx vitest run`. Always run `git status` after running tests and discard any accidental `html/*` changes (`git checkout -- html/...`, remove any new untracked `html/assets/*`) before staging/committing.
+
+**Explicitly out of scope for now:** Playwright / end-to-end browser tests. These come later as part of a dedicated, deliberately-designed QA protocol — do not add Playwright specs ad hoc alongside unit tests unless Brian asks for that protocol work specifically.
 
 ---
 
@@ -462,6 +583,17 @@ When a DB change is needed and the situation supports it, prefer editing the bas
 ## Pre-push verification agent (future consideration)
 
 CI only fires when targeting `main` — it is silent when pushing to `fix/local-run`. A verification agent on the branch could catch Carl's guardrail violations (missing `config.toml` entry, `.single()` usage, hook over 150 lines, etc.) before CI ever sees the code. Not redundant with Husky or CI — fills the gap between local commit and PR. Revisit when branch work volume picks up.
+
+---
+
+## Staging/main sync skills
+
+| Skill | Purpose | Trigger phrases |
+|---|---|---|
+| `/audit-branch-drift` | Read-only comparison of `staging` vs `main` in `rto-compass-hub`. Plain English summary of what each branch has that the other doesn't. No changes made. | "/audit-branch-drift", "check branch drift", "how far apart are staging and main", "what's different between staging and main", "do we need a catchup" |
+| `/branch-catchup` | Two-phase sync after drift is confirmed: Phase 1 ports staging-only (Lovable) work into `main` via `feat/staging-sync` branch + PR; Phase 2 force-pushes `main` → `staging` so both point at the same commit. Each phase gated by explicit approval (commit/push/reset). Phase 2 includes a mandatory pre-reset drift scan (added 02 July 2026) that checks per-file last-touch commits on both branches before allowing the force-push — confirms nothing on staging would be lost, not just that the Phase 1 PR description looks complete. | "/branch-catchup", "sync staging and main", "do the catchup", "bring staging up to date", "port lovable changes to main" |
+
+Run `/audit-branch-drift` first, then `/branch-catchup` when drift is confirmed. Staging diverging again afterward is expected — Lovable keeps writing to it.
 
 ---
 
