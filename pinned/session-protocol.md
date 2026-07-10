@@ -15,6 +15,8 @@ Run in order before any other work:
 
 If any pull fails (conflict, divergence, dirty working tree): **STOP and report.** Do not attempt to resolve conflicts autonomously.
 
+4. **Check local machine setup** — some local artifacts (Claude Code hooks, `.claude/settings.local.json` entries) are gitignored/personal and do NOT travel with a `git clone` of this repo. If this looks like a machine that hasn't been bootstrapped yet (e.g. `.claude/hooks/session-start-context.sh` is missing, or pinned docs clearly weren't auto-injected this session), read `complyhub-kb/pinned/machine-bootstrap.md` and follow it to recreate them.
+
 ## Session end
 
 1. Review changes made to `complyhub-kb/` this session
