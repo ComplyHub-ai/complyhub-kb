@@ -1,3 +1,7 @@
+> **Superseded 11 July 2026.** Do not add new verdicts here. Use
+> `pr-review-open-prs.md` (workspace root). Historical content below kept for
+> reference only.
+
 # Phase 1 — PR Review Verdicts (Partial)
 **Date:** 16 June 2026
 **Status:** In progress — reviewing one by one.

@@ -10,7 +10,7 @@ This folder tracks the full branch cleanup plan. Every file here must be kept up
 |---|---|
 | `PLAN.md` | Master plan — phases, branch inventory, status table |
 | `AGENT_PROMPT.md` | Prompt template used by the review agent |
-| `phase1-verdicts-partial.md` | Running log of every PR verdict produced during Phase 1 |
+| `phase1-verdicts-partial.md` | **Retired (11 July 2026).** Historical Phase 1 log only — active record is `pr-review-open-prs.md` at workspace root |
 | `completed-prs.md` | Detailed write-up of every PR that has been merged and deleted |
 | `phase5-conflict-tracker.md` | Running log of files that will conflict when `fix/local-run` is resynced with `main` |
 
