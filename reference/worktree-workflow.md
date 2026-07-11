@@ -54,5 +54,19 @@ git worktree remove ..\rto-compass-hub-<slug>
 ```
 Never just delete the worktree folder manually — `git worktree remove` keeps the main repo's worktree metadata clean. If it refuses due to uncommitted changes, resolve those first (report to Brian, don't discard silently).
 
+## When the other worktree merges first (catch-up)
+
+If worktree B's PR lands on `main` while worktree A is still mid-branch: **A is behind — that is normal.** You can usually still commit and push A's feature branch. The problem appears when merging A into `main` (or when GitHub requires the branch to be up to date).
+
+Catch-up on A's feature branch (prefer **merge**, not rebase):
+
+```powershell
+git fetch origin
+git merge origin/main --no-ff
+# resolve conflicts on the feature branch if any, then push
+```
+
+Full orchestration notes (parallel crews, dry-run first, cost savings): `complyhub-kb/reference/ai-model-routing.md` §§ "Parallel workflows" and "Cost & limit savings".
+
 **Trigger phrases** (kept in `CLAUDE.local.md` since they're used every session):
 - "set up a worktree for [branch]" / "open a worktree for PR review of [branch]" / "remove the worktree for [branch]"

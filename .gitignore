@@ -1,0 +1,9 @@
+# Local / secrets — never commit (belt for accidental copies from workspace .secrets/)
+.secrets/
+**/.secrets/
+openrouter.env
+*.openrouter.env
+.env
+.env.*
+!.env.example
+!**/.env.example

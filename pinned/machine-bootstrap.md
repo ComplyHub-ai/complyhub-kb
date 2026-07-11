@@ -1,4 +1,4 @@
-> **Last updated:** 10 July 2026 · **Confidence:** high — written and tested on the original machine.
+> **Last updated:** 10 July 2026 · **OpenRouter secrets:** 11 July 2026 · **Confidence:** high — written and tested on the original machine.
 
 # Machine bootstrap — local Claude Code artifacts not carried by git
 
@@ -150,6 +150,29 @@ If it reports not connected/not found, add it (HTTP transport, OAuth) — check 
 This is a local config change to Claude Code's own settings — treat it like any other "self-modification" action: tell the user what was created/edited (hook script, settings.local.json hooks + MCP entries, `.mcp.json`), and flag two things that are expected, not failures:
 - `SessionStart` hooks fire outside the current turn, so if pinned docs don't appear to auto-load on the very next session, the settings watcher may need a one-time `/hooks` open or a restart to pick up the new file.
 - The first real Supabase MCP tool call on this machine will trigger an OAuth browser login — that's expected, not a misconfiguration. Vercel MCP needs its own separate one-time `claude mcp add`/OAuth step since it's user-scoped, not part of this workspace's files at all.
+
+## Step 5 — OpenRouter secrets (workspace-local, outside both git repos)
+
+OpenRouter credentials for Claude Code live under `<workspace-root>/.secrets/`, which is **outside** `complyhub-kb/` and `rto-compass-hub/` (the workspace root is not a git repo). Cloning either repo does **not** bring the key.
+
+1. Ensure the folder exists with mode `700`:
+   ```bash
+   mkdir -p <workspace-root>/.secrets && chmod 700 <workspace-root>/.secrets
+   ```
+2. If `openrouter.env` is missing, copy from the example and paste a real key from https://openrouter.ai/keys:
+   ```bash
+   cp <workspace-root>/.secrets/openrouter.env.example <workspace-root>/.secrets/openrouter.env
+   chmod 600 <workspace-root>/.secrets/openrouter.env
+   # edit openrouter.env — replace sk-or-v1-REPLACE_ME
+   ```
+3. Load before launching Claude Code (or add to `~/.zshrc`):
+   ```bash
+   source <workspace-root>/.secrets/load-openrouter.sh
+   ```
+4. Verify inside Claude Code with `/status` (base URL `https://openrouter.ai/api`). If a prior Anthropic OAuth login conflicts, `/logout` once, quit, relaunch.
+5. Confirm `complyhub-kb/.gitignore` ignores `.secrets/`, `openrouter.env`, and `.env*` patterns (belt against accidental copies into the KB repo).
+
+Never put the key in committed KB docs, `settings` files that might be synced, or chat logs. Full routing policy: `complyhub-kb/reference/ai-model-routing.md`.
 
 ## Keeping this file in sync
 
