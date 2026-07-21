@@ -13,8 +13,28 @@ MCP server configured in `.mcp.json` (PAT-authenticated; not committed to git).
 **Default Supabase access is READ-ONLY.** For diagnosis, schema inspection, and data checks, only use read operations.
 
 **Write operations allowed when Brian explicitly says to deploy migrations:**
-- `apply_migration` — allowed when Brian says "apply the migration" or "deploy to production"
 - `execute_sql` (writes) — allowed when Brian explicitly asks for a data fix or manual SQL
+
+**Never use `apply_migration` to deploy an existing `supabase/migrations/*.sql` file — it does not respect
+the filename's version.** Confirmed 21 Jul 2026 (PR #279 post-merge): calling `apply_migration` with a file's
+SQL content records it under a freshly-generated version (based on the moment the tool ran), not the
+file's own `YYYYMMDDHHmmss` prefix — even when `name` is set to match the file. This creates exactly the
+kind of git/production ledger mismatch the migration-discipline rules exist to prevent, and it required
+`supabase migration repair --status reverted <wrong-version>` + `--status applied <correct-version>` for
+every affected file to fix. `apply_migration` is fine for one-off SQL Claude authors on the fly with no
+corresponding file — never for a file that already exists in `supabase/migrations/`.
+
+**The only correct way to deploy an existing migration file to production is `supabase db push`, run by
+Brian from his terminal inside `rto-compass-hub/`.** It reads the actual files, compares versions against
+what production has recorded, and applies + records them correctly under their true filename version.
+Claude cannot run this — no local Supabase CLI in this environment — so give Brian the exact command and
+wait for him to run it and report back the output.
+
+If a `supabase db push` reveals a migration whose SQL was already applied out-of-band (e.g. via the
+Supabase dashboard SQL editor, or drift from a Lovable-era direct change) — confirmed by checking whether
+the object already exists before applying — do not re-run it. Instead use
+`supabase migration repair --status applied <version>` to fix the ledger only. See
+`complyhub-kb/reference/diagnosis-discipline.md` § "Learned from PR #279" for the full incident.
 
 **Never use without explicit discussion — these are destructive:**
 `create_branch`, `delete_branch`, `merge_branch`, `reset_branch`, `rebase_branch`, `pause_project`, `create_project`, `deploy_edge_function`
