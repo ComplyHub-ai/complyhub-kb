@@ -1,6 +1,52 @@
 > **Last updated:** 11 July 2026 · **Confidence:** high — Brian's dual-surface model routing policy.
 > **Verified live:** 11 July 2026 — OpenRouter Anthropic Messages skin GREEN for Anthropic + DeepSeek + Kimi + GLM + Qwen; Cursor Task slugs GREEN for `composer-2.5-fast`, `gpt-5.3-codex`, `gpt-5.5-medium`, `claude-4.6-sonnet-medium-thinking`, `claude-opus-4-8-thinking-high`, `glm-5.2-high`, `kimi-k2.7-code`, `grok-4.5-high`.
 
+> ## ✅ Claude Code gap SOLVED via cursor-agent shell-out (15 July 2026)
+> The per-callsign multi-model routing below was long documented as Cursor-desktop-only, because
+> Claude Code's own Agent tool `model` parameter only accepts `sonnet`/`opus`/`haiku`/`fable` — true,
+> and still the case. But Claude Code can **shell out to the Cursor CLI** (`cursor-agent`, a separate
+> terminal tool from Cursor desktop, installed via WSL — see `complyhub-kb/reference/cursor-workflow.md`
+> for setup) as a headless subprocess pinned to any model on the account's Cursor plan. This was built
+> and empirically proven end-to-end on 15 July 2026:
+> - `cursor-agent --print --output-format json --model <id> "<prompt>"` runs one-shot, non-interactively,
+>   returns parseable JSON. Confirmed working from Claude Code's Bash tool via `wsl.exe -e bash -lc`.
+> - Real available models on the account (not the DeepSeek/OpenRouter list below, which Cursor CLI does
+>   NOT have access to): `kimi-k2.7-code`, `composer-2.5-fast`, `gemini-3-flash`/`3.5-flash`,
+>   `glm-5.2-high`, `gpt-5.4-mini` (cheap tier); `gpt-5.3-codex`, `claude-4.5-sonnet`, `gemini-3.1-pro`
+>   (mid); `claude-opus-4-8-*` (premium). Full list: `cursor-agent models`.
+> - A cheap model (`kimi-k2.7-code`) run as an **adversarial fresh-eyes checker** — fresh context, told
+>   to assume something is broken — caught real, project-aware bugs on a live edge function twice
+>   (banned `.single()` usage, swallowed DB errors, wrong Deno version, wrong response shape) purely
+>   from reading code and this repo's own `CLAUDE.md` conventions.
+> - The Supabase MCP **does** work from `cursor-agent`, contra earlier assumption — but only when: (a)
+>   invoked from the actual workspace root (not a subrepo with its own `.cursor/mcp.json.example`), and
+>   (b) both `--approve-mcps` (approves the server) AND `--force` (approves each tool call — otherwise
+>   silently `User rejected MCP`) are passed. Once working, the checker confirmed a real production bug
+>   live: `superadmin_active_tenant` — referenced by two edge functions — **does not exist** in the
+>   `public` schema at all (not just undocumented drift; the table is fully absent). Noted for the
+>   bug-fix flow, not yet actioned as of this writing.
+> - Safety: the Supabase MCP for this path is deliberately scoped tighter than Claude Code's own,
+>   full-access `.mcp.json` — `.cursor/mcp.json` uses `--project-ref gdwhlstfguxarnxasrrs --features
+>   database,docs,debugging --read-only`. Empirically confirmed against live prod: `apply_migration`
+>   is hard-rejected (`"Cannot apply migration in read-only mode."`), and the `--features` scoping
+>   removes the `account`/`branching`/`functions`/`storage` tool groups entirely (verified via direct
+>   MCP protocol probe: 29 tools → 8). `execute_sql` remains reachable but forces `read_only:true` at
+>   the query layer. `--force` on the dispatch command widens what the subprocess *could* ask
+>   permission for generally, but the DB tool it actually has access to structurally cannot write.
+> - Practical architecture: Claude Code stays the **orchestrator + Maker** (all edits, all commit/push
+>   gates). Cheap `cursor-agent` subprocesses handle all five other callsigns — **Scout** (recon),
+>   **Hound** (root-cause tracing on bug reports), **Compass** (planning/tradeoffs), **Tinker**
+>   (mechanical PR gauntlet), **Sentinel** (merge-gate verdict), and **Checker** (fresh-eyes review incl.
+>   live-DB verification) — never edits, on all six. Scout/Checker were proven with full real-task runs
+>   on 15 July 2026 (including the live-DB capstone above); Hound/Compass/Tinker/Sentinel were confirmed
+>   wired via lightweight dispatch smoke test the same day — same mechanism, so no separate mechanical
+>   risk to re-prove, but none of the four has yet been run against a real task end-to-end the way
+>   Scout/Checker were. See `.cursor/orchestrate/dispatch.sh` and `.cursor/orchestrate/roles.md` for the
+>   working implementation, prompt templates per role, and exact gotchas hit during setup.
+> - This supersedes the OpenRouter-based plan below for reaching non-Anthropic cheap models from
+>   Claude Code — OpenRouter is still valid for other uses, but the Cursor CLI path is what's actually
+>   built and proven for the Scout/Checker roles.
+
 # AI model routing — orchestrator + role matrix
 
 Token-efficient workflow for Cursor and Claude Code. One policy, two adapters. Default effort is **medium** (explore/shell **low**). Never use high/xhigh effort as the default. Speed is **not** a priority — pick quality-per-dollar, not the fastest tier.
@@ -239,6 +285,8 @@ Scout (cheap) → Compass (Opus medium) → Brian approves → Maker (Sonnet med
 | PR verdict | Sentinel | `claude-opus-4-8-thinking-high` (or `gpt-5.5-medium` if cost-bound) | medium |
 
 ### Claude Code (OpenRouter, Anthropic Messages skin — all verified)
+
+> ⚠️ **Not achievable per-subagent in Claude Code today** — see the configuration gap note at the top of this doc. This table describes the target policy if `.claude/agents/*.md` role files existed and the Agent tool accepted arbitrary model strings; neither is true as of 13 July 2026. Treat this as aspirational for Claude Code until that's built, not as current behaviour.
 
 | Phase | Callsign | OpenRouter model | Effort |
 |---|---|---|---|

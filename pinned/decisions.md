@@ -81,6 +81,17 @@ Features are gated behind an active Stripe subscription. Expired or unpaid accou
 
 ---
 
+### Brian (Khian) has full merge authority on `rto-compass-hub` PRs
+**Decided:** confirmed multiple times through Jun–Jul 2026 · **Who:** Carl (delegated)
+
+Brian has full authority to merge any approved PR to `main`, including rescue/cleanup branches. Carl has delegated all merging decisions to Brian for ongoing cleanup work — no Carl or Angela sign-off is required before merge.
+
+**Implication:** Never gate a merge on Carl/Angela approval, never say "escalate to Carl" or "Carl must review" as a blocker. Surface review findings clearly so Brian can make the call himself.
+
+**Two deploy paths after merge:** Merging a PR to `main` fires a Vercel **production** deploy automatically — serves `rto.complyhub.ai`, no separate publish step (verified via Vercel MCP, PR #104). Separately, `staging` is the Lovable branch — Brian prompts in Lovable and pushes land on `staging`; publishing that path is a distinct Lovable action, not a main merge. Confirm a production deploy via `list_deployments` (newest `target: production`, `state: READY`) rather than assuming Lovable needs a manual publish for GitHub-path changes.
+
+---
+
 ## Open decisions
 
 ## Retired / superseded

@@ -1,0 +1,18 @@
+{
+  "enabledMcpjsonServers": [
+    "supabase"
+  ],
+  "enableAllProjectMcpServers": true,
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash <ABSOLUTE_WORKSPACE_PATH>/.claude/hooks/session-start-context.sh"
+          }
+        ]
+      }
+    ]
+  }
+}

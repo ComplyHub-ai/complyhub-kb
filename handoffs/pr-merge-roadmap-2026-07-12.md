@@ -6,6 +6,12 @@
 >
 > **Queue status (single source of truth):** `pr-review-open-prs.md` — update that
 > file as each PR is reviewed, merged, or closed.
+>
+> **Update — 13 July 2026: Part 2 (Steps A, B, C) is done — see "Progress update"
+> section near the end.** Went further than originally scoped in Step A (full CI
+> re-enabled with per-PR scoping, not just a minimal type-check gate). Step D
+> (clearing the queue PR-by-PR) is next and still outstanding — this doc's plan
+> otherwise stands as written below.
 
 ---
 
@@ -183,9 +189,55 @@ ONGOING
 | File | Purpose |
 |------|---------|
 | `pr-review-open-prs.md` | Open queue, verdicts, merge history |
-| `pr-process-automation-audit-2026-07-11.md` | Technical audit + recommendations for Angela |
+| `pr-process-automation-audit-2026-07-11.md` | Technical audit + recommendations for Angela — see its "Remediation log (13 July 2026)" for full fix detail |
 | `complyhub-kb/handoffs/pr-review-fix-workflow.md` | Step-by-step review procedure for agents |
 
 ---
 
-*Last updated: 12 July 2026*
+## Progress update (13 July 2026)
+
+**Step A — done, and further than originally scoped.** This doc originally
+recommended a *minimal* gate (type-check + quick scans only) to avoid blocking
+everything on legacy debt. What actually shipped ([PR
+#188](https://github.com/ComplyHub-ai/rto-compass-hub/pull/188)) is the full
+CI workflow, re-enabled and **scoped to only the files a PR changes** (lint,
+`.single()` guard, security checks, edge-function type-check) so legacy issues
+elsewhere in the repo can't fail an unrelated PR — the same outcome the minimal
+gate was meant to achieve, done more completely. `main`'s required checks now
+include type-check, lint, the `.single()` guard, migration guards, and security
+checks. `unit-tests` was **deleted from CI entirely** (Carl's call), not just
+left out of required checks — it had 8 pre-existing failures unconnected to
+any specific PR.
+
+**Step B — done** ([PR #192](https://github.com/ComplyHub-ai/rto-compass-hub/pull/192)):
+`blocked`/`wip`/`do-not-merge` now actually stop both `auto-merge.yml` and the
+newly-fixed `dependabot-auto-merge.yml` (which was dormant in the wrong folder
+before this). `strict_required_status_checks_policy` and
+`delete_branch_on_merge` are both `true`. Two Cursor Bugbot findings caught
+real follow-on bugs in the label-honouring logic itself (a stale/missing label
+read on non-`pull_request` trigger events, and a missing `unlabeled` trigger
+that meant removing a stop label never re-armed auto-merge) — both fixed same
+day. A labeler case-sensitivity bug was also found and fixed along the way
+(not in the original audit): `auth`/`billing`/`tenant`/etc. keyword patterns
+were lowercase-only and silently missed most PascalCase-named sensitive files.
+
+**Step C — done, interim form.** Rather than reopening/pushing every legacy PR
+to trigger real mechanical classification, all 19 previously-unlabelled open
+PRs were blanket-labeled `tier-b` (forces human review, errs safe) and the 5
+open Dependabot PRs got `do-not-merge`. This is a safety net, not equivalent to
+each PR having been properly reviewed — re-tier individual PRs down to
+`tier-a` only as they're actually looked at.
+
+**Step D — not started.** The ~30-PR backlog itself hasn't been drained yet.
+This is the next actionable piece of this roadmap; `pr-review-open-prs.md`'s
+own "recommended order" section is the place to pick up from.
+
+**Not done from Part 3 (expected — queue isn't empty yet):** ruleset still
+isn't version-controlled anywhere (Phase 4 item); `unit-tests` was deleted
+rather than fixed-and-re-enabled, so re-adding a real test gate later is now
+a fresh piece of work, not a "re-enable" — worth remembering before assuming
+Phase 1's "re-enable tests" step is a small lift.
+
+---
+
+*Last updated: 13 July 2026*

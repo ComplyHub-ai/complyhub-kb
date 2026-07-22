@@ -69,6 +69,10 @@ The repo and the production database are independent. Merging to `main` only upd
 
 **If anyone applies directly to production:** write a reconciliation migration capturing the exact change. Merge it before any new branch work touches that schema area. This is what happened with Angela's 26 June fixes — failure to do this caused branch DB failures across the whole PR.
 
+**Reconciliation file naming — must match the original production version, not today's date (effective 14 July 2026):** `migration-drift-check.yml` matches production `schema_migrations` rows to git files by exact `version` + `name` string identity — not by SQL content. Query `supabase_migrations.schema_migrations` for the row's real `version` and `name`, then name the reconciliation file `supabase/migrations/<that version>_<that name>.sql` — e.g. a prod row `version=20260712031504, name=batch04a_restrict_select_sensitive_role_filtered_tables` becomes `supabase/migrations/20260712031504_batch04a_restrict_select_sensitive_role_filtered_tables.sql`, verbatim SQL from `.statements`.
+
+Do **not** timestamp the file with the date you're doing the reconciliation and do **not** prefix the name with `reconcile_`/similar — either one breaks the exact-match and the drift check keeps flagging the row as unresolved even though the SQL is now captured in git. (This is exactly what happened with the 13 July 2026 `Reconcile Angela's 12 Jul security remediation batches` commit — 11 files were written as `20260713100000+_reconcile_*`, using the commit date instead of the original version, so all 11 still show as drift today.) Backdating the filename to the true original version is safe — `supabase db push` and branch-DB creation treat a file whose version is already recorded as applied and skip re-running it; on a *fresh* branch DB (where that version doesn't exist yet) it correctly runs for the first time, which is the whole point.
+
 **Branch DB + seed.sql:** Branch DBs run: baseline → migrations → `seed.sql`. The `seed.sql` is live and configured in `config.toml` under `[db.seed]`. It uses hardcoded tenant UUIDs so QA accounts exist on every branch DB. If a migration adds a column that `seed.sql` references and the baseline doesn't have it, the seed step fails. Always check `seed.sql` when adding columns to seeded tables.
 
 ### Schema drift — Lovable legacy (context as of 25 June 2026)
@@ -91,6 +95,14 @@ When a DB change is needed and the situation supports it, prefer editing the bas
 
 **Watch for redundancies:** before adding anything to the baseline, check whether an existing migration file already handles it.
 
+### Migration idempotency — every CREATE must be safe to run twice (effective 16 Jul 2026)
+
+Before finishing any migration file that does `DROP X IF EXISTS <name>` then `CREATE X <name>`, check that the name being dropped and the name being created are the SAME name — not "drop the old live name, create a differently-named new thing." If they differ, a second run of the same file (or any other file creating that same new name) hits a collision and the whole migration chain halts.
+
+**Incident:** `20260716180000_qi_asqa_narrative_restrict_write_policies_actual_names.sql` correctly dropped the real live policy names (`tenant_insert`/`tenant_update`) but then created *new* policies under different names copied verbatim from an earlier broken file. Cursor Bugbot caught it post-merge as High Severity — a branch DB rebuild or any other PR touching the table would hit `CREATE POLICY` on an existing name and fail. Root cause: verifying correctness against **current live state only**, not **resilience against re-runs**.
+
+**How to apply:** For every `CREATE POLICY`/`CREATE FUNCTION`/`CREATE TABLE` in a new migration, trace the exact name string through: what does `DROP ... IF EXISTS` target, and does the following `CREATE ...` use that *same* string? If reconciling/replacing an earlier broken migration, don't copy its new-object name verbatim — verify it doesn't already exist from a prior partial run, and drop it by that name too. Before considering a migration file done, ask: "if this ran twice in a row right now, would the second run succeed?"
+
 ### Migration archive — never read
 
 `supabase/migrations/_archive/` contains 3,600+ historical Lovable-era files. They do not run. Never read, grep, or reference them when diagnosing migration failures. When investigating any migration issue, only look at files directly in `supabase/migrations/` (not subdirectories). Always verify the actual file before drawing conclusions — do not rely on memory about what migrations exist.
@@ -108,6 +120,34 @@ When making a bug fix, feature addition, or any code change on a branch in `rto-
 **Mechanics:** before pushing, run the relevant test file(s) locally (`npx vitest run <path>`) in addition to `npm run type-check` and `npm run lint`. Watch for `html/` collateral damage — Vitest's HTML report generator can overwrite the app's real build output directory; always run `git status` after tests and discard any accidental `html/*` changes before staging/committing.
 
 **Explicitly out of scope for now:** Playwright/end-to-end browser tests — come later as part of a dedicated QA protocol.
+
+### Pre-push adversarial self-review (effective 14 Jul 2026)
+
+Before pushing any commit to `rto-compass-hub` (and before opening/updating a PR), run a dedicated adversarial self-review of the actual diff — not just `tsc`/`eslint`, which only catch syntax/type issues, not logic bugs. Trace through each changed function's branches by hand, specifically checking:
+
+1. **Status/enum comparisons** — check the real `CHECK` constraint or type definition for the column before writing any `=== 'x'` or `!== 'x'` comparison. Don't pattern-match off nearby existing code — that code is often exactly the bug being fixed. Known multi-state columns: `trainer_monthly_reports.status` (`draft|submitted|reviewed|approved|committed`), `sso_monthly_reports.status` (`draft|submitted|tabled|archived`). Prefer an explicit allow-list of "done" states over a `!== 'draft'` deny-list — a deny-list silently treats any new/synthetic placeholder value as done unless specifically excluded.
+2. **Role checks** — roles are stored in both a single `tenant_members.role` column AND a `tenant_members.roles` JSONB array inconsistently across features. Check both whenever gating on a role, not just whichever one the nearest example used.
+3. **Timezone assumptions** — ComplyHub is Australia-only (AEST/AEDT). Any date/time construction from user input must explicitly use `Australia/Sydney` (via `luxon`, already a dependency — see `EditMeetingTimeDialog.tsx`), never a bare `new Date(...)` that implicitly uses the browser's local zone.
+
+**Why:** In the 14 Jul 2026 session (governance meeting time fixes, PR #153), three separate Bugbot findings across two review rounds shared this exact root cause — a narrow assumption checked against a richer real domain model, caught reactively instead of proactively.
+
+**How to apply:** After finishing a round of fixes and before every `git push`, re-read the full diff once specifically hunting for these three patterns before considering the round done. In addition to, not instead of, `tsc`/`eslint`/unit tests above.
+
+### Never run `npm run build`
+
+Never run `npm run build` for any reason — verification, pre-push checks, or confirming a fix compiles. It hangs the local workstation. To verify code correctness, run `npm run type-check` (TypeScript) and `npm run lint` (ESLint) instead — both are fast and sufficient for pre-commit verification. The actual build gate is Vercel, which runs automatically after push.
+
+### Existing-data impact check — PR review checklist for forms/mutations/effects (effective added after PR #37)
+
+When reviewing a PR that modifies a form, mutation, or `useEffect` that runs on existing records, explicitly check three things before writing the verdict:
+
+1. **Auto-filter/cleanup effects:** Does any `useEffect` filter or clear form state based on external data (e.g. TAS units, scope records)? Trace what happens when that external query returns empty — does it silently wipe previously saved data? A guard requiring non-empty external data before any wipe is mandatory.
+2. **Mutation atomicity:** Does any sync function do delete-then-insert? If the insert fails after delete, what state is left in the DB? Prefer diff-based sync (only delete removed rows, only insert new rows). Rate delete-all-then-insert as MEDIUM severity minimum, not LOW.
+3. **Edit pre-population fallback chain:** For edit modals, trace the full fallback chain. If a dedicated hook can fail or return empty, is there a fallback to data already in memory (e.g. from the list query)? If not, flag MEDIUM.
+
+**Why:** PR #37 (assessment-tools multi-select) passed review but had three post-merge Bugbot findings (two HIGH, one MEDIUM) — the review traced the happy path on new records but didn't ask "what happens to existing records when external queries degrade?"
+
+**How to apply:** Any PR touching a form with edit mode, any mutation writing junction-table rows, any `useEffect` filtering saved state against external data.
 
 ## New table checklist
 
