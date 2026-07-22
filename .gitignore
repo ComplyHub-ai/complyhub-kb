@@ -7,3 +7,10 @@ openrouter.env
 .env.*
 !.env.example
 !**/.env.example
+
+# Token-free home-workspace bootstrap templates (exact files only)
+!localshi/workspace-root/.secrets/
+localshi/workspace-root/.secrets/**
+!localshi/workspace-root/.secrets/README.md
+!localshi/workspace-root/.secrets/openrouter.env.example
+!localshi/workspace-root/.secrets/load-openrouter.sh

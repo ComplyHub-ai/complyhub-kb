@@ -1,0 +1,9 @@
+{
+  "name": "agent-office",
+  "version": "1.0.0",
+  "description": "Localhost-only visual status board for the ComplyHub cursor-agent crew (Scout/Hound/Compass/Tinker/Sentinel/Checker).",
+  "private": true,
+  "scripts": {
+    "start": "node server.js"
+  }
+}

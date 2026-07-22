@@ -6,6 +6,13 @@
 > **PR queue status (single source of truth):** `pr-review-open-prs.md` in this
 > same directory. This file is background on the automation only — not a second
 > queue log.
+>
+> **Update — 13 July 2026: nearly all "Recommended actions" below are now DONE.**
+> See "Remediation log (13 July 2026)" section near the end for what changed,
+> what's still outstanding, and the two PRs that did it. This audit's findings
+> are kept as-is below for the historical record of what was wrong; don't treat
+> the "High severity" / gaps sections as current state — check the remediation
+> log first.
 
 ## Scope
 
@@ -209,3 +216,95 @@ The weak part is that simple changes could still auto-merge without full tests
 running, and older pull requests were never given the new labels or reviewer
 requests. Nothing was changed in GitHub — only documented. **For which PRs are
 open, merged, or blocked, use `pr-review-open-prs.md` only.**
+
+---
+
+## Remediation log (13 July 2026)
+
+Unlike this audit, everything below **was actually applied to live GitHub config**
+— tracked here so the fix history isn't only in PR diffs. Two PRs did this work:
+[#188](https://github.com/ComplyHub-ai/rto-compass-hub/pull/188) (CI cost/scoping)
+and [#192](https://github.com/ComplyHub-ai/rto-compass-hub/pull/192) (automation
+gaps), both merged to `main` same day. Cross-reference against the "Recommended
+actions (priority order)" table above — item numbers below match that table.
+
+**Done:**
+
+- **#1 — CI re-enabled and required.** All 5 previously `disabled_manually`
+  workflows (`CI`, `Deploy Edge Functions`, `Deploy MCP Function`, `Apply
+  Supabase Migrations`, `Migration Drift Check`) are back on. `ci.yml`'s
+  `lint`, `single-guard`, `security-guards`, and `edge-functions` jobs are now
+  scoped to only the files a PR actually changes (not the whole repo), so
+  legacy/pre-existing issues can't fail a new, unrelated PR. `main`'s required
+  status checks now include `Type check (blocking)`, `Lint (blocking)`,
+  `Block .single() usage (changed files only)`, `Migration guards (new files
+  only)`, and `Security checks (changed files only)`, alongside the existing
+  `Vercel` / `Vercel Preview Comments` / `Cursor Bugbot`. The `unit-tests` job
+  was **removed entirely** (Carl's call) rather than left unrequired — it had
+  8 pre-existing failures unrelated to any given PR, confirmed by running the
+  suite directly against `main` before deciding.
+- **#4 — `blocked` / `wip` / `do-not-merge` now honoured.** Both `auto-merge.yml`
+  (Tier A) and the newly-activated `dependabot-auto-merge.yml` skip arming
+  auto-merge if a PR carries any of these labels. Took 2 follow-up rounds after
+  Cursor Bugbot review caught real gaps in the first pass: (a) the Dependabot
+  workflow's label check read `github.event.pull_request.labels`, which doesn't
+  exist at all for its `check_suite`/`workflow_run` triggers — fixed by
+  re-fetching the PR live via the API instead of trusting the event payload;
+  (b) `auto-merge.yml`'s trigger list was missing `unlabeled`, so removing a
+  stop label from a `tier-a` PR never re-triggered the workflow to re-arm
+  auto-merge — fixed by adding `unlabeled` to the trigger types.
+- **#5 — Dependabot workflow fixed and activated.** Moved from
+  `.github/workflow/` (singular — GitHub silently ignores this folder) to
+  `.github/workflows/`. It had correct logic (only patch/minor/security-advisory
+  updates, only after checks pass) the whole time, just never ran.
+- **#6 — `strict_required_status_checks_policy: true`.**
+- **#7 — `delete_branch_on_merge: true`.** Confirmed working — both PR #188's
+  and #192's branches were auto-deleted on merge.
+- **Labeler case-sensitivity bug found and fixed** (not in the original audit —
+  found while doing this remediation): `labeler.yml`'s `auth`/`role`/
+  `permission`/`billing`/`tenant` keyword patterns were lowercase-only, so
+  PascalCase files (`AuthGate.tsx`, `useBillingState.ts`, `TenantCard.tsx`, most
+  of the actual sensitive frontend code in this repo) were silently
+  misclassified `tier-a`. Verified with `minimatch` directly against real
+  repo filenames before and after the fix. Now case-insensitive via character
+  classes (`*[Aa]uth*` etc.).
+
+**Partially done / interim measure, not the real fix:**
+
+- **#2 — Legacy queue not backfilled.** Rather than reopening/pushing all ~30
+  open PRs to trigger the labeler (risk of side effects mid-triage), all 19
+  previously-unlabelled open PRs were manually labeled `tier-b` as a blanket
+  safety default — this guarantees human review, it is **not** the same as
+  each PR having been through actual mechanical/tier classification. Re-tier
+  individual PRs to `tier-a` as they're actually reviewed, if warranted.
+- **#3 — Park backlog risk.** All 5 open Dependabot PRs (#68–#72) and the 19
+  PRs above now carry `do-not-merge` (Dependabot) or `tier-b` (the rest) —
+  nothing in the current open queue can auto-merge unattended.
+
+**Not done:**
+
+- **#8 — Export live ruleset into repo/KB.** Still only visible via
+  `gh api repos/ComplyHub-ai/rto-compass-hub/rules/branches/main` — no
+  version-controlled copy exists yet.
+- **#9/#10** — unchanged from this audit; still applicable.
+
+**Access note:** applying #1/#6/#7 required repo **admin** permissions —
+Khian initially had `maintain` only and the API call 404'd (GitHub obscures
+permission errors on this endpoint). Carl granted admin access mid-session to
+unblock it.
+
+### Plain English (remediation)
+
+Almost everything this audit flagged as broken has now been fixed and turned
+on for real, not just written down. The full safety-check pipeline is back on
+and required before anything can merge, and it only checks the parts of a
+pull request that actually changed — so old, unrelated problems elsewhere in
+the codebase can't block someone's new work anymore. The "stop merging this"
+label now actually works in both directions (adding it blocks, removing it
+un-blocks), the robot that auto-merges small dependency updates is switched on
+properly for the first time, and a hidden bug that caused the risk-labeling
+system to miss most capitalised file names (which is most of the real
+security-sensitive code) has been fixed too. The one thing genuinely not done
+yet is going through the ~30 already-open pull requests one by one — for now
+they've all been marked "needs a human to look at this" so nothing slips
+through by accident while that happens.

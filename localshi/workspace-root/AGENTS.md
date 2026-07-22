@@ -9,7 +9,7 @@
 | Name | Path | Notes |
 |------|------|-------|
 | `complyhub-kb` | `./complyhub-kb/` | Team KB — full read/write access |
-| `rto-compass-hub` | `./rto-compass-hub/` | Codebase — READ-ONLY, no edits or commits |
+| `rto-compass-hub` | `./rto-compass-hub/` | Codebase — branch-aware (see Write permissions below) |
 
 ## Workspace layout
 
@@ -23,7 +23,7 @@ complyhubworkspace/
 │   ├── reference/     ← fetch on demand
 │   ├── codebase-state/← as-shipped codebase snapshots
 │   └── handoffs/      ← scenario procedures
-└── rto-compass-hub/   ← codebase (READ-ONLY — no edits, no commits)
+└── rto-compass-hub/   ← codebase (branch-aware — see Write permissions)
 ```
 
 ## Session start (mandatory first action)
@@ -45,13 +45,19 @@ Full session protocol (start, end, notes, token efficiency): read `complyhub-kb/
 |---|---|
 | `complyhub-kb/` | Full — read, write, commit, push (including `main`) |
 | `complyhub-kb/audit/` | Full — same as above |
-| `rto-compass-hub/` | Read-only — fetch and pull only; no commits, no file edits |
+| `rto-compass-hub/` on `main` | Read-only — fetch and pull only, never edit or commit |
+| `rto-compass-hub/` on any `feat/*` or `fix/*` branch | Edits and commits allowed — all new work goes through a branch + PR |
+| `rto-compass-hub/` on any `cursor/*` branch | Edits and commits allowed — for PR review workflow only |
 
 Full rules, entity routing, and confidentiality: read `complyhub-kb/pinned/guardrails.md`
 
 ## Codebase write restriction
 
-`rto-compass-hub/` is read-only. If a task requires codebase file edits:
+Before editing any file in `rto-compass-hub/`, run `git branch --show-current` first. If it shows `main`, stop — do not edit or commit. Report the branch and ask the user to create or switch to a `feat/*`/`fix/*`/`cursor/*` branch first.
+
+On an appropriate branch, edits and commits are allowed, but **never** run `git push` or `git commit` unless the user explicitly says so in that turn (see the commit/push gates in `CLAUDE.local.md` — approving an edit is not approving a commit, approving a commit is not approving a push).
+
+If codebase changes are needed but no suitable branch exists and the user hasn't asked to create one:
 
 - **If Claude Desktop is also active this session:** produce a prompt the user can run in Claude Desktop.
 - **Otherwise:** produce a prompt to give to Lovable.

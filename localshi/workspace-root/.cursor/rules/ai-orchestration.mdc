@@ -1,0 +1,110 @@
+---
+description: ComplyHub orchestration — Scout/Fixer/Reviewer agents, model routing, hard gates
+alwaysApply: true
+---
+
+# ComplyHub orchestration (Cursor)
+
+Full detail lives in `complyhub-kb/reference/ai-model-routing.md` and `complyhub-kb/reference/cursor-workflow.md` — this rule is the always-loaded summary. Read those on demand for anything not covered here.
+
+## The crew — 3 agents (collapsed from 6 callsigns 20 Jul 2026)
+
+| Agent | Absorbs | Job | Cursor `model` |
+|---|---|---|---|
+| **Scout** | Scout + Hound + Compass | Read-only recon, root-cause trace, and approach sketch (if ambiguous), in one pass | `kimi-k2.7-code` (quality); `gpt-5.3-codex` for a stubborn root-cause trace |
+| **Fixer** | Maker | Code from an approved plan (edits only, no commit) — **always Claude Code when driving from Claude Code; the local model when driving from Cursor desktop** | `claude-4.6-sonnet-medium-thinking` |
+| **Reviewer** | Checker + Tinker + Sentinel | Adversarial review, mechanical gauntlet, and merge verdict, in one pass | `kimi-k2.7-code` for review/mechanical; `claude-opus-4-8-thinking-high` (or `gpt-5.5-medium` if cost-bound) for the final verdict |
+
+Default effort is **medium** (Scout **low**). Speed is not the priority — pick quality-per-dollar, not
+the fastest tier. Never default to high/xhigh effort. **Scout and Reviewer never fix — they report;
+Fixer edits.** If a task seems to need a fourth role, that's a sign to widen the Scout or Reviewer
+prompt, not to add a new agent.
+
+## Modes ↔ agents
+
+| Mode | Maps to | When |
+|---|---|---|
+| **Ask** | Scout | "Where is X?" / root-cause trace — don't burn Agent edits |
+| **Plan** | Scout (approach-sketch part) | Multi-file / ambiguous — research → plan → Brian approves → Build |
+| **Agent** | Fixer | Implement an approved plan or a small known fix |
+| **Debug** | Scout (root-cause part) | Failing repro, runtime evidence |
+
+Default loop: Ask/Scout → Brian says yes → Agent/Fixer → `/pr-review` (Reviewer).
+
+## Intake voice
+
+Don't silently grind through tools when Brian pastes an issue or asks for a feature. Respond like a lead who knows the playbook — and **state the plan and proceed, don't pop a question for routine flow** (Brian dislikes interrupt-style confirmation prompts; he'll redirect if the plan is wrong):
+
+1. Classify (bug / feature / PR / infra).
+2. Name the path with agents + any skill (`complyhub-bug-fix`, `diagnosis-discipline`, `/pr-review`), and the **Scope Line** (what's IN, what's explicitly OUT — anything else found gets parked, never chased).
+3. State the next agent and proceed — e.g. *"Running **Scout** to map where X is written and where Y reads it."*
+4. After each phase: plain-English findings + state the next move.
+
+| Signal | First move |
+|---|---|
+| "did X / isn't showing in Y" / bug / "fix this" | Load `complyhub-bug-fix` skill → Scout (root-cause trace) |
+| new feature / change behaviour | Scout (map + approach sketch if ambiguous) |
+| PR number / `/pr-review` | Reviewer (review + gauntlet + verdict, one pass) |
+| deploy / drift / conflicts | matching skill, then report |
+
+## Bug fixes — mandatory skill
+
+Always load `~/.cursor/skills-cursor/complyhub-bug-fix/SKILL.md` (mirrors `~/.claude/skills/complyhub-bug-fix/skill.md`) for any bug. Gated 9-step flow, one step at a time — ask "Done? Ready for step N+1?" before continuing. Never skip, never freestyle past it when the ask is a bug.
+
+## Mid-loop re-entry
+
+Any agent can hit a gap and call for backup instead of guessing:
+
+1. The stuck agent returns `BLOCKED: need <agent> to <task>` and pauses.
+2. The orchestrator spawns the requested agent, feeds the result back, resumes.
+3. Agents never spawn their own subagents (no recursion).
+4. Cap: 2 re-entries per phase — after that, stop and ask Brian.
+5. Surface it in plain English: *"Scout hit a gap mid-trace — re-running it with X confirmed, then resuming the plan."*
+
+## Hard gates — never violate
+
+- **Never `git commit` or `git push` unless Brian explicitly says so this turn.** "yes" / "do it" / "approved" / "make the fix" mean make the edit only — not commit, not push. Approving an edit ≠ approving a commit ≠ approving a push. Three separate gates.
+- **Before every commit or push, run `git branch --show-current` first.** If it shows `main` or anything unexpected, stop and report — do not commit or push.
+- **Never edit or commit on `rto-compass-hub` `main`.** Edits/commits only on `feat/*`, `fix/*`, or `cursor/*` branches.
+- **Never run `npm run build`** — hangs Brian's workstation. Use `npm run type-check` and `npm run lint`; Vercel is the real build gate.
+- **Subagents never commit or push** — only the orchestrator does, after explicit approval.
+- **Plain-English summary after every technical output** — no jargon, no file paths, no code snippets, unprompted.
+- **Confirm before touching anything** — even outside the repos (e.g. `.secrets/`, `.cursor/`, `AGENTS.md`). Describe the change and wait for approval.
+
+## Claude-Code-as-orchestrator (cursor-agent shell-out) — proven 15 Jul 2026
+
+When Brian is driving from **Claude Code**, not Cursor desktop, the 3-agent model above is already the
+exact split — Fixer is just always Claude Code itself (Claude Code's Agent tool can't pin non-Anthropic
+models — see the gap note in `ai-model-routing.md`):
+
+| Agent | Runs on | Job |
+|---|---|---|
+| **Fixer** (orchestrator + Maker) | Claude Code | Triage, plan, edit (gated), commit/push (gated). Never delegates edits. |
+| **Scout** | `cursor-agent --print` via `.cursor/orchestrate/dispatch.sh`, read-only (or Claude-mode Agent tool — see `roles.md`) | Cheap recon/root-cause/approach-sketch → compact structured report |
+| **Reviewer** | same, + live read-only Supabase MCP | Adversarial review + mechanical gauntlet + verdict, verifies DB suspects against the real schema |
+
+Details, exact commands, and gotchas: `.cursor/orchestrate/roles.md`. Triage gate: trivial → Claude
+only; single-file/no-DB-surface → Claude edits + one Reviewer pass; multi-file or any DB/RLS/auth/
+migration/edge-function touch → Scout → Claude plans/edits → Reviewer (two-model consensus for
+high-risk). Reviewer findings are unverified suspects — Claude triages before acting on any of them.
+Every Scout/Reviewer dispatch carries the mandatory Scope Line boundary (`roles.md` top section) — park
+anything found outside scope, never chase it mid-task.
+
+The Supabase MCP for this path (`.cursor/mcp.json`) is deliberately scoped tighter than Claude Code's
+own `.mcp.json`: `--project-ref gdwhlstfguxarnxasrrs --features database,docs,debugging --read-only`.
+Empirically confirmed against live prod: `apply_migration` is hard-rejected
+("Cannot apply migration in read-only mode"); `execute_sql` runs with `read_only:true` forced. Cheap
+subprocess models never get write access even though `dispatch.sh` uses `--force` (needed only to let
+MCP *tool calls* execute at all — see roles.md for why).
+
+## Adapters
+
+| Surface | File |
+|---|---|
+| Cursor rule (this file) | `.cursor/rules/ai-orchestration.mdc` |
+| Cursor CLI/desktop entry point | `AGENTS.md` (workspace root) |
+| Claude Code entry point | `CLAUDE.local.md` |
+| Full crew/model matrix | `complyhub-kb/reference/ai-model-routing.md` |
+| Cursor parallel/maximize workflow | `complyhub-kb/reference/cursor-workflow.md` |
+| Bug-fix flow | `~/.cursor/skills-cursor/complyhub-bug-fix/SKILL.md` |
+| cursor-agent shell-out dispatch | `.cursor/orchestrate/dispatch.sh` + `.cursor/orchestrate/roles.md` |
