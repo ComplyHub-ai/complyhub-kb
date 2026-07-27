@@ -18,12 +18,12 @@
    If a local `MEMORY.md` already exists with different/additional entries, merge — don't overwrite entries
    that aren't part of this export.
 3. Known gap, carried over as-is: `MEMORY.md`'s index (below) references a `user_role.md` file, but that
-   file did not exist in the source memory directory at export time — only the 12 files below actually
+   file did not exist in the source memory directory at export time — only the 13 files below actually
    existed. Don't fabricate a `user_role.md` to fill the gap; just note the same dangling reference exists
    in the destination copy too, consistent with how the memory system already tolerates unresolved
    `[[name]]` links (see `feedback_living_doc_decision_tracking.md`'s own description of that convention).
 4. `[[name]]` cross-references inside file bodies are preserved verbatim in this export and will resolve
-   correctly once all 12 files are re-created, since they reference each other's `name:` frontmatter slugs,
+   correctly once all 13 files are re-created, since they reference each other's `name:` frontmatter slugs,
    not file paths.
 
 ---
@@ -47,6 +47,7 @@
 - [generate-audit-pack Role Bug](project_generate_audit_pack_role_bug.md) — casing bug (lowercase vs Proper Case) + profiles.role staleness confirms 403 for every real Admin/CM, corrected 27 Jul 2026
 - [Tenant Context Race in Effects](feedback_tenant_context_race_effect_deps.md) — tenant-scoped fetch effects must depend on useEffectiveRole's ready + effectiveTenantId, not just route params
 - [Status Enum vs CHECK Constraint](feedback_status_enum_vs_check_constraint.md) — grep the table's CHECK constraint for the full status enum before trusting a copied allowlist; Checker missed this on PR #311 too
+- [Cichecker Skill](project_cichecker_skill.md) — location/purpose of the cichecker skill at rto-compass-hub/.claude/skills/cichecker/SKILL.md, run before commit/push/PR
 ```
 
 ---
@@ -502,4 +503,23 @@ the column's CHECK constraint and confirm each one hits the intended branch."
 
 Related: [[feedback_role_casing_proper_case]] (a similar class of bug — code assuming a narrower/different
 value set than what's actually live).
+```
+
+---
+
+## File: `project_cichecker_skill.md`
+
+```markdown
+---
+name: cichecker-skill
+description: Location and purpose of the cichecker skill run before commit/push/PR on rto-compass-hub branches
+metadata:
+  type: project
+---
+
+The `cichecker` skill lives at `rto-compass-hub/.claude/skills/cichecker/SKILL.md`.
+
+**Why:** Cross-references every file changed on a branch against every check the real CI workflow (`.github/workflows/ci.yml`) runs — lint, type-check, `.single()` guard, migration guards, exhaustive service-role-key security check (see [[feedback_cichecker_exhaustive_service_role_check]]), role-casing checks (see [[feedback_role_casing_proper_case]]) — and confirms the branch is up to date with `main`, merging `origin/main` in automatically if behind and the tree is clean. Entirely read-only — no code edits, no commits, no pushes.
+
+**How to apply:** Run via the Skill tool (`cichecker`) right before the commit/push/PR hard gates, on any `rto-compass-hub` branch about to ship. Mandatory step in the living-doc workflow (see [[feedback_living_doc_decision_tracking]]) and standard practice for any PR, not just multi-item bodies of work.
 ```
