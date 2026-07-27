@@ -59,6 +59,43 @@ Detail + per-PR notes live in `pr-review-open-prs.md`. Snapshot:
 
 ---
 
+## New task — CI migration pipeline chronically failing (surfaced 22 Jul 2026)
+
+- Task: fix/triage the "Apply Supabase Migrations" GitHub Action, which fails on every push to `main`
+- Trigger: Brian forwarded a Supabase "Branch Error" notification, Wed 22 Jul 2026 03:00:15 UTC —
+  `unexpected update function status 403: {"message":"Forbidden resource"}` plus a warning that
+  `20260722060000_sa_extend_trial_v2_restore_billing_guards.sql` and
+  `20260722060100_revoke_anon_execute_governance_functions.sql` were "Applied out-of-order"
+- Stage: SCOUT complete — root cause traced, not yet fixed
+- Findings (verified 22 Jul 2026):
+  - `gh run view` on run `29887285654` ("Apply Supabase Migrations", failed 03:00:11 UTC, right after
+    PR #287 merged) confirms the real failure: `supabase db push` aborts with "Remote migration
+    versions not found in local migrations directory" against several thousand pre-existing orphan
+    version numbers (the same Lovable-era backlog already in this doc's Backlog section, items
+    "19 migrations..." / "213 production migration records..."). This is chronic, not caused by
+    PR #287's own files.
+  - Because that step never completes, the CLI never applies the two named files through its normal
+    ordered path — hence "Applied out-of-order migrations". Per `reconciliationwork.md`, they were in
+    fact applied manually via the Supabase SQL editor and are confirmed live in production (verified
+    via `list_migrations` + `pg_get_functiondef` on 22 Jul 2026) — so no data risk from this specific
+    run, but the CI gate itself is broken on every push to `main` until the orphan backlog is
+    resolved.
+  - `list_branches` (Supabase MCP) independently shows the `main` branch's own status as
+    `MIGRATIONS_FAILED`, consistent with a standing condition rather than a one-off.
+  - The 403 "unexpected update function status: Forbidden resource" could NOT be traced to a GitHub
+    Actions run — `deploy-edge-functions.yml` last ran 21 Jul 07:36 UTC and succeeded, no run around
+    03:00 22 Jul. The message format matches Supabase's own GitHub-integration branch webhook (not a
+    workflow in this repo), most likely from Supabase's integration trying to sync an Edge Function's
+    config as part of the same failed branch-update cycle and hitting a permissions/token-scope issue
+    on the management API. **Unconfirmed** — needs a look at the Supabase GitHub integration's PAT
+    scope/settings, which isn't visible from repo-side tools.
+- Scope IN: diagnose + fix the CI migration-apply gate; confirm the 403's real source
+- Scope OUT: re-solving the orphan-migration backlog itself (that's the existing Backlog items below —
+  this task depends on that backlog being cleared, doesn't duplicate it)
+- Updated: 22 Jul 2026
+
+---
+
 ## Backlog — PARKED findings (NOT scheduled work)
 
 _Adjacent issues surfaced by a RECON/CHECK beat but outside the task's Scope Line. Parked here so they
@@ -74,14 +111,40 @@ aren't lost and aren't chased. Promote to a real task only via a new FRAME._
   `revoke_anon_execute_billing_rpcs`. Lower-severity companions also anon-executable but read-only:
   `get_clause_heatmap_data`, `get_clause_heat_timeline`, `get_clause_heatmap_trend`,
   `get_clause_signals`, `notify_meeting_scheduled`.
-- **19 migrations merged to `main` but never applied to production** (ops/deploy gap, not a code
-  defect). Date range 25 May–19 Jul 2026 — all recent, none Lovable-era. Surfaced during PR #259's
-  REVIEW via the Migration Drift Check; recount on 20 Jul 2026 after correcting for version-timestamp
-  drift (Supabase records actual execution time, not filename time) — original figure of 81 was
-  overcounted. Needs its own dedicated pass: batch-verify each one's actual DB state vs. expected,
-  then apply via MCP `apply_migration`, in dependency order. Full list captured in the 20 Jul 2026
-  conversation / CI log for PR #259.
-- **213 production migration records with no corresponding local file** (undocumented direct-to-prod
-  changes), dated 25 May–17 Jul 2026. Recount on 20 Jul 2026 after correcting for version-timestamp
-  drift — original figure of 286 was overcounted. Needs investigation per the reconciliation-migration
-  procedure in `supabase/migrations/CLAUDE.md`.
+- ~~**19 migrations merged to `main` but never applied to production**~~ **[x] RESOLVED (no functional
+  gap) — verified 22 Jul 2026.** The claimed "19, dated 25 May–19 Jul" figure didn't hold up on
+  re-derivation: a raw local-vs-prod version diff produced 211 candidates, not 19, and the actual date
+  range of genuine candidates ran 9 Jun–22 Jul (nothing 25 May–8 Jun survived the correction below) —
+  so the old count/range was stale and should not be reused.
+  - Correction method: 75 of 211 resolved by matching migration **name** (not version) against
+    production — same file, applied under a drifted timestamp. Another 78 resolved via ±120s
+    timestamp-proximity to a real prod apply (same method already used for the 213-item backlog).
+    Left 58 genuine candidates with no name or close-timestamp match.
+  - **Direct DB verification on all 58** (per Brian's request, not just ledger-matching): extracted
+    every table/column/function each of the 58 files creates or alters (6 tables, 20 columns, 76
+    functions) and queried production directly. **Every single object already exists.** Spot-checked
+    the two highest-risk chains (multiple migrations rewriting the same function, the exact pattern
+    that caused the real `sa_extend_trial_v2` regression): live `sa_extend_trial_v2` already has all
+    guards (via the separately-verified PR #287 fix); live `suggest_consultations_for_tas` already
+    contains today's Tier 5 logic from `20260722103245_suggest_consultations_for_tas_unit_tier.sql`,
+    despite the CI apply pipeline being broken (see task above) — confirms these changes reach
+    production through some path other than the failing GitHub Action.
+  - **Conclusion: no missing functionality.** The apparent "unapplied" status is a ledger/bookkeeping
+    mismatch (git commit timestamp ≠ Supabase's real apply timestamp), the same root cause already
+    diagnosed for the 213-item backlog — not an ops/deploy gap causing anything to actually be
+    missing in production. Not chased further (adding these 58 versions to `.drift-baseline.txt` for
+    tidiness is optional, low-priority follow-up, not required).
+
+- ~~**213 production migration records with no corresponding local file**~~ **[x] RESOLVED — verified
+  22 Jul 2026.** Cross-referenced against `rto-compass-hub/supabase/migrations/.drift-baseline.txt`
+  (the CI-tracked accepted-debt file): 199 of 213 were already documented there. Of the remaining 14
+  genuinely-new items, verified 13 now have matching committed migration files on `main` (commit
+  `d63fbaad9` "Reconcile 13 undocumented production migrations", `<production version>_<name>.sql`
+  convention) — checked each of the 14 version numbers directly against
+  `supabase/migrations/` on `main`. The 14th (`20260716012333`) needed no file — corrected finding in
+  `reconciliationwork.md` shows it created a safe function, not the vulnerable one originally blamed;
+  the actual regression (prod version `20260716051346`) was fixed via the `sa_extend_trial_v2` guard
+  restoration (PR #287, independently verified live 22 Jul 2026). One minor gap: none of the 14
+  versions have been added to `.drift-baseline.txt` itself yet (recommended in `reconciliationwork.md`
+  but not yet done) — cosmetic/tracking only, since real git files now cover 13 of them; not a drift
+  risk. Not chased further — outside this pass's scope.
