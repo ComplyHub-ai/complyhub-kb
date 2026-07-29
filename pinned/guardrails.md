@@ -1,4 +1,4 @@
-> **Last updated:** 26 May 2026 · **Reconsider by:** 5 Nov 2026 · **Confidence:** high — canonical rules for all AI tools in this workspace.
+> **Last updated:** 29 July 2026 · **Reconsider by:** 29 Jan 2027 · **Confidence:** high — canonical rules for all AI tools in this workspace.
 
 # Guardrails
 
@@ -43,15 +43,11 @@ Two legally separate Australian businesses share this workspace. Route all finan
 
 ## Codebase write restriction
 
-Two parallel workflows are active — do not confuse them:
+There is no Lovable-prompt workflow anymore (retired, confirmed 22–23 Jul 2026) — do not offer a "prompt for Lovable" or a "prompt for Claude Desktop" for codebase edits.
 
-**Workflow 1 — Lovable + Claude Code on `main`**
-`rto-compass-hub/main` is read-only. If a task requires editing codebase files, offer the appropriate option:
-- **If working across Claude Desktop and Claude Code in the same session:** offer a prompt for the user to run in Claude Desktop.
-- **If working with Claude Code or Codex alone:** offer a prompt to give to Lovable.
+`rto-compass-hub/main` is read-only — no direct edits, commits, or pushes. All code changes reach it via the 7-step gated dev workflow (raise → findings → plan → build/ship only after RJ's explicit go-ahead, then branch + commit + push + PR) — see the workspace `CLAUDE.md` section 3 for the full loop.
 
-**Workflow 2 — Branch work with Carl on `fix/local-run`**
-`rto-compass-hub/fix/local-run` allows edits and commits. All code changes on this branch must follow the rules in `rto-compass-hub/CLAUDE.md` (Carl's file) — that file is authoritative for all code decisions. Do not create guardrails or patterns that conflict with it.
+`rto-compass-hub/fix/local-run` allows edits and commits directly. All code changes on this branch must follow the rules in `rto-compass-hub/CLAUDE.md` (Carl's file) — that file is authoritative for all code decisions. Do not create guardrails or patterns that conflict with it.
 
 ## Database migrations
 
