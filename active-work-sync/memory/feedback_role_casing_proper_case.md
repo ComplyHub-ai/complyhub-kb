@@ -5,7 +5,7 @@ metadata:
   node_type: memory
   type: feedback
   originSessionId: 67b8eb46-7fd2-4721-bf9a-f02ed9b2a0aa
-  modified: 2026-07-27T02:36:20.962Z
+  modified: 2026-07-29T07:40:30.994Z
 ---
 
 `rto-compass-hub/CLAUDE.md`'s "Roles and permissions" section has a role-values table explicitly labeled
@@ -31,5 +31,5 @@ staleness issue with this same field). Not yet fixed (outside the diff of the PR
 
 **How to apply:** before writing ANY role-name comparison in a new edge function or migration, check
 `src/lib/constants/roles.ts` for the actual `ROLES.*` value — never infer casing from CLAUDE.md's
-canonical-values table alone, since that table describes a future state. `CLAUDE.md` and the cichecker
-skill were both updated 24 Jul 2026 with an explicit ❌/✅ example covering this.
+canonical-values table alone, since that table describes a future state. `CLAUDE.md` and the ci-gate
+skill (renamed from `cichecker` 29 Jul 2026) were both updated 24 Jul 2026 with an explicit ❌/✅ example covering this.

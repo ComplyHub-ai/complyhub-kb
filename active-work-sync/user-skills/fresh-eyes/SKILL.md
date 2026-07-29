@@ -1,5 +1,5 @@
 ---
-name: checker
+name: fresh-eyes
 description: >
   Spawns a fresh-eyes, adversarial reviewer as a genuine Claude Agent subagent —
   no cursor-agent, no WSL, no prior conversation context — to review a whole
@@ -7,12 +7,12 @@ description: >
   rules, check that changed pieces integrate correctly with each other, and
   verify code-to-database and code-to-edge-function connections against the
   LIVE Supabase project rather than assuming the code is right. Trigger when
-  Brian says "/checker", "spawn checker", "run checker on this", "fresh eyes
-  review", or "adversarial review this branch". Read-only — never edits,
+  Brian says "/fresh-eyes", "spawn fresh-eyes", "run fresh-eyes on this", "fresh
+  eyes review", or "adversarial review this branch". Read-only — never edits,
   commits, or pushes.
 ---
 
-# Checker — Fresh-Eyes Adversarial Branch Review
+# Fresh-Eyes — Adversarial Branch Review
 
 This skill spawns a single-purpose reviewer with **no memory of this conversation** —
 it starts cold, reads the branch and the repo's own rules, and reports back. That's the
@@ -29,9 +29,9 @@ second look, cleared — and stops. Brian decides what gets fixed and when.
 - After pushing, before merging, if something feels worth a second opinion
 - Any time Brian says one of the trigger phrases above
 
-Not a replacement for `cichecker` (which runs CI's own mechanical checks — lint,
+Not a replacement for `ci-gate` (which runs CI's own mechanical checks — lint,
 type-check, migration/security guards) or `verify-bot-fix` (which triages bot review
-threads). Checker is a human-shaped adversarial read of the whole branch — the "does
+threads). Fresh-eyes is a human-shaped adversarial read of the whole branch — the "does
 this actually hang together and do what it claims" pass.
 
 ---

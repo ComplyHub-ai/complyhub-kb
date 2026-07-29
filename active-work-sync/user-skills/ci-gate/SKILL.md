@@ -1,9 +1,9 @@
 ---
-name: cichecker
-description: Read-only pre-commit/push/PR gauntlet for rto-compass-hub branches. Cross-references every changed file against every check the real CI workflow (.github/workflows/ci.yml) runs — lint, type-check, .single() guard, migration guards, security guards (incl. exhaustive service-role-key scan), config.toml coverage, edge-function type-check — plus role-casing and status-enum checks CI doesn't cover, and confirms the branch is up to date with main. No edits, no commits, no pushes. Trigger when Brian says "/cichecker", "run cichecker", "check CI before I push", or "is this branch ready to ship".
+name: ci-gate
+description: Read-only pre-commit/push/PR gauntlet for rto-compass-hub branches. Cross-references every changed file against every check the real CI workflow (.github/workflows/ci.yml) runs — lint, type-check, .single() guard, migration guards, security guards (incl. exhaustive service-role-key scan), config.toml coverage, edge-function type-check — plus role-casing and status-enum checks CI doesn't cover, and confirms the branch is up to date with main. No edits, no commits, no pushes. Trigger when Brian says "/ci-gate", "run ci-gate", "check CI before I push", or "is this branch ready to ship".
 ---
 
-# cichecker
+# ci-gate
 
 Mechanical pre-ship gauntlet for any `rto-compass-hub` feature/fix branch. Entirely read-only — it
 never edits a file, commits, or pushes. Run it right before the commit/push/PR gates in
@@ -19,7 +19,7 @@ casing, status-enum completeness) that have caused real bot-caught bugs on past 
 ## How to trigger
 
 ```
-/cichecker
+/ci-gate
 ```
 
 ---
@@ -188,7 +188,7 @@ Produce a plain-English pass/fail table, one row per step above (0.5–10), e.g.
 | 10 | Status enum completeness | ✅ / ⚠️ flag (file:line) |
 
 **Stop here.** This skill only reports. Brian decides what to fix and when; only proceed to the
-commit/push/PR hard gates once cichecker reports clean (or Brian explicitly accepts a flagged item).
+commit/push/PR hard gates once ci-gate reports clean (or Brian explicitly accepts a flagged item).
 
 ---
 

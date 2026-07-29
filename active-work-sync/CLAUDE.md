@@ -215,9 +215,11 @@ For any body of work with several distinct open items that need deciding across 
 
 **Stale/contradictory content:** if a section in such a file is found to be stale or contradicts a later locked decision, flag it to Brian and ask permission before editing — never silently clean it up.
 
-**Before commit/push/PR:** once a fresh chat implements the locked decisions on a `rto-compass-hub` branch, run the `cichecker` skill (`rto-compass-hub/.claude/skills/cichecker/SKILL.md`) first — it cross-references the branch's changed files against every check the real CI workflow runs, and confirms the branch is up to date with `main`. Read-only; only proceed to the commit/push/PR hard gates above once it reports clean.
+**Before commit/push/PR:** once a fresh chat implements the locked decisions on a `rto-compass-hub` branch, run the `ci-gate` skill (user-level skill) first — it cross-references the branch's changed files against every check the real CI workflow runs, and confirms the branch is up to date with `main`. Read-only; only proceed to the commit/push/PR hard gates above once it reports clean.
 
-**"checker" (not "cichecker") — a separate skill.** When Brian says "checker" (e.g. "spawn checker", "run checker on this"), run the `checker` skill (`rto-compass-hub/.claude/skills/checker/SKILL.md`) — a fresh-eyes adversarial reviewer with no memory of this conversation, spawned as a genuine Claude Agent subagent against the whole branch (not just diff hunks), including live-DB verification of any RPC/RLS/edge-function it touches. `cichecker` is the mechanical CI-parity gate (lint/type-check/guards); `checker` is the human-shaped "does this actually hang together" review. Different words, different skills — don't conflate them.
+**"fresh-eyes" — a separate skill.** When Brian says "fresh-eyes" (e.g. "spawn fresh-eyes", "run fresh-eyes on this"), run the `fresh-eyes` skill (user-level skill) — a fresh-eyes adversarial reviewer with no memory of this conversation, spawned as a genuine Claude Agent subagent against the whole branch (not just diff hunks), including live-DB verification of any RPC/RLS/edge-function it touches. `ci-gate` is the mechanical CI-parity gate (lint/type-check/guards); `fresh-eyes` is the human-shaped "does this actually hang together" review. Different names, different skills — don't conflate them.
+
+**Note:** `rto-compass-hub/.claude/skills/checker/SKILL.md` is a stale, erroneously-committed copy of the old `checker` skill, pushed directly to `main` before this rename. It has NOT been renamed or removed — that requires a proper `fix/*` branch + PR, not a direct edit to `main`. Don't treat it as current; the user-level `fresh-eyes` skill above is the real one.
 
 ---
 

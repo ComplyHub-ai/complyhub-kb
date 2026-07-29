@@ -5,7 +5,7 @@ metadata:
   node_type: memory
   type: feedback
   originSessionId: 363be5c4-e1b1-48f6-90c4-458948d10958
-  modified: 2026-07-29T00:53:02.861Z
+  modified: 2026-07-29T07:39:44.936Z
 ---
 
 When replacing a Postgres function or view (`CREATE OR REPLACE ...`) in rto-compass-hub, there are two
@@ -40,7 +40,7 @@ fields, and another (`20260723143058`) fixed a real production outage (`jsonb_bu
 Postgres's 100-arg limit), added a `sec.claim_tenant_id()` tenant-access guard, and renamed a column.
 Shipping the baseline-based version would have silently reverted all three — re-breaking the app for
 every tenant and dropping a security check — while looking like a clean diff, since it's valid SQL that
-just does the wrong thing. Caught by `cichecker`'s pre-push check, but only after already committing and
+just does the wrong thing. Caught by `ci-gate` (formerly `cichecker`)'s pre-push check, but only after already committing and
 pushing the wrong version once.
 
 **Why both fail the same way:** neither `pg_get_functiondef` nor the baseline file carries any signal
@@ -53,7 +53,7 @@ or baseline) you're about to copy from. If hits exist, read the **most recent** 
 migration's body on that file's current definition — not on the live fetch or the baseline in isolation.
 If a migration touching that object was merged more recently than what you're about to copy from, treat
 it as a red flag and re-check before trusting anything else. Do this while *authoring* the migration, not
-only as a pre-push gate — `cichecker` Step 5 already runs this check before push, but by then a wrong
+only as a pre-push gate — `ci-gate` (formerly `cichecker`) Step 5 already runs this check before push, but by then a wrong
 version may already be committed. This is now also written into the team-durable docs:
 `rto-compass-hub/supabase/migrations/CLAUDE.md` and `complyhub-kb/pinned/conventions.md` § "CREATE OR
 REPLACE on an existing object — check git history first" (added 29 Jul 2026) — those are the source of

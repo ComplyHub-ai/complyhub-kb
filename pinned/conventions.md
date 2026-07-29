@@ -118,7 +118,7 @@ later migrations already merged to `main` had changed it: `20260717061109` added
 100-argument limit), added a `sec.claim_tenant_id()` tenant-access guard, and renamed `qual_code` to
 `training_product_code`. Replacing against the baseline would have reverted all three — reintroducing
 the outage and dropping the tenant-access check — while adding logging that looked correct on its own.
-Caught by `cichecker`'s pre-push gate, but only after the (wrong) migration had already been committed
+Caught by `ci-gate`'s pre-push gate (formerly named `cichecker`), but only after the (wrong) migration had already been committed
 and pushed once. Doing the git-log check while *authoring* the file, not just before pushing, avoids the
 wasted round trip.
 

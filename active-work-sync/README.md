@@ -19,15 +19,23 @@ or pull.
 | `active-work.md`, `pr-review-open-prs.md`, `crosstenantleak.md`, `support-tickets-triage.md`, `trainer-report-period-resync-gap.md` | Workspace root | Yes — same relative path on both |
 | `AGENTS.md`, `CLAUDE.md` | Workspace root | Yes — kept OS-agnostic on purpose (no hardcoded absolute paths; anything that differs by OS, e.g. WSL vs native, is worded as an either/or in the file itself rather than forked into two files) |
 | `user-skills/<name>/` | Wherever Claude Code keeps **user-level** skills on that machine (its own skills directory, not tied to any repo) | Content yes, location no — each machine has its own path for this |
+| `user-commands/<name>.md` | The workspace root's own `.claude/commands/` folder (workspace-scoped, not a repo, not the same as user-level skills above) | Content yes, location no — same reasoning as user-skills, just a different Claude Code feature |
 | `memory/` (`MEMORY.md` + individual memory files) | Wherever Claude Code keeps its **memory** for this workspace on that machine | Content yes, location no — the path is machine/project-specific by design (it's derived from the workspace path, which differs Windows vs Mac), so don't hardcode it anywhere |
 
 **Not included on purpose:** `trigger-phrases.local.md` (the `.local` name is
 deliberate — it's allowed to hold real per-machine differences, e.g. shell
 syntax, and syncing it would fight that). Anything inside `rto-compass-hub/`
-(including project-scoped skills like `checker`, `fix-qa-finding`,
-`verify-bot-fix` under `rto-compass-hub/.claude/skills/`) — those are committed
-to that repo already and travel via its own ordinary `git pull`, no help needed
-from this folder.
+(including project-scoped skills like `fix-qa-finding`, `verify-bot-fix` under
+`rto-compass-hub/.claude/skills/`) — those are committed to that repo already
+and travel via its own ordinary `git pull`, no help needed from this folder.
+
+**Known stale copy (29 Jul 2026):** `rto-compass-hub/.claude/skills/checker/`
+was erroneously committed directly to `main` before the `checker` → `fresh-eyes`
+rename (skills should never live inside a repo's tracked files in the first
+place — that's the whole reason this folder exists). It's being left alone for
+now rather than fixed via another direct edit; a proper `fix/*` branch + PR is
+needed to remove or rename it. Don't treat it as current — `user-skills/fresh-eyes/`
+above is the real one.
 
 ---
 
@@ -52,6 +60,8 @@ Trigger phrase: **"sync work to home/work pc"** or **"push active work."**
 3. For `user-skills/`: for each folder here, write/update the matching skill at
    wherever *this* machine's Claude Code user-level skills directory is — same
    skill name, same file(s), just placed at this machine's own path.
+3b. For `user-commands/`: same idea, but the target is this workspace's own
+   `.claude/commands/` folder at the workspace root (not a user-level directory).
 4. For `memory/`: for each file here, write/update the matching file at wherever
    *this* machine's Claude Code memory directory is for this workspace — same
    filenames, same content, this machine's own path. Update the local `MEMORY.md`

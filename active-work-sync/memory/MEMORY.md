@@ -20,15 +20,15 @@
 - [Handover Scope](feedback_handover_scope.md) — handover text = next single step/PR only, never restate the full remaining roadmap
 - [PR Audit Functional Deps](feedback_pr_audit_functional_deps.md) — check runtime/build dependencies between PRs, not just file-line conflicts
 - [Multi-Item Fix Completeness](feedback_multi_item_fix_completeness.md) — before shipping a multi-part fix, re-derive the original full list, don't trust conversation memory
-- [CREATE OR REPLACE: Check Git History Too](feedback_create_or_replace_check_git_history_too.md) — both the live pg_get_functiondef AND the 00000000000000_baseline.sql copy can be stale vs git; check migration history for the object before replacing it, do it while authoring not just at cichecker
+- [CREATE OR REPLACE: Check Git History Too](feedback_create_or_replace_check_git_history_too.md) — both the live pg_get_functiondef AND the 00000000000000_baseline.sql copy can be stale vs git; check migration history for the object before replacing it, do it while authoring not just at ci-gate
 - [No AskUserQuestion / No Monitor](feedback_no_askuserquestion.md) — never use AskUserQuestion, Monitor, or ScheduleWakeup; plain-text options, single direct status checks instead of watch loops or self-scheduled wakeups
-- [Living Doc Decision Tracking](feedback_living_doc_decision_tracking.md) — root-level .md per body of work, one-at-a-time locked decisions written into file, cichecker before commit/PR, delete after audit
-- [Cichecker: Exhaustive Service-Role Check](feedback_cichecker_exhaustive_service_role_check.md) — grep ALL changed edge functions for SUPABASE_SERVICE_ROLE_KEY in one pass, never a remembered subset
+- [Living Doc Decision Tracking](feedback_living_doc_decision_tracking.md) — root-level .md per body of work, one-at-a-time locked decisions written into file, ci-gate before commit/PR, delete after audit
+- [ci-gate: Exhaustive Service-Role Check](feedback_ci_gate_exhaustive_service_role_check.md) — grep ALL changed edge functions for SUPABASE_SERVICE_ROLE_KEY in one pass, never a remembered subset
 - [Role Casing: Proper Case, Not Snake_case](feedback_role_casing_proper_case.md) — tenant_members.role is Proper Case today; CLAUDE.md's snake_case table is a future-migration target, not current state
 - [generate-audit-pack Role Bug](project_generate_audit_pack_role_bug.md) — casing bug (lowercase vs Proper Case) + profiles.role staleness confirms 403 for every real Admin/CM, corrected 27 Jul 2026
 - [Tenant Context Race in Effects](feedback_tenant_context_race_effect_deps.md) — tenant-scoped fetch effects must depend on useEffectiveRole's ready + effectiveTenantId, not just route params
-- [Status Enum vs CHECK Constraint](feedback_status_enum_vs_check_constraint.md) — grep the table's CHECK constraint for the full status enum before trusting a copied allowlist; Checker missed this on PR #311 too
-- [Cichecker Skill](project_cichecker_skill.md) — location/purpose of the cichecker skill at rto-compass-hub/.claude/skills/cichecker/SKILL.md, run before commit/push/PR
+- [Status Enum vs CHECK Constraint](feedback_status_enum_vs_check_constraint.md) — grep the table's CHECK constraint for the full status enum before trusting a copied allowlist; Fresh-Eyes (formerly Checker) missed this on PR #311 too
+- [ci-gate Skill](project_ci_gate_skill.md) — location/purpose of the ci-gate skill (renamed from cichecker 29 Jul 2026, user-level at C:\Users\brian\.claude\skills\ci-gate\SKILL.md), run before commit/push/PR
 
 Note: the source `user_role.md` reference in the original index was a dangling link (file never existed at export time) — not recreated here, consistent with how [[feedback_living_doc_decision_tracking]] already tolerates unresolved `[[name]]` links.
 
