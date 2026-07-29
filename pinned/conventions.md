@@ -95,6 +95,33 @@ When a DB change is needed and the situation supports it, prefer editing the bas
 
 **Watch for redundancies:** before adding anything to the baseline, check whether an existing migration file already handles it.
 
+### `CREATE OR REPLACE` on an existing object — check git history first, not just the baseline (effective 29 Jul 2026)
+
+The baseline-first rule above is about *creating* new objects. Replacing an *existing* function or view
+is the opposite risk: `00000000000000_baseline.sql` is a point-in-time snapshot, and any migration
+merged after it was generated won't be reflected there. Copying a function/view body straight from the
+baseline and issuing `CREATE OR REPLACE` silently reverts every change made to that object since —
+there's no error at write time or at apply time, because it's valid SQL that just does the wrong thing.
+
+**Before writing any `CREATE OR REPLACE FUNCTION`/`VIEW` migration:**
+```bash
+git log --oneline -- 'supabase/migrations/*<object_name>*'
+```
+If any hits exist, read the **most recent** one and base the new migration's body on that file's
+current definition — never on the baseline directly.
+
+**Incident:** 29 Jul 2026 — a migration meant only to add `RAISE WARNING` logging to
+`rpc_get_tas_build_state`'s exception handlers was drafted from the baseline copy of the function. Two
+later migrations already merged to `main` had changed it: `20260717061109` added
+`resources_ready`/`resources_checks` fields (and three more exception-wrapped checks), and
+`20260723143058` fixed a production outage (a `jsonb_build_object` call had grown past Postgres's
+100-argument limit), added a `sec.claim_tenant_id()` tenant-access guard, and renamed `qual_code` to
+`training_product_code`. Replacing against the baseline would have reverted all three — reintroducing
+the outage and dropping the tenant-access check — while adding logging that looked correct on its own.
+Caught by `cichecker`'s pre-push gate, but only after the (wrong) migration had already been committed
+and pushed once. Doing the git-log check while *authoring* the file, not just before pushing, avoids the
+wasted round trip.
+
 ### Migration idempotency — every CREATE must be safe to run twice (effective 16 Jul 2026)
 
 Before finishing any migration file that does `DROP X IF EXISTS <name>` then `CREATE X <name>`, check that the name being dropped and the name being created are the SAME name — not "drop the old live name, create a differently-named new thing." If they differ, a second run of the same file (or any other file creating that same new name) hits a collision and the whole migration chain halts.
