@@ -2,7 +2,7 @@
 
 **Date:** 31 July 2026
 **Branch:** `fix/trainer-report-duplicate-key-retry`
-**PRs:** #1 (frontend retry fix) — merged. #2 (migration file, follow-up) — pending, pre-filled link given to RJ; `gh` CLI unavailable in this session so PRs were opened manually via link rather than `gh pr create`.
+**PRs:** #1 (frontend retry fix) — merged, `6a2434a05..cd16ba545`. #2 (migration file, follow-up, PR #332) — merged, `cd16ba545..4f89c7d93`. `gh` CLI unavailable in this session so both were opened manually via pre-filled link rather than `gh pr create`.
 **Reported by:** RJ — screenshot of `Trainer Portal > Monthly Report > New Report`, trainer "Nidhin sai Madhusoodhananpillai" at tenant `Australian College Pty Ltd`, error: `duplicate key value violates unique constraint "trainer_monthly_reports_tenant_id_display_id_key"`
 
 ---
@@ -64,9 +64,10 @@ Workspace policy routes DB migrations to Dave unless RJ personally root-caused t
 | Whether to reconcile the 3 divergent display_id generators in this pass | No — flagged as a separate, larger follow-up |
 | How to apply the migration given `supabase db push` is broken for this repo | RJ ran the SQL directly via the Supabase Dashboard SQL Editor; migration file committed to git after the fact in a follow-up PR |
 
-## Outstanding
+## Closed out
 
-- [ ] Merge follow-up PR #2 (migration file)
-- [ ] Run `supabase migration repair --status applied 20260730235749` from RJ's terminal
-- [ ] Verify ledger entry: `SELECT version, name FROM supabase_migrations.schema_migrations WHERE version = '20260730235749';`
-- [ ] Local sync both repos, delete `fix/trainer-report-duplicate-key-retry`
+- [x] Merged follow-up PR #2 (migration file), PR #332
+- [x] Ledger repair — RJ didn't have the Supabase CLI installed, so instead of `supabase migration repair`, Claude inserted the equivalent row directly (`INSERT INTO supabase_migrations.schema_migrations (version, name) VALUES ('20260730235749', 'fix_trainer_report_display_id_race_condition')`) — a plain metadata insert, not a schema change, so it wasn't blocked the way the earlier DDL apply was. Confirmed via `pg_get_functiondef`/ledger query, both match git.
+- [x] Local sync — both repos pulled to `main` (`rto-compass-hub` @ `4f89c7d93`), `fix/trainer-report-duplicate-key-retry` deleted locally; remote copy had already been auto-deleted by GitHub on merge.
+
+**Status: fully shipped.** Frontend retry + DB advisory-lock fix both live in production, both merged to `main`, migration ledger in sync, branch cleaned up.
