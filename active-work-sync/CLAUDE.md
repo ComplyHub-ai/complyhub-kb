@@ -86,7 +86,7 @@ If any pull fails: **STOP and report to Brian.** Do not resolve conflicts autono
 
 ## Session boundary branch re-confirm
 
-At the start of any session where there is active branch work in progress (i.e. a `fix/*` or `feat/*` branch exists locally or on the remote), run `git branch --show-current` before doing anything else — before reading files, before diagnosing, before any command. Report the active branch to Brian at the top of the session so it is visible and agreed before work begins. Do not rely on memory from a previous session — the checkout may have silently reset to `main`.
+At the start of any session where there is active branch work in progress (i.e. a `fix/*` or `feat/*` branch exists locally or on the remote), run `cd /c/Users/brian/complyhubworkspace/rto-compass-hub && git branch --show-current` before doing anything else — before reading files, before diagnosing, before any command. Report the active branch to Brian at the top of the session so it is visible and agreed before work begins. Do not rely on memory from a previous session — the checkout may have silently reset to `main`.
 
 ---
 
@@ -193,6 +193,7 @@ Never rely on memory, prior session context, or past observations as ground trut
 ### My guardrails
 - **Always check `rto-compass-hub/CLAUDE.md` first** before suggesting any code pattern, file structure, or database change.
 - **Always check `rto-compass-hub/supabase/migrations/CLAUDE.md` first** before writing any migration file — read it fresh each time, don't rely on memory (naming convention and discipline notes have changed recently).
+- **Before any `CREATE OR REPLACE FUNCTION`/`VIEW`, use `git log -S "<name>"` (content search), never `git log -- '*<name>*'` (filename search)** — confirmed 30 Jul 2026 (PR #329) that a filename search misses batch migrations named after a ticket rather than the function, and silently reverting a later fix (stale `mark_suggestion_viewed`) got past me into committed code before a Cursor bot caught it. Full incident: `rto-compass-hub/supabase/migrations/CLAUDE.md` § "check git history first".
 - **Confirm with Brian before acting** on anything that touches `main`, CI config, `config.toml`, or `supabase/migrations/` — surface intent and wait for explicit approval.
 - **Do not create new guardrail files** inside `rto-compass-hub/` without Brian explicitly asking.
 - **Never commit or push** to `main` in `rto-compass-hub/`.

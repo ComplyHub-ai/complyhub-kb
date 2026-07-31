@@ -43,27 +43,6 @@ this file was internally inconsistent, so the same mistake may exist elsewhere.
 
 ---
 
-## Professional Development Register
-
-- **Ticket:** `3269389d-48cc-40bd-bfd3-6b6edfdf4c11` · bug · Medium urgency · in_progress
-- **Tenant:** `5ae31e05-cbc1-4197-b728-4dc5a4b13b73`
-- **Reported:** Kim Luehman, 20 Apr 2026 — couldn't add PD records for herself or "Tim" via the PD
-  Register; option no longer available.
-- **Status: OPEN — likely already fixed, needs confirmation only**
-
-**Diagnosis:** Angela's same-day reply confirmed the Add-PD screen had been narrowed to active trainers
-only, which broke the register (PD tracking applies to all RTO staff). `src/components/pdr/PDRegisterForm.tsx`
-(~lines 106-150) now fetches both active trainers (`tp_trainers`) **and** active non-trainer staff
-(`tenant_members`) into the person picker. `git log -S"Active non-trainer staff"` traces this to commit
-`6a87702fb`, dated 20 Apr 2026 10:43 UTC — same day as the ticket.
-
-**Proposed action:** no code fix needed. Confirm with Kim that PD entry now works; if so, close the
-ticket (status update is a separate ask — this doc doesn't write to `suggestions`).
-
-**Decision needed from Brian:** confirm-and-close, or is there a newer regression Kim is describing?
-
----
-
 ## Cannot access reasonable adjustment register
 
 - **Ticket:** `8d3bcb36-22ef-4e90-b350-9217dc58d2b8` · question · Medium urgency · in_progress
@@ -114,19 +93,33 @@ market, learners, AOT, delivery, evidence) — migration `20260729003727_tas_pro
 - **Tenant:** `91ffcbdc-c932-4b4c-b0e0-8a208a27abb4` (Australian College)
 - **Reported:** hasitha, 21 May 2026 — SIS40221 packaging rules allow 3 units from
   Group A/B/C/another training package, but the elective screen only allows 2 external units.
-- **Status: OPEN — root cause identified, needs a scope decision**
+- **Status: DIAGNOSIS SUPERSEDED (corrected 30 Jul 2026, evidence-verified against live DB) — this
+  original diagnosis was WRONG. See `ticketImplementationplan.md` § "Adding Electives — qualification
+  packaging rules misread" for the verified root cause, full implementation plan, and one remaining
+  scope decision.**
 
-**Diagnosis:** `supabase/functions/tga-fetch-qualdetails/index.ts` (~lines 158-213) parses packaging
-rules looking for simple standalone "up to N units from external" phrasing. SIS40221's rule is a
-compound sentence (mixed Group A/B/C/external count), which the parser doesn't match, so it falls back
-to a hardcoded default: `Math.min(2, elective_units_required)`. That capped value flows through
-`packagingValidation.ts:176` into the UI cap in both `ElectivesSection.tsx` variants
-(builder-sandbox and builder).
+**Diagnosis (corrected):** the original diagnosis above blamed `tga-fetch-qualdetails/index.ts` — that
+function has **zero callers** anywhere in `src/` or `supabase/` (confirmed by grep) and is dead code; it
+cannot be causing this. The real cause: the codebase already has a separate, AI-based extractor
+(`tga-extract-packaging-rules`) that reads SIS40221's packaging rules **correctly** and stores the right
+answer (max 3 external electives) in `q1_tas_builder.packaging_rules`. But the number actually enforced
+in the UI comes from a *different* code path — `packagingValidation.ts`'s PRIORITY 1/2 branches — which
+compute a pure arithmetic guess (`Math.min(2, floor(electiveRequired / 3))`) from the elective count
+alone, ignoring the correct AI-extracted answer entirely. This is a **precedence bug**, not a parsing
+bug: the right answer already exists and is being discarded. Live-DB verification across all 42
+qualifications with an AI extraction found **~48% carry a wrong enforced cap** — 13 too restrictive
+(blocks legitimate units, SIS40221's class of problem) and 1 too permissive (HLT23221 — the system
+currently allows more external units than the qualification's real rule permits, a compliance risk more
+serious than the original ticket).
 
-**Proposed fix options:** (a) extend the TGA-text parser to catch compound A/B/C/external phrasing, or
-(b) add a manual per-qualification override for `max_external_electives` in the packaging-rules UI.
+**Proposed fix:** make the AI-extracted rules the authoritative source for the numeric caps (fixing the
+precedence bug), surface confidence/provenance in the UI so staff can see *why* a cap applies, and add a
+manual per-qualification override as the escape hatch for qualifications where the rule genuinely can't
+be derived. Full 7-phase implementation plan already written — see `ticketImplementationplan.md`.
 
-**Decision needed from Brian:** which fix approach — (a) parser fix or (b) manual override, or both.
+**Decision needed from Brian:** one open item only — whether the manual-override phase (Phase 4) ships
+in the same PR as the core derivation fix, or as a fast-follow. Recommendation in the implementation
+plan is to ship the core fix first (no schema change needed) and the override as a fast follow.
 
 ---
 
@@ -155,7 +148,7 @@ TAS/qualification data (or add a free-text entry option as a fallback).
 - **Tenant:** Triquetra (`f5850faf-deb6-4de0-bd06-8060c97ca423`)
 - **Reported:** Sharwari Rajurkar, 14 Jul 2026 — wants an "Admin Support" role so non-training admin
   staff aren't wrongly flagged non-compliant in trainer management when given an existing role.
-- **Status: OPEN — well-scoped, low-risk feature, needs a naming/scope decision**
+- **Status: OPEN — WAITING ON PRODUCT DECISION (Angela). Sharwari (ticket reporter) has been asked to clarify who these Admin Support users are and what they need to do in the platform, so scope can be forwarded to Angela accurately. Do not proceed to a fix/* branch until Angela's decision comes back.**
 
 **Diagnosis:** Live trigger `sync_trainer_profile()` auto-pushes any `tenant_members` row whose role
 matches `Trainer%` (case-insensitive prefix) into `tp_trainers`, which feeds the whole compliance/matrix
@@ -164,8 +157,7 @@ the auto-sync and the resulting compliance flags — no changes needed to the tr
 
 **Proposed fix:** add a new role constant to `src/lib/constants/roles.ts` + a roles migration.
 
-**Decision needed from Brian:** confirm role name/scope (does it need any special permissions beyond
-avoiding the trainer auto-sync?), then this is ready for a `fix/*` or `feat/*` branch.
+**Decision needed:** Angela's product decision on permission scope for the new "Admin Support" role (options discussed: (a) minimal — role exists, no gate changes, defaults to no special access; (b) operational_write tier — same access as other operational roles for docs/registers, just not training-specific). Role name "Admin Support" (matching ticket wording) is tentatively agreed pending final confirmation. Blocked on Sharwari's reply about who these users are and what they need to do, which will be forwarded to Angela.
 
 ---
 
@@ -367,5 +359,5 @@ a real trainer-matrix-engine admin account to catch the RLS failure directly.
 
 None yet — every item above has at least one open decision point for Brian before a `fix/*` branch
 should be started. Items expected to move to `LOCKED` fastest: **Triquetra doc leak** (P0, scope
-question only), **Last Updated TAS**, **RPL course code**, **Admin Support role** — these have a single
-concrete fix path already identified.
+question only), **Last Updated TAS**, **RPL course code** — these have a single concrete fix path
+already identified.

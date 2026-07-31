@@ -199,4 +199,36 @@ If the env var is missing, surface a clear error rather than silently falling ba
 
 This applies equally to any code written by Claude in Lovable prompts, KB docs, or direct file edits — prompts that end up as committed code are held to the same standard.
 
+### `rto-compass-hub`'s `tsc --noEmit` checks ZERO files — do not trust it as verification
+
+Confirmed 1 Aug 2026 on PR #334. `npx tsc --noEmit` — which is exactly what `npm run type-check`,
+`.husky/pre-push`, and CI's "Type check (blocking)" job all run — silently type-checks **nothing**.
+Proof: `npx tsc --noEmit --extendedDiagnostics` reports `Files: 0`; appending a blatant
+`const x: number = "a string"` to a real file and re-running the command exits 0 with no output.
+
+**Root cause:** the root `tsconfig.json` is a solution-style config (`"files": []` plus
+`"references"` to `tsconfig.app.json`/`tsconfig.node.json`). Plain `tsc` only processes the root's
+own (empty) file list — it does not expand into referenced projects unless invoked with `tsc --build`.
+`git log` shows this has been the config since the "Initial commit from remix" (~26 Feb 2026), so this
+has likely been a no-op for as long as the current repo structure has existed — not a recent
+regression.
+
+**Real-world consequence:** a genuine compile-time bug (a `const` declared inside a `try` block,
+referenced from the sibling `catch` block — a real scope violation) shipped in CB6's bulk
+trainer-assignment fix, passed the pre-push hook and would have passed CI's type-check job, and was
+only caught by Cursor Bugbot / Vercel bot reviewing the pushed PR.
+
+**Until this is fixed properly (needs a deliberate decision — touches `ci.yml`, `tsconfig.json`, and
+the pre-push hook, not a drive-by patch):**
+- `npx tsc --noEmit --project tsconfig.app.json` or `npx tsc --build --project tsconfig.app.json` do
+  check real files, but a full non-incremental run OOMs on Brian's machine (~2GB heap exhausted) — the
+  same memory ceiling documented elsewhere for `npm run build`.
+- ESLint does not catch this bug class (block-scope/control-flow compile errors) — a clean lint pass
+  is not a substitute for a real type-check.
+- For a specific pattern (e.g. "is this variable visible across this try/catch boundary"), an isolated
+  repro in a throwaway `.ts` file checked with `npx tsc --noEmit --strict <file>` (no project config)
+  is fast and does check the file, since no solution-style config is involved.
+- Actual CI runners (GitHub Actions) may have more RAM than Brian's local machine, but the *command*
+  itself is vacuous regardless of available memory — more RAM does not fix `files: 0`.
+
 **Lovable exception — anon key only:** Lovable regenerates `src/integrations/supabase/client.ts` and does not support exporting constants from it safely. Frontend gateway files (`src/lib/documentFiles.ts`, etc.) that call Edge Functions need both the project URL and the anon key to construct auth headers for Kong. The anon key is a **public** key — it is already committed in `client.ts` and safe to expose in browser code. Inlining it as a local constant in gateway files is acceptable. The service role key must never appear in any frontend file under any circumstances.
