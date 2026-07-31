@@ -2,14 +2,14 @@
 
 **Date:** 31 July 2026
 **Branch:** `fix/trainer-report-duplicate-key-retry`
-**PR:** open, pending creation via pre-filled link (see below) — `gh` CLI unavailable in this session, so the PR itself has not been opened yet, only pushed
+**PRs:** #1 (frontend retry fix) — merged. #2 (migration file, follow-up) — pending, pre-filled link given to RJ; `gh` CLI unavailable in this session so PRs were opened manually via link rather than `gh pr create`.
 **Reported by:** RJ — screenshot of `Trainer Portal > Monthly Report > New Report`, trainer "Nidhin sai Madhusoodhananpillai" at tenant `Australian College Pty Ltd`, error: `duplicate key value violates unique constraint "trainer_monthly_reports_tenant_id_display_id_key"`
 
 ---
 
 ## Root cause (confirmed live against production, project `gdwhlstfguxarnxasrrs`)
 
-`trainer_monthly_reports` has a `BEFORE INSERT` trigger, `trg_tmr_set_display_id`, which calls `tmr_next_display_id(tenant_id)` to assign `display_id` when not already set. That function computes the next id as a plain, unlocked `MAX(...) + 1` scoped only by `tenant_id`:
+`trainer_monthly_reports` has a `BEFORE INSERT` trigger, `trg_tmr_set_display_id`, which calls `tmr_next_display_id(tenant_id)` to assign `display_id` when not already set. That function computed the next id as a plain, unlocked `MAX(...) + 1` scoped only by `tenant_id`:
 
 ```sql
 SELECT COALESCE(MAX(CAST(SUBSTRING(display_id FROM 'TMR-(\d+)') AS INT)), 0) + 1
@@ -19,49 +19,54 @@ v_display_id := 'TMR-' || LPAD(v_next_num::TEXT, 4, '0');
 
 No row lock, no advisory lock, no real sequence. Two concurrent inserts for the same tenant (e.g. two trainers submitting near-simultaneously) can read the same MAX, compute the same next id, and collide on `trainer_monthly_reports_tenant_id_display_id_key` — whichever commits second gets exactly this error, and the client had no handling for it, so the raw Postgres message reached the trainer.
 
-Confirmed via `pg_get_functiondef` that the live function body matches the repo exactly, and via `git log -S` that neither `tmr_next_display_id` nor `trg_tmr_set_display_id` has been touched since the original baseline snapshot — this is definitely the current, active logic, not something already superseded.
+Confirmed via `pg_get_functiondef` that the (then-)live function body matched the repo exactly, and via `git log -S` that neither `tmr_next_display_id` nor `trg_tmr_set_display_id` had been touched since the original baseline snapshot.
 
 **Confirmed tenant:** `Australian College Pty Ltd` (`91ffcbdc-c932-4b4c-b0e0-8a208a27abb4`), identified via `profiles.full_name` match — 20 active trainers, so concurrent submission near a reporting deadline is realistic.
 
-**Honest gap:** could not reconstruct which concurrent transaction actually won the race against this specific report — Postgres retains no record of rows that never committed, and only 2 historical rows exist for this tenant (dated 2 Jun and 23 Jun), neither belonging to this trainer. The mechanism is confirmed live; the exact opposing transaction is not forensically reconstructable after the fact.
+**Honest gap:** could not reconstruct which concurrent transaction actually won the race against this specific report — Postgres retains no record of rows that never committed, and only 2 historical rows existed for this tenant (dated 2 Jun and 23 Jun), neither belonging to this trainer. The mechanism is confirmed live; the exact opposing transaction was not forensically reconstructable after the fact.
 
-## Confirmed blast radius — same bug exists in more places
+## Confirmed blast radius — same bug existed in more places
 
-1. **8 more tables, same RPC.** `submit_trainer_monthly_report` (the RPC called on submit) creates linked entries in `ssr_register`, `whs_register`, `ofi_register`, `risk_register`, `rpl_register`, `caa_register`, `pdr_register`, `ien_register`, each using the identical inline unlocked `MAX(...)+1` pattern. Confirmed live via `pg_constraint` that all 8 carry the same `UNIQUE (tenant_id, custom_id)` shape — any of these can hit the identical failure mode under the same conditions.
-2. **Three independent, live-routed write paths** into `trainer_monthly_reports`, each generating `display_id` differently:
-   - `src/pages/trainer-portal/monthly-report.tsx` (routed at `monthly-report`) — relies on the trigger, `TMR-0001` format.
-   - `src/pages/trainer/MonthlyReportForm.tsx` (routed at `trainer/monthly-reports` and `trainer/monthly-reports/:meetingId`) — RPC `upsert_trainer_monthly_report`, sets its own `TMR-202607-a1b2c3` format directly, bypassing the trigger.
-   - RPC `submit_trainer_monthly_report_full` — a third counter using a different regex (strips all non-digits rather than capturing the digit run after `TMR-`), which can disagree with the trigger's own count.
-   Live proof this is real, not theoretical: this tenant's only two existing rows are `TMR-2026` and `TMR-20260602-XRN4` — two different formats, meaning more than one path has already written here.
+1. **8 more tables, same RPC.** `submit_trainer_monthly_report` (the RPC called on submit) creates linked entries in `ssr_register`, `whs_register`, `ofi_register`, `risk_register`, `rpl_register`, `caa_register`, `pdr_register`, `ien_register`, each using the identical inline unlocked `MAX(...)+1` pattern. Confirmed live via `pg_constraint` that all 8 carry the same `UNIQUE (tenant_id, custom_id)` shape.
+2. **Three independent, live-routed write paths** into `trainer_monthly_reports`, each generating `display_id` differently — the trigger (`TMR-0001`), RPC `upsert_trainer_monthly_report` (`TMR-202607-a1b2c3`), and RPC `submit_trainer_monthly_report_full` (a third, differently-regexed counter). Live proof this is real: this tenant's only two existing rows at the time were `TMR-2026` and `TMR-20260602-XRN4` — two different formats. **Not addressed by this fix** — flagged as a separate, larger reconciliation.
 
-## What was fixed (Track 1 — frontend, this PR)
+## What was fixed
 
-`src/pages/trainer-portal/monthly-report.tsx`, `submitMutation`'s insert branch: on a `23505` violating specifically `trainer_monthly_reports_tenant_id_display_id_key`, retry the insert once (a fresh retry re-reads the max and succeeds once the winning transaction has committed). Any other insert error (including the legitimate `trainer_monthly_reports_tenant_meeting_trainer_key` "already have a report for this meeting" case) surfaces unchanged. If the retry is also exhausted, the trainer sees a plain-English message instead of raw SQL.
+**Track 1 — frontend (`src/pages/trainer-portal/monthly-report.tsx`):** on a `23505` violating specifically `trainer_monthly_reports_tenant_id_display_id_key`, retry the insert once; any other insert error surfaces unchanged; if the retry is also exhausted, the trainer sees a plain-English message instead of raw SQL. Does not fix the underlying race — stops trainers being blocked by a self-resolving collision. `tsc`/`eslint` clean.
 
-This does not fix the underlying race — it stops trainers being blocked by an ugly, confusing error on what is very likely a self-resolving collision.
+**Track 2 — DB (`tmr_next_display_id`, `submit_trainer_monthly_report`):** added a tenant-scoped `pg_advisory_xact_lock` before the `MAX+1` read in both functions, serializing concurrent callers for the same tenant so they can no longer race. No schema/table change. `CREATE OR REPLACE` bodies were based on the **live** production definitions (confirmed via `pg_get_functiondef` immediately before writing the migration, not the baseline copy) — `submit_trainer_monthly_report` in particular carried a status guard (`reviewed`/`approved` also blocked from re-submit) from a commit more recent than the last migration file touching it; basing the replace on a stale copy would have silently reverted that. Every existing guard was carried forward unchanged.
 
-- `npx tsc --incremental --noEmit` — clean
-- `npx eslint src/pages/trainer-portal/monthly-report.tsx` — clean
-- PR not yet opened (`gh` unavailable this session) — pre-filled creation link given to RJ directly
+Applied directly to production via the Supabase SQL Editor (RJ ran it — Claude was blocked from running DDL directly against prod by Claude Code's own auto-mode safety classifier), then confirmed live via `pg_get_functiondef` that both advisory locks are present.
 
-## Open issue — flagged to Dave, not actioned by Claude (Track 2)
+## Ownership — explicitly overridden by RJ
 
-Per workspace policy, DB migrations are Dave's to write — this was root-caused by Claude at RJ's request, not by RJ personally, so it does not qualify for the self-ship exception. Proposed shape of the fix, for Dave's review and adaptation (**not applied, not written as a migration file**):
+Workspace policy routes DB migrations to Dave unless RJ personally root-caused the bug (here, Claude did the root-causing, not RJ independently) — so the default read was "flag to Dave, don't write the SQL." RJ explicitly overrode that and directed Claude to write and ship the DB fix directly this time. Recorded here as a deliberate, in-the-moment exception, not a change to the standing policy.
 
-- Serialize `tmr_next_display_id` (or its calling trigger) with a tenant-scoped advisory lock — `pg_advisory_xact_lock(hashtext(tenant_id::text))` — before the `MAX+1` read, so concurrent inserts for the same tenant queue instead of racing. No new table, no schema change, function-body-only.
-- Apply the identical fix to the 8 inline `MAX+1` blocks inside `submit_trainer_monthly_report` (one migration, since they're all one function body).
-- Separately flagged, not proposed as part of this fix: the 3 divergent `display_id` generators (`trg_tmr_set_display_id`, `upsert_trainer_monthly_report`, `submit_trainer_monthly_report_full`) should eventually converge on one canonical generator — bigger reconciliation than this bug needs, called out as a follow-up rather than bundled in.
+## Process notes (for next time)
+
+- An ambiguous yes/no question ("ship Track 1 now while Track 2 goes to Dave, or hold both?") got answered "let's do both," which was misread as "do both parts of the option just described" rather than "implement both fixes yourself." Cost a round of frustration. Lesson: when a question has more than one plausible reading and the action gated behind it is hard to reverse (shipping to Dave vs. shipping to prod), the ambiguity should have been flagged rather than resolved by picking a reading.
+- The migration file was written locally but never `git add`/`commit`/`push`'d before telling RJ "the PR has both fixes" — so the first PR merged with only the frontend fix, and the migration had to go in as a second, follow-up PR after the DB change was already live. Lesson: after any Write to a file meant to ship, confirm `git status` shows it staged/committed before describing it as part of a branch or PR — don't assume a tool call landed correctly.
+- `apply_migration`/`execute_sql` DDL against production got blocked by Claude Code's auto-mode classifier — expected behavior for directly-executed schema changes, not a bug. RJ ran the SQL manually via the Supabase Dashboard SQL Editor instead.
 
 ## Files changed
 
 | Area | File |
 |---|---|
 | Retry + friendly error on display_id collision | `src/pages/trainer-portal/monthly-report.tsx` |
+| Advisory-lock fix, tmr_next_display_id + submit_trainer_monthly_report | `supabase/migrations/20260730235749_fix_trainer_report_display_id_race_condition.sql` |
 
 ## Decisions recorded
 
 | Decision | Outcome |
 |---|---|
-| Ship a frontend mitigation now vs. wait for the DB fix | Ship now — retry is safe, independent of the DB-side fix, and unblocks trainers immediately |
-| Who writes the DB migration | Dave — flagged, not actioned, per migration-ownership policy (Claude root-caused this, not RJ personally) |
+| Ship a frontend mitigation independent of the DB fix | Yes — retry is safe on its own and unblocks trainers immediately |
+| Who writes the DB migration | Claude, per RJ's explicit override of the default Dave-ownership policy |
 | Whether to reconcile the 3 divergent display_id generators in this pass | No — flagged as a separate, larger follow-up |
+| How to apply the migration given `supabase db push` is broken for this repo | RJ ran the SQL directly via the Supabase Dashboard SQL Editor; migration file committed to git after the fact in a follow-up PR |
+
+## Outstanding
+
+- [ ] Merge follow-up PR #2 (migration file)
+- [ ] Run `supabase migration repair --status applied 20260730235749` from RJ's terminal
+- [ ] Verify ledger entry: `SELECT version, name FROM supabase_migrations.schema_migrations WHERE version = '20260730235749';`
+- [ ] Local sync both repos, delete `fix/trainer-report-duplicate-key-retry`
