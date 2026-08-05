@@ -2,7 +2,7 @@
 
 **Date:** 3 August 2026
 **Branch:** `fix/qi-survey-question-key-mismatch`
-**PR:** opened (pre-filled link), merge pending
+**PR:** [#349](https://github.com/ComplyHub-ai/rto-compass-hub/pull/349) — merged 5 August 2026 (merge commit `f7bc50dcc`)
 **Source:** RJ's daily ticket batch, Item 2 — "QI success state — DB bug is fixed, just needs the success state in the frontend. Test slug: demo-rapid-learner-2026."
 
 ## What was actually wrong
