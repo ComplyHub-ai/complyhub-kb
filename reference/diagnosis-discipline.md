@@ -41,3 +41,62 @@ These rules apply to every bug fix, not just QA findings. Violating them is how 
 On PR #279 (`rpc_tas_create_draft`), the live function was faithfully copied and preserved — but the live copy itself was already missing a `tenant_scope_items` upsert path from a migration (`20260716090000`) that had been merged to `main` on 16 July but never actually applied to production. Cursor Bugbot and Vercel's bot both flagged the replacement as "dropping" that logic — correctly, because they diff against git history, not the live DB, and git said the function should look different from what was live. Confirmed via `supabase_migrations.schema_migrations`: the version jumped straight past `20260716090000`, meaning it was merged but never deployed.
 
 **Rule going forward:** before any `CREATE OR REPLACE FUNCTION` on an existing function, in addition to fetching the live definition, run `git log --oneline -- 'supabase/migrations/*<function_name>*'` (or grep migration files/content for the function name). If a migration touching that function is more recent in git than what the live fetch reflects, stop and check `list_migrations` / `schema_migrations` for a version gap before treating the live fetch as ground truth — the live DB and git can silently disagree, and only a history check catches it.
+
+## Learned from PR #356 — a call-pattern-scoped search is not the same as "is this referenced anywhere"
+
+Before deleting anything (storage buckets, tables, columns, functions), "is this still referenced in
+code?" was checked by grepping for a specific call shape — e.g. `storage.from('<bucket-id>')`. That
+search came back clean for 6 storage buckets, which were then queued for deletion in a PR. Cursor
+Bugbot caught, before merge, that all 6 were actually live: referenced not as a direct call argument but
+as a **string value inside a config/lookup object**
+(`supabase/functions/register-evidence-manager/index.ts`'s `REGISTERS` map, e.g.
+`ofi: { bucket: "ofi-evidence" }`), resolved dynamically at runtime rather than passed literally to
+`.storage.from(...)`. The call-pattern-scoped grep was structurally blind to this — it only ever could
+have matched the one shape it was written to look for.
+
+**Rule going forward:** before deleting or dropping anything, search for the **literal identifier
+itself** (bucket id, table name, column name, function name) as a plain string across the **entire**
+relevant codebase — not scoped to a specific call pattern, and not scoped to only `src/`. Specifically:
+1. Do the first pass as an unrestricted string search (no `.method(...)` wrapper, no quote-style
+   assumption) across both frontend (`src/`) and edge functions (`supabase/functions/`) — this is
+   deliberately blunter and will surface more candidates to manually rule out, but a cheap false
+   positive is vastly preferable to a missed true one.
+2. Explicitly check config objects, lookup/dispatch maps, and any `Record<string, ...>`-shaped
+   structures in edge functions separately — this is exactly the pattern this incident missed, and
+   edge functions in particular are easy to under-scrutinize relative to user-facing frontend screens.
+3. Only after the unrestricted pass comes back clean should a narrower, call-pattern-specific search be
+   trusted as confirmation — never as the sole check.
+4. Re-run the same check again immediately before executing the delete, not just once during planning —
+   code can change between the two points.
+
+## Learned from PR #362 review — both bugs came from checking the happy path only
+
+Two review bots (Cursor Bugbot, Vercel) each caught a separate bug in the same ~15-line block that
+implemented "publish this record, unless it was already published." Both slipped through because the
+first-draft implementation only proved the happy-path, first-attempt, admin-role case worked — neither
+retries nor the full set of allowed roles were stress-tested before calling it done.
+
+1. **A "skip if already done" check must read live state, not a client-side cache.** The draft checked
+   `item.published_to_register_id` from a React Query cache already sitting in the component. That
+   cache can't reflect a *previous* attempt at the same operation that partially failed (e.g. the create
+   succeeded but the follow-up link-back update didn't) — which is exactly the scenario the check exists
+   to protect against. **Rule:** any "does this already exist / has this already run" guard in front of
+   a create-if-not-exists flow must query the database directly, immediately before deciding, not trust
+   data fetched earlier in the session. Ask explicitly: "if this exact code path partially failed and
+   the user retries, what does my check see?"
+
+2. **`.insert(...).select(...)` depends on the SELECT RLS policy, not just INSERT.** The draft confirmed
+   the INSERT policy allowed all 5 approver roles (having just widened it for 2 of them) and treated
+   that as "permissions checked." It missed that requesting data back from an insert
+   (`.select().maybeSingle()`) triggers a second, separate RLS check — the table's SELECT policy — to
+   read the row back. Two of the five roles could insert but not read back their own new row (a
+   RESTRICTIVE audience-based SELECT policy filtered it out), so the insert silently succeeded while the
+   code treated the null read-back as a failure. **Rule:** when writing any `.insert(...).select(...)`
+   against a table with RLS, check the SELECT policy for every role the write path needs to work for —
+   not just the INSERT/WRITE policy — or avoid the read-back entirely by generating the row's ID
+   client-side (`secureId()`) and inserting without `.select()`.
+
+**Standing habit these both point to:** before calling an insert/create flow done, explicitly write out
+(a) what happens on a second, retried call, and (b) whether the exact write-then-read pattern used has
+been checked against every role/permission tier the feature is meant to support — not just the role
+used to write the code.
