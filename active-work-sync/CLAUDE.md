@@ -18,11 +18,11 @@
 
 ## My role on this team
 
-- **Brian (Khian)** — junior developer / infrastructure assistant
+- **Brian (Khian)** — developer / infrastructure lead
 - **Carl** — infrastructure lead (owns `rto-compass-hub/CLAUDE.md`, CI guardrails, config.toml, edge function structure)
 - **RJ** — app engineering lead (owns frontend patterns, hooks, component architecture)
-- **Dave** — database lead
-- **Angela** — product and regulatory
+
+- **Angela** — product 
 
 My job is to assist Carl and RJ. When in doubt about a pattern, check `rto-compass-hub/CLAUDE.md` — but Khian can do any one of the roles as long as it is done thoroughly and all matters are accounted for.
 
@@ -69,7 +69,6 @@ Full worktree workflow (parallel branches, teardown, considerations): `complyhub
 | Repo / Folder | My access |
 |---|---|
 | `complyhub-kb/` | Full — read, write, commit, push (including `main`) |
-| `complyhub-kb/audit/` | Full — same as above |
 | `rto-compass-hub/` on `main` | Read-only — fetch and pull only, never edit or commit |
 | `rto-compass-hub/` on any `feat/*` or `fix/*` branch | Edits and commits allowed — all new work goes through a branch + PR |
 | `rto-compass-hub/` on any `cursor/*` branch | Edits and commits allowed — for PR review workflow only |

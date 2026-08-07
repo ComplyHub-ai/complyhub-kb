@@ -13,6 +13,7 @@
 - [No autonomous CI polling](feedback_no_autonomous_ci_polling.md) — don't ScheduleWakeup to auto-check CI/PR status; don't act on a stale wakeup once the situation's moved on — only check when Brian asks. Recurred a 3rd time 20 Jul 2026 because CLAUDE.md itself told Claude to do it — CLAUDE.md's WATCH beat is now fixed to match this rule
 - [Migration drift baseline](reference_migration_drift_baseline.md) — `.drift-baseline.txt` in rto-compass-hub is the authoritative CI-tracked list of already-known orphaned production migrations; check it BEFORE any drift reconciliation investigation, don't rebuild it from scratch. Also now codified in CLAUDE.md directly
 - [Don't trust doc snippets uncritically](feedback_dont_trust_doc_snippets_uncritically.md) — a locked living-doc's "exact code" can still contain a scoping bug (CB6, PR #334); trace try/catch/loop variable scope yourself before pasting, "LOCKED" means the decision is final, not the code
+- [One branch per session, not per task](feedback_one_branch_per_session.md) — don't `git checkout -b` a new branch for each new fix within a session; confirm and reuse one branch unless Brian explicitly says otherwise (corrected sharply 05 Aug 2026)
 
 ## Imported 27 Jul 2026 (cross-machine sync from home PC — see complyhub-kb/handoffs/memory-export-2026-07-27.md)
 
