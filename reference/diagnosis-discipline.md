@@ -100,3 +100,47 @@ retries nor the full set of allowed roles were stress-tested before calling it d
 (a) what happens on a second, retried call, and (b) whether the exact write-then-read pattern used has
 been checked against every role/permission tier the feature is meant to support — not just the role
 used to write the code.
+
+## Learned from PR #381/#383 — a blanket RESTRICTIVE gate applied across many tables needs a per-table access-pattern check, not a single review
+
+PR #381 added one RESTRICTIVE policy (`billing_gate_active_tenant`, requiring
+`sec.user_in_tenant(tenant_id) AND sec.tenant_is_active(tenant_id)`) across a loop of **~48 tables** in a
+single "blanket" migration batch. It was reviewed once, as a batch, against the general principle
+("stop inactive/unpaid tenants from writing data") — not against each table's actual pre-existing access
+pattern. Two regressions escaped: `consultant_portfolio_requests` (an affiliate/consultant requesting
+access to a client tenant they are *not yet* a member of — the exact non-member path the new membership
+check blocked) and, found only in a follow-up audit on PR #383, the identical structural bug on
+`trainer_vet_currency` and `trainer_wud_log` (owner-only insert — `trainer_id = auth.uid()` — with no
+tenant-membership requirement by design, also blocked by the new AND).
+
+A full 50-table audit on PR #383 found the blast radius was larger than either individual fix: 1
+confirmed-broken table already fixed by #383 (`consultant_portfolio_requests`), 1 more confirmed broken
+and fixed in the same PR (`trainer_vet_currency`, real call site in
+`src/pages/trainer-portal/vet-currency.tsx`), 1 fixed defensively despite being dormant
+(`trainer_wud_log` — same structural bug, no live caller found), and one **genuine design question, not
+a bug** — `survey_tokens` has a real PUBLIC/unauthenticated SELECT policy for token-based lookups (e.g.
+survey links opened without login) that the blanket gate would also block; this was deliberately left
+unfixed pending a product decision on whether that public lookup path should sit behind this gate at all.
+The remaining ~45 tables were individually confirmed safe (either already tenant-scoped, or writes go
+exclusively through a service-role client that bypasses RLS regardless of the gate).
+
+**Rule going forward:** any migration that applies the *same* RESTRICTIVE (or otherwise AND-combining)
+policy across a loop/batch of multiple tables must be checked **one table at a time**, not once against
+the batch's stated intent:
+1. For every table in the batch, read its *other* pre-existing policies (SELECT/INSERT/UPDATE) — not
+   just confirm the new policy's own logic is correct.
+2. Explicitly look for "non-membership-by-design" patterns before assuming a tenant-membership AND is
+   safe: owner/author-only checks (`x_id = auth.uid()` with no tenant condition), public/unauthenticated
+   access (`USING (true)` or token-based lookups), cross-tenant affiliate/consultant flows, and
+   super-admin-only tables where the caller may have no membership anywhere.
+3. For every flagged table, grep `src/` and `supabase/functions/` for real call sites and confirm which
+   Supabase client is used — a user-JWT client is subject to RLS and can be broken by the new gate; a
+   service-role client bypasses RLS entirely, so the gate is a no-op for that caller regardless of what
+   the policy says on paper. Don't leave this as "theoretical" — resolve it with file:line evidence one
+   way or the other.
+4. A table with a genuine public/unauthenticated access requirement is a **design decision**, not a
+   mechanical fix — flag it to the human rather than silently patching the gate or silently leaving it
+   broken.
+5. Batch-applying one migration across many tables is efficient to *write*, but each table still needs
+   its own before/after check — "reviewed the batch's intent" is not the same as "reviewed every table's
+   interaction with that intent."
