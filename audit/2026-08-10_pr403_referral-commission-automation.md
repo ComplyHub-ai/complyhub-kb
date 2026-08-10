@@ -38,7 +38,7 @@ Applied via Supabase MCP `execute_sql` against project `gdwhlstfguxarnxasrrs` po
 
 **Open item:** RJ still needs to run `supabase migration repair --status applied 20260810031239` — not yet confirmed done as of this entry.
 
-**Not yet done:** a real `invoice.paid` webhook against a referred, paying tenant to confirm end-to-end (ledger row appears with correct `commission_aud`, non-referred tenants get no row, retried webhooks don't double-count). Schema/code-level verification above confirms the deployed function is correct; a live payment event is the next real-world checkpoint — same caveat as Phase 3's not-yet-tested live signup.
+**Live end-to-end payment test:** deliberately skipped, not overlooked. RJ decided (10 Aug 2026) that the byte-for-byte function verification above is sufficient confidence. There was no real referred tenant yet to test against (Phase 3's live signup check was also skipped), and no Stripe CLI/webhook-trigger access was available to simulate one safely — the only live-adjacent option would have been calling the RPC directly with synthetic parameters, inserting a fake ledger row with no corresponding real payment. If commission accrual is ever suspected of misbehaving, a real `invoice.paid` event against a referred, paying tenant is the first thing to check.
 
 ## Referral-attribution initiative — overall status
 
@@ -48,7 +48,7 @@ All four phases now shipped and verified in production:
 - **Phase 3** (#401): a completed referred signup attributes the tenant and auto-grants the whole consulting org access.
 - **Phase 4** (#403): commission accrues only on actual paid invoices, ex-GST, pending human confirmation.
 
-Two real end-to-end checks remain outstanding (flagged in the Phase 3 and this entry): a live trial signup through a `?ref=` link, and a live paid invoice from a referred tenant. Recommend both before considering this initiative fully closed.
+Two real end-to-end checks (a live trial signup through a `?ref=` link, and a live paid invoice from a referred tenant) were considered and deliberately skipped by RJ on 10 Aug 2026 — schema/function-level verification was judged sufficient given the side effects either check would have caused. Initiative considered closed as of this decision.
 
 ## Files changed
 

@@ -40,7 +40,7 @@ Both migrations applied via Supabase MCP `execute_sql` against project `gdwhlstf
 
 **Open item:** RJ still needs to run two `supabase migration repair --status applied` commands (`20260810024119`, `20260810024133`) — not yet confirmed done as of this entry.
 
-**Not yet done:** a real end-to-end trial signup through a `?ref=` link, to confirm attribution and auto-grant actually work against live data (per this PR's test plan). Schema-level verification above confirms the deployed code is correct; a live signup test is the next real-world checkpoint.
+**Live end-to-end signup test:** deliberately skipped, not overlooked. RJ decided (10 Aug 2026) that the byte-for-byte schema/function verification above is sufficient confidence — a live test would have meant either a real signup granting real access to RJ's affiliate team on a throwaway test tenant, or an agent-triggered edge-function call with the same side effect, neither of which was worth the cleanup for the confidence gained. If referral attribution is ever suspected of misbehaving, that live check is the first thing to run.
 
 ## Files changed
 
