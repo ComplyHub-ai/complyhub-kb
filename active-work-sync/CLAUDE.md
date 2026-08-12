@@ -122,6 +122,8 @@ At the start of any session where there is active branch work in progress (i.e. 
 ### Never run `npm run build`
 `npm run build` hangs Brian's workstation. Do not run it for any reason. To verify code correctness, use `npm run type-check` and `npm run lint` (both fast). If both pass, the change is safe to commit and push — Vercel is the real build gate. After a push, use `list_deployments` (`complyhub-kb/reference/vercel-mcp.md`) to confirm the deploy `state`, and pull `get_deployment_build_logs` if it errors.
 
+**`npm run type-check` is vacuous — do not trust a clean result from it.** Confirmed 12 Aug 2026: `rto-compass-hub`'s root `tsconfig.json` has `files: []` with project references (a solution-style config), so plain `tsc --noEmit` silently checks **zero files** (`npx tsc --noEmit --listFiles` returns nothing) — the command "passes" no matter what's actually broken. The correct check is `npx tsc --build tsconfig.app.json --noEmit`, but that is a **full whole-codebase check** — same order of load as `npm run build`, and it hung for 5+ minutes with no sign of finishing on a small, low-risk diff before being killed. **Never run the full `tsc --build` either — it carries the same hang risk `npm run build` does.** For a normal-sized change: rely on `npm run lint` (catches a good chunk of structural issues via typescript-eslint) plus manual review of the diff's type surface, and let Vercel's build be the real gate. If a change is large or touches complex generic/type-heavy code and you genuinely need a real compile check, ask Brian first before running anything whole-codebase — don't run it speculatively.
+
 ### Applying migrations to production — `supabase db push` only, never `apply_migration`
 Confirmed 21 Jul 2026 (PR #279 post-merge): the Supabase MCP `apply_migration` tool does NOT respect a
 migration file's `YYYYMMDDHHmmss` filename version — it records whatever it applies under a freshly
@@ -178,10 +180,13 @@ stop, report to Brian, resolve before doing anything else. Full incident detail:
 ### Pre-push / pre-PR CI parity check
 Before running `git push` or opening a PR, run the same checks CI will run — don't let CI be the
 first place a failure surfaces, which just means re-pushing to fix what could've been caught locally.
-- `npm run type-check` and `npm run lint` — scope these to the files actually touched in the branch/PR
-  (e.g. `git diff --name-only main...HEAD` fed into the lint command), not a whole-repo pass. A
-  whole-repo run can surface pre-existing issues in files this branch never touched, which isn't this
-  PR's problem to fix and just creates noise.
+- `npm run lint` — scope to the files actually touched in the branch/PR (e.g. `git diff --name-only
+  main...HEAD` fed into the lint command), not a whole-repo pass. A whole-repo run can surface
+  pre-existing issues in files this branch never touched, which isn't this PR's problem to fix and just
+  creates noise. **Do not run `npm run type-check`** — it's vacuous (see "Never run `npm run build`"
+  above) — and do not run the full `tsc --build tsconfig.app.json --noEmit` fix for it either, since
+  that carries the same whole-codebase hang risk as `npm run build`. Lean on lint + manual diff review;
+  Vercel's build is the real type-safety gate.
 - **Migration drift check** — compare local `supabase/migrations/*.sql` against `list_migrations` on
   the live project. Flag anything local that isn't reflected upstream, or anything upstream the branch
   doesn't have, before it goes into a PR.

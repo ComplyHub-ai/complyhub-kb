@@ -17,7 +17,7 @@ Last updated: 11 August 2026
 
 | Worktree | Path | Branch | Claimed by | Task | Since |
 |---|---|---|---|---|---|
-| A | `rto-compass-hub` | `fix/post-demo-backlog-cleanup` | this chat | Post-demo backlog: CI dual-column, SSR seed-path, Risk status table | 12 Aug 2026 |
+| A | `rto-compass-hub` | `main` (read-only) | this chat | PR review mode: PR #418 first, then PR #412 — no local branch checked out for either (both are Cursor-agent branches) | 12 Aug 2026 |
 | B | `rto-compass-hub-worktree-b` | `main` 
 
 ## Pending — awaiting reply
