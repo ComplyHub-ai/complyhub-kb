@@ -2,8 +2,8 @@
 
 **Date:** 12 August 2026
 **Branch:** `feat/tga-catalog-course-unit-dropdowns`
-**PR:** [#420](https://github.com/ComplyHub-ai/rto-compass-hub/pull/420)
-**Merge commit:** pending
+**PR:** [#420](https://github.com/ComplyHub-ai/rto-compass-hub/pull/420) — merged `f767e3c9f` (squash of `064bae92f` only, see Follow-up below)
+**Follow-up PR:** [#422](https://github.com/ComplyHub-ai/rto-compass-hub/pull/422) — carries the combined-dropdown refinement that missed #420's merge window
 **Purpose:** RJ flagged (screenshot, Credit Transfer "Add" modal) that "Course Code"/"Course Title"/"Unit Code"/"Unit Title" were free-text inputs, inviting typos and codes that don't exist on the tenant's own registration. Asked for these to be replaced with a dropdown of the RTO's actual courses (quals/skillsets/units) wherever this pattern appears.
 
 ---
@@ -48,12 +48,27 @@ No migration. Reads two existing tables (`tga_pre_import`, `training_products`/`
 
 ## CI note
 
-CI was still running (checks pending) at PR creation time — not yet confirmed green. Update this entry once checks complete.
+All blocking checks (Lint, Type check, Security, Migration guards, Edge Functions) passed on #420's commit `064bae92f`. `Supabase Preview` showed failed on #420 — confirmed pre-existing/unrelated: the same check also fails on the already-merged, unrelated PR #417, and matches the known `schema_migrations` ledger-drift issue previously documented against PR #322 (2026-07-29 audit entry) — did not block merge.
+
+Separately, after seeing #420's CI go green RJ merged the PR from the GitHub UI — but a second commit (`8c158697a`, the "combine RPL/CT into one qual+skillset+unit dropdown" refinement, requested after #420 was opened) had just been pushed and wasn't picked up: the merge's diff stat (+549/-48) matches `064bae92f` alone, and `main` post-merge confirmed to still have CT's old two-dropdown layout and no `'all'` catalog type. Reopening #420 wasn't possible (GitHub PRs are terminal once merged), so the second commit was cherry-picked onto a fresh branch off the new `main` and shipped as PR #422 instead — see that PR for its own CI status.
+
+## Follow-up: PR #422 (combine into one dropdown)
+
+Requested by RJ after #420 was opened, once he saw RPL's dropdown live in the Vercel preview and pointed out it only offered qualifications while Credit Transfer split qualification/unit across two separate dropdowns. Decision (confirmed with RJ): collapse to **one** dropdown per register, sourced from all three `tga_pre_import` snapshot columns combined (`preimport_snapshot`/`skillset_snapshot`/`units_snapshot`), since a credited/recognised item can legitimately be any of the three — not just RPL's prior qualification-only view.
+
+- `useTgaCatalogOptions.ts` — added `TgaCatalogType = 'all'`, which queries all three snapshot columns in one row-fetch and merges/dedupes across them (falls back to `useScopedTrainingProducts` unfiltered-by-type when `tga_pre_import` is empty).
+- `RPLRegisterForm.tsx` — `type="qualification"` → `type="all"`, otherwise unchanged.
+- `CTRegisterForm.tsx` — the two `TgaCatalogOrManualField` blocks (qualification pair, unit pair) collapsed into **one** required field ("Course, Skill Set or Unit"), `type="all"`. `unit_code`/`unit_title` remain in the DB schema (no migration) but are no longer independently editable from the form — whatever is picked fills `course_code`/`course_title` only.
+- Assessment Validation deliberately **not** changed — that register structurally needs a qualification code and a unit code as distinct fields (a validation event references a specific unit within a specific qualification), unlike RPL/CT where one generalised "credited item" is the actual data being captured.
+
+No DB/RLS change beyond #420's (same two read-only source tables). Same blast radius/dead-code findings as #420 — nothing new.
 
 ---
 
 ## Files changed
 
-New: `src/hooks/useTgaCatalogOptions.ts`, `src/components/shared/TgaCatalogCombobox.tsx`, `tests/hooks/useTgaCatalogOptions.test.ts`, `tests/components/shared/TgaCatalogCombobox.test.tsx`.
-Modified: `src/components/rpl/RPLRegisterForm.tsx`, `src/components/assessmentValidation/AssessmentValidationForm.tsx`, `src/components/ct/CTRegisterForm.tsx`.
-All frontend-only, no migration, no production DB step required.
+**#420** (merged, `064bae92f`): New: `src/hooks/useTgaCatalogOptions.ts`, `src/components/shared/TgaCatalogCombobox.tsx`, `tests/hooks/useTgaCatalogOptions.test.ts`, `tests/components/shared/TgaCatalogCombobox.test.tsx`. Modified: `src/components/rpl/RPLRegisterForm.tsx`, `src/components/assessmentValidation/AssessmentValidationForm.tsx`, `src/components/ct/CTRegisterForm.tsx`.
+
+**#422** (open): Modified: `src/hooks/useTgaCatalogOptions.ts` (adds `'all'` type), `src/components/shared/TgaCatalogCombobox.tsx` (placeholder copy), `src/components/rpl/RPLRegisterForm.tsx`, `src/components/ct/CTRegisterForm.tsx`, `tests/hooks/useTgaCatalogOptions.test.ts` (2 new cases for the combined type, 8 total).
+
+All frontend-only across both PRs, no migration, no production DB step required.
