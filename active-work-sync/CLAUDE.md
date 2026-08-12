@@ -44,14 +44,17 @@ complyhubworkspace/
 │   ├── codebase-state/    ← as-shipped codebase snapshots
 │   ├── agent-office/      ← localhost visual status board for the cursor-agent crew
 │   └── handoffs/          ← scenario procedures
-└── rto-compass-hub/       ← codebase
-    ├── CLAUDE.md          ← Carl's code rules — authoritative for all code decisions
-    ├── src/               ← React + TypeScript frontend (Vite)
-    ├── supabase/          ← Edge Functions, migrations, config.toml
-    └── .github/workflows/ ← CI guardrails
+├── rto-compass-hub/       ← codebase, worktree A
+│   ├── CLAUDE.md          ← Carl's code rules — authoritative for all code decisions
+│   ├── src/               ← React + TypeScript frontend (Vite)
+│   ├── supabase/          ← Edge Functions, migrations, config.toml
+│   └── .github/workflows/ ← CI guardrails
+└── rto-compass-hub-worktree-b/  ← second checkout, worktree B — parallel task, separate chat
 ```
 
-Full worktree workflow (parallel branches, teardown, considerations): `complyhub-kb/reference/worktree-workflow.md`.
+Both worktrees share one production Supabase project and one Vercel project — see "Two worktrees" under
+AI orchestration below for the coordination rule. Full worktree workflow (parallel branches, teardown,
+considerations): `complyhub-kb/reference/worktree-workflow.md`.
 
 ---
 
@@ -78,14 +81,24 @@ Full worktree workflow (parallel branches, teardown, considerations): `complyhub
 ## Session start (mandatory first action)
 
 1. `cd complyhub-kb && git pull --ff-only && cd ..`
-2. `cd rto-compass-hub && git fetch && git pull && cd ..`
-3. Report latest commits in both repos after pulling
+2. Determine which worktree this chat owns (A: `rto-compass-hub`, B: `rto-compass-hub-worktree-b`) —
+   check `active-work.md`'s worktree registry block first; if it doesn't already say and Brian hasn't
+   stated it this session, ask before doing anything else. **One VS Code window with two chats is the
+   normal setup — there is no environmental signal (like a different working directory) that tells one
+   chat apart from the other, so this has to be asked/stated explicitly, every new chat, every time.**
+   Once known, **immediately write the claim into the registry block** (worktree / branch / task /
+   "since" timestamp) before any other work — this is the only channel the *other* chat has for knowing
+   this worktree is in use, since sessions cannot see each other. Then pull using that worktree's
+   absolute path (never a bare `cd` without it, and never assume the shell's cwd carried over from a
+   prior turn): `cd <absolute path to worktree> && git fetch && git pull && cd ..`. Use that same
+   absolute path for every git/file command for the rest of the session.
+3. Report latest commits in both repos after pulling, and state which worktree this session is using.
 
 If any pull fails: **STOP and report to Brian.** Do not resolve conflicts autonomously.
 
 ## Session boundary branch re-confirm
 
-At the start of any session where there is active branch work in progress (i.e. a `fix/*` or `feat/*` branch exists locally or on the remote), run `cd /c/Users/brian/complyhubworkspace/rto-compass-hub && git branch --show-current` before doing anything else — before reading files, before diagnosing, before any command. Report the active branch to Brian at the top of the session so it is visible and agreed before work begins. Do not rely on memory from a previous session — the checkout may have silently reset to `main`.
+At the start of any session where there is active branch work in progress (i.e. a `fix/*` or `feat/*` branch exists locally or on the remote), run `git branch --show-current` in the worktree this session is using — before doing anything else — before reading files, before diagnosing, before any command. Report the active worktree and branch to Brian at the top of the session so it is visible and agreed before work begins. Do not rely on memory from a previous session — the checkout may have silently reset to `main`.
 
 ---
 
@@ -150,16 +163,17 @@ This keeps git and production in sync for every new migration going forward, wit
 drift reconciliation first. Revert to plain `supabase db push` once that reconciliation happens — do not
 carry this interim procedure forward as a permanent pattern.
 
-### Verify `main` is clean before AND after any dry-run merge / Tinker dispatch
+### Verify `main` is clean before AND after any dry-run merge / Reviewer dispatch
 An interrupted Workflow once left `rto-compass-hub/main` genuinely dirty (staged/modified files from
-a PR) because the `git merge --abort` after a Tinker-style dry-run merge never ran — the process was
-killed between the merge and the abort, with no automatic recovery. Nothing was committed/pushed, but
-this is a real, repeatable risk, not a one-off. Before dispatching Tinker (or running the "check
-conflicts" dry-run merge manually), confirm `git status` is clean first. After it returns — success,
-error, or interrupted — check `git status` again independently; don't trust the dispatch's own
-self-report of "clean." If `main` (or any branch) shows unexpected changes, treat it exactly like a
-branch-verification failure: stop, report to Brian, resolve before doing anything else. Full incident
-detail: `.cursor/orchestrate/roles.md` § Tinker.
+a PR) because the `git merge --abort` after a Reviewer-style dry-run merge (this was the old Tinker
+role, since absorbed into Reviewer) never ran — the process was killed between the merge and the abort,
+with no automatic recovery. Nothing was committed/pushed, but this is a real, repeatable risk, not a
+one-off. Before dispatching Reviewer's mechanical pass (or running the "check conflicts" dry-run merge
+manually), confirm `git status` is clean first. After it returns — success, error, or interrupted —
+check `git status` again independently; don't trust the dispatch's own self-report of "clean." If
+`main` (or any branch) shows unexpected changes, treat it exactly like a branch-verification failure:
+stop, report to Brian, resolve before doing anything else. Full incident detail:
+`.cursor/orchestrate/roles.md` § "Known incident".
 
 ### Pre-push / pre-PR CI parity check
 Before running `git push` or opening a PR, run the same checks CI will run — don't let CI be the
@@ -232,86 +246,97 @@ phrases; don't pre-read it speculatively.
 
 ---
 
-## AI orchestration — decision procedure (not just background)
+## The Loop — orchestration decision procedure (not just background)
 
 **This section is an instruction to Claude Code, read fresh every session — not a glossary.** Every
 task Brian gives, before acting, run this triage and say the plan out loud.
 
-### The crew — all six callsigns are real from Claude Code
+Collapsed 20 Jul 2026 from six named callsigns to **three agents** — too many roles to hold in his
+head, and it caused inconsistency about who was allowed to fix a bug. One flow: **FRAME → RECON →
+PLAN → MAKE → CHECK → SHIP.** One ledger: `active-work.md` at the workspace root — source of truth for
+worktree/branch/stage plus the parked backlog. One rule: the Scope Line (below).
 
-| Callsign | Job | Dispatched when |
-|---|---|---|
-| **Scout** | Read-only recon, maps a change before it's planned | Multi-file/ambiguous task, before planning |
-| **Hound** | Root-cause tracer, never proposes a fix | Any bug report — mandatory, via `complyhub-bug-fix` skill step 3 |
-| **Compass** | Planner, proposes 2-3 approaches with tradeoffs | Ambiguous/architectural task, after Scout maps it |
-| **Maker** | Writes code, commits, pushes | Always Claude Code itself — **never delegated** |
-| **Tinker** | Mechanical PR gauntlet (type-check/lint/dry-run-merge/banned-patterns) | Right before proposing a PR |
-| **Sentinel** | Merge-gate verdict from diff + Tinker + Checker output | Final step before proposing commit/push |
-| **Checker** | Adversarial fresh-eyes review, incl. live read-only DB | After any single/multi-complex edit, before calling it done |
+### The three agents
 
-**Two modes, switchable mid-conversation just by Brian saying so** (e.g. "go claude mode" / "back to
-default") — no config file, no slash command:
-- **Default mode** (current default) — all six run via `cursor-agent` (Cursor CLI — via WSL on Windows,
-  natively on Mac) subprocesses dispatched through `.cursor/orchestrate/dispatch.sh`, the
-  cheap/quality-optimized model mix.
-- **Claude mode** — no `cursor-agent`/WSL involved at all; each role runs as a genuine Claude Code Agent
-  tool subagent (Haiku for Scout/Checker-DB-queries, Sonnet for Hound/Tinker, Opus for Compass/
-  Sentinel/Checker-verdict), logged via `.cursor/orchestrate/log-agent-event.py` so the Agent Office UI
-  still shows them as real, live characters.
+| Agent | Absorbs (retired names) | Job | Ever edits/commits? |
+|---|---|---|---|
+| **Scout** | Scout + Hound + Compass | Read-only recon: maps the change, traces root cause on a bug report, sketches 2-3 approaches if the task is genuinely ambiguous — all in one pass | Never |
+| **Fixer** | Maker | Plans + writes the fix + commits/pushes | **Always Claude Code itself — never delegated** |
+| **Reviewer** | Checker + Tinker + Sentinel | Adversarial fresh-eyes review (incl. live read-only DB) + mechanical gauntlet (type-check/lint/dry-run-merge/banned-patterns) + final SHIP/NEEDS-WORK verdict — all in one pass | Never |
 
-Both modes are always read-only, never given edit access. Exact commands, prompt
-templates, models, and gotchas: **`.cursor/orchestrate/roles.md`** — read it before the first dispatch
-of a session. Full technical background: `complyhub-kb/reference/ai-model-routing.md`.
+**Who fixes bugs — always Fixer, i.e. Claude Code itself.** Scout and Reviewer only ever report. If a
+task seems to need a fourth role, that's a sign the current Scout or Reviewer pass needs to cover more
+ground in one dispatch — not a reason to bring back a retired name.
 
-A localhost-only visual status board for this crew ("Agent Office" — pixel-art office, each callsign
-as a character, live status dashboard) lives at `complyhub-kb/agent-office/` — start with `npm start`
-from that folder, view at `http://localhost:4173`. Purely observational, doesn't affect dispatch.
+**No AskUserQuestion popups for routine flow.** State the call in prose and proceed (state-and-proceed);
+Brian redirects if wrong. The commit/push hard gates above are still absolute and separate from this.
 
-**Supports multiple concurrent instances of the same role** (added 16 Jul 2026) — state is keyed by
-`agent_id`, not role, so if Brian runs two chats in parallel (e.g. two Scouts, one per PR), both show
-up as distinct characters/cards instead of one overwriting the other. Each instance is auto-labeled
-with a short tag pulled from its task text (e.g. "PR #163" if present). No special handling needed on
-dispatch — just make sure every dispatch (via `dispatch.sh` or `log-agent-event.py`) uses its own
-unique `agent_id`, which both already do by construction. Full detail: `.cursor/orchestrate/roles.md`
-§ "Agent Office" and `complyhub-kb/agent-office/server.js`/`public/client.js` comments.
+**Two engines, one switch** — both read-only, never given edit access:
+- **Claude mode** (default when tokens are healthy) — Scout/Reviewer run as genuine Claude Code Agent
+  tool subagents.
+- **Cursor CLI mode** — a first-class token-budget handoff, kept deliberately (not removed) for when
+  Brian is close to running out of tokens; dispatched via `.cursor/orchestrate/dispatch.sh`. Switchable
+  mid-conversation just by Brian saying so ("go claude mode" / "cursor mode") — no config file, no
+  slash command.
+
+Exact commands, prompt templates, models, and gotchas for both engines:
+**`.cursor/orchestrate/roles.md`** — read it before the first dispatch of a session. Historical
+background on why this shape was chosen: `complyhub-kb/reference/ai-model-routing.md`.
+
+### ⛔ Mandatory Scope Line — every Scout/Reviewer dispatch
+
+The #1 cause of rabbit holes and wasted tokens is an unbounded sub-agent that keeps digging past what
+it was asked. At FRAME, state what's IN and OUT. Every Scout/Reviewer prompt must end with:
+
+```
+SCOPE: <exactly what to look at — the one task>. OUT OF SCOPE: everything else.
+BOUNDARY: Report findings and STOP. Do NOT investigate beyond SCOPE. Do NOT propose or write fixes.
+If you notice something outside SCOPE, list it under a "PARKED (out of scope)" heading in one line
+each — do not chase it.
+```
+
+Anything found outside scope goes to `active-work.md` Backlog — never chased in the current task. Scope
+only expands via a new FRAME. **A finding beat (Scout/Reviewer) never fixes — it reports; Fixer edits.**
+No "just have Scout fix it" shortcut. Scout/Reviewer output is **unverified suspects**, never acted on
+directly — triage every finding before doing anything about it.
 
 ### Step 1 — classify every incoming task
 
 | Size | Definition | What happens |
 |---|---|---|
 | **Trivial** | typo, rename, doc tweak, one-liner, no logic/DB surface | I do it directly. No delegation, no announcement needed beyond normal work. |
-| **Bug report** | "did X, isn't showing in Y", "broke after Z" | Mandatory `complyhub-bug-fix` skill → **Hound** traces root cause (step 3) → I plan (step 6, Brian approves) → I fix (step 7) → **Checker** reviews. |
-| **Single** | one file, one clear logic change, no DB/RLS/auth surface | I edit directly, then run **one Checker pass** before calling it done. |
-| **Multi/complex** | 2+ files, OR touches DB/RLS/auth/migrations/edge functions, OR ambiguous scope | **Scout** maps it → **Compass** proposes approaches (if genuinely ambiguous) → I plan + edit → **Checker** reviews (two-model consensus if DB/RLS/auth/migration). |
-| **Pre-PR** | any change about to become a PR | **Tinker** (mechanical gauntlet) → **Sentinel** (merge verdict, weighs Tinker + Checker) → I propose commit/push to Brian. |
+| **Bug report** | "did X, isn't showing in Y", "broke after Z" | Mandatory `complyhub-bug-fix` skill → **Scout** traces root cause → I plan (Brian approves) → I fix (Fixer) → **Reviewer** checks. |
+| **Single** | one file, one clear logic change, no DB/RLS/auth surface | I edit directly, then run **one Reviewer pass** before calling it done. |
+| **Multi/complex** | 2+ files, OR touches DB/RLS/auth/migrations/edge functions, OR ambiguous scope | **Scout** maps it and sketches approaches if genuinely ambiguous → I plan + edit → **Reviewer** checks (two-model consensus if DB/RLS/auth/migration). |
+| **Pre-PR** | any change about to become a PR | **Reviewer** runs the full gauntlet (mechanical checks + merge verdict) → I propose commit/push to Brian. |
 | **Reviewing existing/external PR(s)** | "review PR #X", multiple open PRs assigned, PR triage | **PR review mode** — see below. Always one PR at a time, one stage at a time, report-then-wait — never a background Workflow, never multiple PRs' agents running concurrently. |
 
-### PR review mode (multiple assigned/external PRs) — added 16 Jul 2026
+### PR review mode (multiple assigned/external PRs)
 
 This is the standing default whenever Brian hands over one or more existing PR numbers to review —
 not a one-off instruction to ask for each time. **Never launch this as a background `Workflow` script
-and never run more than one PR through the crew at once** — a background Workflow already caused two
+and never run more than one PR through the flow at once** — a background Workflow already caused two
 real incidents: agents ran invisibly because nothing called the office logger, and ~28 agents fired at
 once with no checkpoint for Brian to review a report before the next stage spent tokens on it.
 
-**Sequencing — one PR fully through the crew before starting the next:**
+**Sequencing — one PR fully through the flow before starting the next:**
 1. **Scout** maps the PR's changed files/symbols and blast radius (out-of-diff callers) → report to
    Brian → wait for go.
-2. **Checker** reviews (see the 4 standing objectives below, live DB where relevant) → report → wait.
-3. **Tinker** runs the mechanical gauntlet: type-check/lint/banned-patterns, AND a dry-run merge
-   conflict check against `main` **and against every other PR in the same batch** (so cross-PR
-   collisions like two PRs touching the same file surface early) — subject to the mandatory
-   before/after `git status` verification in the hard gates section above. → report → wait.
-4. **Sentinel** gives the final SHIP/NEEDS-WORK verdict, including a post-merge checklist (migrations
+2. **Reviewer** reviews (see the 4 standing objectives below, live DB where relevant) → report → wait.
+3. **Reviewer** (mechanical pass) runs type-check/lint/banned-patterns, AND a dry-run merge conflict
+   check against `main` **and against every other PR in the same batch** (so cross-PR collisions like
+   two PRs touching the same file surface early) — subject to the mandatory before/after `git status`
+   verification in the hard gates section above. → report → wait.
+4. **Reviewer** gives the final SHIP/NEEDS-WORK verdict, including a post-merge checklist (migrations
    to apply, edge functions to deploy, drift to verify) → report → wait, then move to the next PR.
 
-**Standing Checker objectives for any PR review** (fold into the adversarial-review prompt every time,
+**Standing Reviewer objectives for any PR review** (fold into the adversarial-review prompt every time,
 not just when Brian lists them out):
 1. **Regression check** — does this PR reintroduce something already fixed in a prior PR or session?
    Compare against current `main`, not just the PR's own diff.
-2. **Conflict check** — with `main` and with every other PR in the same batch (Tinker's dry-run merge
-   covers the mechanical side; Checker should also flag *logical* conflicts Tinker's git-level check
-   can't see, e.g. two PRs changing the same behavior differently without a textual merge conflict).
+2. **Conflict check** — with `main` and with every other PR in the same batch (the mechanical dry-run
+   merge covers the git-level side; also flag *logical* conflicts a textual merge can't see, e.g. two
+   PRs changing the same behavior differently without a textual merge conflict).
 3. **Migrations/edge functions** — does the PR include any? If so, note explicitly what must happen
    **after merge**: apply the migration to production (never auto-applied by merge), deploy the edge
    function, and check for schema drift (compare the PR's migration against what's already live —
@@ -319,42 +344,74 @@ not just when Brian lists them out):
 4. **Bug scan** — incomplete fixes, wrong fixes, and blast radius (does it break something outside the
    diff Scout already mapped).
 
-Default to **Claude mode** for PR review batches unless Brian says otherwise — real Anthropic models,
-proven logged/visible in the Agent Office. See `.cursor/orchestrate/roles.md` § PR review mode for the
-exact per-stage prompts.
+Default to **Claude mode** for PR review batches unless Brian says otherwise. See
+`.cursor/orchestrate/roles.md` § PR review mode for the exact per-stage prompts.
 
 ### Step 2 — state the plan, then wait
 
 Before touching anything (except trivial tasks), say: the classification, what's being delegated (
-which callsign(s)) and to which model, and the branch this lands on. Then **wait for Brian's
+Scout or Reviewer) and to which engine, and the branch this lands on. Then **wait for Brian's
 go-ahead** — same rule as the existing "always run the plan by Brian before making any change" gate
 above. Only proceed immediately if Brian already said go in the same message.
 
 Example:
 > "This touches filtering logic + existing tenant data — classifying as multi/complex. Plan: **Scout**
-> (`kimi-k2.7-code`, read-only) maps the current filter implementation and callers → I plan + edit on
-> a `feat/*` branch → **Checker** (`kimi-k2.7-code`, read-only incl. live DB) reviews end-to-end before
-> you commit. Want me to start with Scout?"
-
-Checker/Hound output is **unverified suspects**, never acted on directly — I triage every finding
-before doing anything about it, and I can point at the same file:line myself before treating a claim
-as fact.
+> (Claude mode, read-only) maps the current filter implementation and callers → I plan + edit on a
+> `feat/*` branch → **Reviewer** (Claude mode, read-only incl. live DB) checks end-to-end before you
+> commit. Want me to start with Scout?"
 
 ### Mid-loop re-entry
 
-If any callsign or I hit a gap mid-task, say so and ask for the right next step rather than guessing —
-cap 2 re-entries per phase, then stop and ask Brian.
+If Scout, Reviewer, or I hit a gap mid-task, say so and ask for the right next step rather than
+guessing — cap 2 re-entries per phase, then stop and ask Brian.
 
-### Parallel worktrees
+### Two worktrees — parallel work, one shared backend
 
-Behind `main` is normal when another workflow merges first — catch up with `merge origin/main` on the
-feature branch before landing the PR (not usually required just to push).
+The workspace runs two parallel checkouts of `rto-compass-hub` so two tasks (in two separate chats) can
+be in flight at once:
+
+- **Worktree A** — `rto-compass-hub/`
+- **Worktree B** — `rto-compass-hub-worktree-b/`
+
+**No separate VS Code window per worktree is required or expected.** One window, two chat tabs is the
+normal setup — each chat is its own independent session (own conversation, own tool state, own Bash
+working directory) regardless of how many windows are open. Two chats cannot see each other directly —
+there is no channel between sessions, and no environmental signal that tells one apart from the other.
+Coordination works through two layers instead:
+
+1. **Git is ground truth.** `git worktree list` plus `git branch --show-current` in each worktree gives
+   the live, authoritative picture of what's checked out where. Git also physically refuses to check
+   out the same branch in two worktrees at once — a free hard interlock. Run `git worktree prune` first
+   if a check needs to trust the list (stale entries for deleted folders linger otherwise).
+2. **`active-work.md`'s worktree registry block is the only channel between chats** — which chat claims
+   which worktree, on what task, since when. Written immediately once a chat's worktree is known (see
+   Session start above), advisory intent on top of git: where the ledger and git disagree, git wins.
+   Before claiming a worktree for a new branch: check the registry block, `git status` (dirty-at-claim
+   carries strays into the new branch — stop and ask Brian if it's dirty and not archived), and that
+   the claim isn't stale (verify against `git status`/last-commit time before trusting a claim older
+   than a day). Release the claim back to unclaimed when the task finishes or pauses for the day.
+
+**One database job at a time — hard rule, not a preference.** Both worktrees share one production
+Supabase project, one Vercel project, and one `config.toml`. Parallel is safe for frontend-only work.
+It is NOT safe for two simultaneous migration or edge-function tasks — filename-version ordering and
+the interim `execute_sql`-then-`migration repair` procedure both assume one mutator at a time. If one
+worktree is mid migration/edge-function work, the other worktree takes frontend-only work until it
+ships.
+
+**Session start applies per-chat, not per-window:** each chat determines and declares its own worktree
+per the Session start procedure above — never assume a chat is on worktree A by default just because
+that's the first-listed one.
+
+**Reviewer's conflict check must widen** when two worktrees are both active: dry-run merge against the
+other worktree's branch too, not just `main`.
+
+Full detail: `complyhub-kb/reference/worktree-workflow.md`.
 
 ### Cursor desktop (alternate surface)
 
-When driving from Cursor desktop directly instead of Claude Code, the same six callsigns apply via
-Cursor's native Task tool with per-callsign `model` slugs instead of `dispatch.sh` — see
-`.cursor/rules/ai-orchestration.mdc`. Same crew, same triage logic, different plumbing.
+When driving from Cursor desktop directly instead of Claude Code, the same three agents apply via
+Cursor's native Task tool with per-agent `model` slugs instead of `dispatch.sh` — see
+`.cursor/rules/ai-orchestration.mdc`. Same agents, same triage logic, different plumbing.
 
 ---
 
@@ -370,7 +427,7 @@ Cursor's native Task tool with per-callsign `model` slugs instead of `dispatch.s
 | 6 | `complyhub-kb/README.md` | KB orientation |
 | on demand | `trigger-phrases.local.md` | Daily command reference — read when a trigger phrase is used |
 | on demand | `complyhub-kb/reference/ai-model-routing.md` | Orchestrator role matrix + cursor-agent shell-out technical background |
-| on demand | `.cursor/orchestrate/roles.md` | **Read before first Scout/Checker/etc. dispatch each session** — exact commands, prompt templates, model choices, gotchas |
+| on demand | `.cursor/orchestrate/roles.md` | **Read before first Scout/Reviewer dispatch each session** — exact commands, prompt templates, model choices, gotchas |
 | on demand | `complyhub-kb/reference/cursor-workflow.md` | Cursor parallel windows, worktrees, modes, maximize features |
 | on demand | `complyhub-kb/reference/worktree-workflow.md` | Parallel worktree workflow |
 | on demand | `complyhub-kb/reference/supabase-mcp.md` | Supabase MCP usage rules |

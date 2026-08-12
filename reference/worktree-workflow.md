@@ -1,10 +1,22 @@
 # Parallel worktree workflow
 
-> Moved from `CLAUDE.local.md` (10 July 2026) to shrink that file to identity + hard gates only. Content unchanged from the original.
+> Moved from `CLAUDE.md` (10 July 2026) to shrink that file to identity + hard gates only. Content unchanged from the original.
 
 When Brian has multiple independent tasks queued up (e.g. several bug fixes), a second `git worktree` can be spun up so two branches are worked on at the same time in two separate VS Code windows — no stashing, no switching, no risk of one branch's edits landing on the other.
 
 **This is a repeatable, on-demand workflow — not tied to any fixed branch name.** Create one whenever there's a genuine second task ready to go; tear it down once that task's PR is merged.
+
+**Standing exception — `rto-compass-hub-worktree-b` (worktree B).** Unlike the on-demand `<slug>`
+worktrees below (created per-task, torn down on merge), this one is a **persistent** second checkout
+kept around specifically so two chats can each own one worktree at once (A = `rto-compass-hub`, B =
+`rto-compass-hub-worktree-b`) without spinning one up from scratch every time. Same git mechanics as
+everything else in this doc — same npm-install/`.env`-copy/port considerations, same one-branch-per-
+worktree rule — it just doesn't get removed when a task finishes; the next task reuses it. Claim/release
+via the worktree registry block at the top of `active-work.md`, and check it before branching in either
+worktree (git is still ground truth — the registry is advisory intent on top of it). See `CLAUDE.md`
+§ "Two worktrees" for the coordination rule, including **one database/migration/edge-function job at a
+time** — both worktrees share one production Supabase project and one Vercel project, so that surface
+can never run in both at once, even though frontend-only work safely can.
 
 **Common case: active dev in one worktree, PR review in the other.** The two worktrees don't have to both be Brian's own fresh work — one can stay on an in-progress `fix/*`/`feat/*` branch while the second checks out whatever's being reviewed (a colleague's branch, a `cursor/*` PR branch). This avoids stashing or switching out of active work just to review, test, or fix a PR — follow the normal PR review + fix workflow (`complyhub-kb/handoffs/pr-review-fix-workflow.md`) in that second worktree, entirely independent of what's checked out in the first.
 
@@ -12,14 +24,14 @@ When Brian has multiple independent tasks queued up (e.g. several bug fixes), a 
 
 ```
 c:\Users\brian\complyhubworkspace\
-├── CLAUDE.local.md          ← shared — found automatically by both windows (upward directory lookup)
+├── CLAUDE.md          ← shared — found automatically by both windows (upward directory lookup)
 ├── AGENTS.md                ← shared
 ├── complyhub-kb\             ← shared — reachable by absolute or relative path from either worktree
 ├── rto-compass-hub\          ← primary worktree (main checkout)
 └── rto-compass-hub-<slug>\   ← secondary worktree, e.g. rto-compass-hub-2 or rto-compass-hub-fix2
 ```
 
-Keeping the new worktree nested inside `complyhubworkspace` (as a sibling of `rto-compass-hub`, not a folder elsewhere on disk) is what makes `CLAUDE.local.md` and `complyhub-kb` work automatically in the second window — no duplication or copying needed for those.
+Keeping the new worktree nested inside `complyhubworkspace` (as a sibling of `rto-compass-hub`, not a folder elsewhere on disk) is what makes `CLAUDE.md` and `complyhub-kb` work automatically in the second window — no duplication or copying needed for those.
 
 **Creation steps:**
 ```powershell
@@ -68,5 +80,5 @@ git merge origin/main --no-ff
 
 Full orchestration notes (parallel crews, dry-run first, cost savings): `complyhub-kb/reference/ai-model-routing.md` §§ "Parallel workflows" and "Cost & limit savings".
 
-**Trigger phrases** (kept in `CLAUDE.local.md` since they're used every session):
+**Trigger phrases** (kept in `CLAUDE.md` since they're used every session):
 - "set up a worktree for [branch]" / "open a worktree for PR review of [branch]" / "remove the worktree for [branch]"

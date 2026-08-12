@@ -1,3 +1,14 @@
+> ## ⚠️ SUPERSEDED — historical record, not current policy
+> Written 11 July 2026 around **six named callsigns** (Scout/Hound/Compass/Maker/Tinker/Sentinel).
+> Collapsed 20 Jul 2026 to **three agents** — Scout, Fixer, Reviewer — because six roles was too many
+> to hold in your head and caused inconsistency about who was allowed to fix a bug. See `CLAUDE.md`
+> § "The Loop" for the current model and rationale, and `.cursor/orchestrate/roles.md` /
+> `.cursor/rules/ai-orchestration.mdc` for the current agents + model routing. Everything below this
+> banner is kept **as-is for its cost-modeling methodology and the cursor-agent shell-out proof** — the
+> callsign names in it are retired and should not be followed. Mapping if you need it while reading:
+> Scout stays Scout; Hound + Compass fold into Scout; Maker → Fixer; Tinker + Sentinel + Checker fold
+> into Reviewer.
+
 > **Last updated:** 11 July 2026 · **Confidence:** high — Brian's dual-surface model routing policy.
 > **Verified live:** 11 July 2026 — OpenRouter Anthropic Messages skin GREEN for Anthropic + DeepSeek + Kimi + GLM + Qwen; Cursor Task slugs GREEN for `composer-2.5-fast`, `gpt-5.3-codex`, `gpt-5.5-medium`, `claude-4.6-sonnet-medium-thinking`, `claude-opus-4-8-thinking-high`, `glm-5.2-high`, `kimi-k2.7-code`, `grok-4.5-high`.
 

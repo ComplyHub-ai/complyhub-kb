@@ -2,7 +2,9 @@
 
 # Cursor workflow — parallel work + maximize features
 
-Companion to `worktree-workflow.md` (git) and `ai-model-routing.md` (Scout/Hound/Compass/Maker crew). This page is **Cursor-specific**.
+Companion to `worktree-workflow.md` (git) and `ai-model-routing.md` (model-routing methodology — note that
+doc's role names are superseded; current agents are Scout/Fixer/Reviewer per `CLAUDE.md` § "The Loop").
+This page is **Cursor-specific**.
 
 ## Parallel work in Cursor — three levels
 
@@ -34,7 +36,7 @@ complyhubworkspace/
 1. Create worktree (see `worktree-workflow.md`).
 2. **File → New Window** (or `cursor /path/to/rto-compass-hub-<slug>`).
 3. Root that window on the **worktree folder**, not the workspace root.
-4. Run a separate crew in each window (intake → Scout → …).
+4. Run a separate loop in each window (intake → Scout → Fixer → Reviewer).
 5. When B merges first: A catch-up = `merge origin/main` on A's branch (see routing doc). Tear down B's worktree.
 
 Each window = own Agent chats, own dirty tree, own branch. One branch checked out in only one worktree (including `main`).
@@ -49,7 +51,7 @@ Each window = own Agent chats, own dirty tree, own branch. One branch checked ou
 | Cloud Agents / `/in-cloud` | Long PR babysit, CI fix, exploratory branch while laptop stays on active feat |
 | `/babysit` | Cloud watches a PR (feedback, conflicts, checks) |
 
-**ComplyHub sweet spot:** Window A local Agent on `fix/*` + Window B `/pr-review` on a worktree, *or* local Maker + Cloud `/babysit` on another PR.
+**ComplyHub sweet spot:** Window A local Agent on `fix/*` + Window B `/pr-review` on a worktree, *or* local Fixer + Cloud `/babysit` on another PR.
 
 ## Rules / skills loading (important gap)
 
@@ -65,20 +67,20 @@ Each window = own Agent chats, own dirty tree, own branch. One branch checked ou
 
 ### Bug fixes
 
-Always load **`complyhub-bug-fix`** (Claude: `~/.claude/skills/…`; Cursor: `~/.cursor/skills/complyhub-bug-fix/SKILL.md` symlink). Gated 9 steps — Scout/Hound/Compass/Maker map to steps 3–7. See `ai-model-routing.md` § Bug fixes.
+Always load **`complyhub-bug-fix`** (Claude: `~/.claude/skills/…`; Cursor: `~/.cursor/skills/complyhub-bug-fix/SKILL.md` symlink). Gated 9 steps — Scout covers recon/root-cause (steps 3–6), Fixer applies the approved fix (step 7). See `ai-model-routing.md` § Bug fixes (historical — role names there are retired).
 
 ## Maximize Cursor for your loop
 
-### Modes (match the crew)
+### Modes (match the agents)
 
 | Mode | Maps to | When |
 |---|---|---|
 | **Ask** | Scout / read-only | "Where is X?", map paths — don't burn Agent edits |
-| **Plan** | Compass | Multi-file / ambiguous — research → plan → you approve → Build |
-| **Agent** | Maker (+ orchestrator) | Implement approved plan or small known fix |
-| **Debug** | Hound | Failing repro, runtime evidence |
+| **Plan** | Scout (approach sketch), then Fixer commits to the plan | Multi-file / ambiguous — research → plan → you approve → Build |
+| **Agent** | Fixer (+ orchestrator) | Implement approved plan or small known fix |
+| **Debug** | Scout (root-cause trace) | Failing repro, runtime evidence |
 
-`Shift+Tab` cycles modes. Default loop: Ask/Scout → Plan/Compass → you yes → Agent/Maker → `/pr-review` (Tinker + Sentinel).
+`Shift+Tab` cycles modes. Default loop: Ask/Scout → Plan → you yes → Agent/Fixer → `/pr-review` (Reviewer).
 
 ### Context (stay lean — saves Team limits)
 
@@ -89,13 +91,14 @@ Always load **`complyhub-bug-fix`** (Claude: `~/.claude/skills/…`; Cursor: `~/
 
 ### Delegation (Task subagents)
 
-Orchestrator stays lean; spawn by callsign/model from `ai-model-routing.md`:
+Orchestrator stays lean; spawn by agent/model per `.cursor/orchestrate/roles.md`:
 
-- Scout → `kimi-k2.7-code` or `composer-2.5-fast`
-- Hound → `gpt-5.3-codex`
-- Compass → `gpt-5.5-medium` (hard: `glm-5.2-high` / Opus-high)
-- Maker → `claude-4.6-sonnet-medium-thinking`
-- Tinker / Sentinel for `/pr-review`
+- Scout (recon, root-cause trace, approach sketch) → `kimi-k2.7-code` default; `gpt-5.3-codex` for a
+  stubborn root-cause trace or `glm-5.2-high` / Opus-high for hard architecture
+- Fixer → `claude-4.6-sonnet-medium-thinking` — always Claude Code itself
+- Reviewer (mechanical gauntlet + adversarial review + verdict) → `kimi-k2.7-code` for the review/
+  mechanical parts; `claude-opus-4-8-thinking-high` (or `gpt-5.5-medium` if cost-bound) for the verdict;
+  covers `/pr-review`
 
 Slash skills you already use: `/pr-review`, Bugbot + security-review in parallel on PRs, `/worktree`, `/babysit`.
 
@@ -118,6 +121,6 @@ When the other window's PR merges first: behind is normal; push usually OK; befo
 ## Related
 
 - `complyhub-kb/reference/worktree-workflow.md` — create/teardown worktrees
-- `complyhub-kb/reference/ai-model-routing.md` — crew, models, cost/limits
+- `complyhub-kb/reference/ai-model-routing.md` — cost/limits methodology (superseded on role names — see `.cursor/orchestrate/roles.md` for current Scout/Fixer/Reviewer models)
 - `complyhub-kb/handoffs/pr-review-fix-workflow.md` — PR fix loop
 - `.cursor/rules/ai-orchestration.mdc` — Cursor always-apply (workspace root)

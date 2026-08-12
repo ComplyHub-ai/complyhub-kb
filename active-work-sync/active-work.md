@@ -3,7 +3,26 @@
 > Parked findings and follow-ups for a **later session** — not current in-progress work.
 > Promote to a real task only via a new FRAME. See `CLAUDE.md` § "The Loop."
 
-Last updated: 07 August 2026
+Last updated: 11 August 2026
+
+---
+
+## Worktree registry (advisory — git is ground truth)
+
+> Which chat is using which worktree, on what task, since when. Check this before claiming a worktree
+> to branch in; a claim older than a day should be re-verified against `git status`/last-commit time
+> before trusting it. Where this disagrees with `git worktree list` / `git branch --show-current`, git
+> wins. One DB/migration/edge-function job across both worktrees at a time — see `CLAUDE.md`
+> § "Two worktrees".
+
+| Worktree | Path | Branch | Claimed by | Task | Since |
+|---|---|---|---|---|---|
+| A | `rto-compass-hub` | `fix/post-demo-backlog-cleanup` | this chat | Post-demo backlog: CI dual-column, SSR seed-path, Risk status table | 12 Aug 2026 |
+| B | `rto-compass-hub-worktree-b` | `main` 
+
+## Pending — awaiting reply
+
+- **Naduni (naduni@australiancollege.edu.au) — Monthly Trainer Report email claim, 11 Aug 2026.** Reported Natasha Green, Aimee Walters, Lauren Roennfeldt not receiving the report email for the 14 Aug 2026 governance meeting. Verified: Natasha + Lauren were sent the reminder 7 Aug 2026, confirmed delivered via Mailgun logs. Aimee submitted her report 23 Jul 2026 for this meeting, so no reminder was due — not a bug. Resent Natasha's and Lauren's emails 11 Aug 2026, confirmed delivered again via Mailgun. Reply sent to Naduni asking her to confirm with Aimee that her submission is on file. **Awaiting her response.**
 
 ---
 
@@ -20,44 +39,6 @@ aren't lost and aren't chased. Promote to a real task only via a new FRAME._
   Trainer/Student cannot write branding); **soak until ~20 Aug 2026** on source buckets
   (`branding`, `organisation-assets`, `avatars`, `dap-documents`, `industry-evidence`) before
   decommission; `organization-logos` (4 orphan objects) decommission after soak + explicit approval.
-- **`TrainerCredentialForm.tsx` has a cross-tenant-shaped storage scoping bug** — found 05 Aug 2026 while
-  auditing the `compliance-evidence` bucket for the remaining-18-bucket migration
-  (`fix/storage-migration-remaining-buckets` branch). `fetchUploadedFiles()` calls
-  `.storage.from('compliance-evidence').list('validation-evidence/')` with NO tenant or record scoping at
-  all — every tenant using this form lists and signs URLs against the same shared flat folder. Live RLS
-  check: `compliance_evidence_select` requires the path's first segment to cast to a valid tenant `uuid`,
-  but `validation-evidence` isn't a UUID, so the cast would error for any non-super-admin — meaning these
-  files may already be functionally broken (inaccessible) rather than actively leaking, but this was NOT
-  confirmed via a live multi-tenant test. Also calls `getPublicUrl()` against this bucket, which is
-  private — same dead-URL pattern already fixed elsewhere in this project. Deliberately NOT migrated as
-  part of the bucket consolidation — the real per-tenant `{tenant}/{record}/...` files in this bucket were
-  migrated normally; the flat `validation-evidence/` files were left in place rather than moving
-  genuinely-unscoped, ownerless data into the new shared bucket. Needs a real redesign of how this form
-  fetches/scopes its uploaded files (add tenant_id + record scoping to both the upload path and the list
-  call) — not a quick fix, not part of the storage migration.
-- **ComplyBot chat file attachments are not wired to the AI at all** — found 05 Aug 2026 while auditing
-  the `evidence-complybot` storage bucket for the remaining-18-bucket migration
-  (`fix/storage-migration-remaining-buckets` branch). `EnhancedComplyBotWidget.tsx` uploads the file and
-  displays it as a link in the chat, but its `sendMessage()` never passes the file (or its URL) into the
-  `callAI()` request — only chat text goes through. `ai-router/index.ts` does have attachment-handling
-  code, but it expects a completely different shape (inline base64 `content`, not a storage URL) and even
-  then only tells the AI a document with this name/size was attached — it explicitly does not analyze
-  content ("Full document content analysis requires the document parsing service... not built yet"). The
-  only persistence anywhere is an `admin_audit` log entry recording document names/count/size, not content.
-  Pre-existing gap, not a regression from the storage migration — attaching a file to ComplyBot today does
-  not help the AI answer anything about that file. Needs its own product/engineering scoping (whether and
-  how to actually wire attached-file content into the AI request) — not a quick fix, not part of the
-  storage migration.
-- **Two governance write functions are anon-executable SECURITY DEFINER** —
-  `gov_set_trainer_report_exemptions` and `gov_update_meeting_time` allow an unauthenticated caller to
-  invoke a security-definer write. Surfaced 22 Jul 2026 during Group 8 of the migration-drift
-  reconciliation (see `reconciliationwork.md`), but these functions sit outside the 138-item baseline
-  itself — a genuinely new finding, not baseline drift. Needs a dedicated follow-up: read both
-  functions' full bodies, confirm what an anonymous caller can actually do (caller-supplied tenant_id/
-  meeting_id with no ownership check?), then revoke anon execute if unwarranted — same pattern as
-  `revoke_anon_execute_billing_rpcs`. Lower-severity companions also anon-executable but read-only:
-  `get_clause_heatmap_data`, `get_clause_heat_timeline`, `get_clause_heatmap_trend`,
-  `get_clause_signals`, `notify_meeting_scheduled`.
 - **19 migrations merged to `main` but never applied to production** (ops/deploy gap, not a code
   defect). Date range 25 May–19 Jul 2026 — all recent, none Lovable-era. Surfaced during PR #259's
   REVIEW via the Migration Drift Check; recount on 20 Jul 2026 after correcting for version-timestamp
@@ -69,111 +50,27 @@ aren't lost and aren't chased. Promote to a real task only via a new FRAME._
   changes), dated 25 May–17 Jul 2026. Recount on 20 Jul 2026 after correcting for version-timestamp
   drift — original figure of 286 was overcounted. Needs investigation per the reconciliation-migration
   procedure in `supabase/migrations/CLAUDE.md`.
-- **`qi_annual_register` missing from git — branch DB fails at QI phase-0 remap** — found 06 Aug 2026
-  while validating branch DB after PR #385 merge. `20260805081059_qi_phase0_remap_register_ids.sql` (on
-  `main`, pre-dates storage work) runs `UPDATE ... FROM public.qi_annual_register` but the table was
-  created in production only (ledger `20260617223949` / `20260619050843` in `.drift-baseline.txt`) with
-  no matching migration files in git. Fresh branch DBs error `relation "public.qi_annual_register" does
-  not exist`; production likely already has the table and applied the remap. **Fix (later session,
-  separate `fix/*` PR):** backdated reconciliation migrations per `supabase/migrations/CLAUDE.md` —
-  `20260617223949_create_qi_annual_register_table.sql` (`CREATE TABLE IF NOT EXISTS`, DDL from prod or
-  `types.ts`) and `20260619050843_add_asqa_report_columns_to_qi_annual_register.sql` (`ADD COLUMN IF NOT
-  EXISTS`); post-merge `migration repair` for those versions; reset/recreate any branch DB that failed at
-  `81059`. Not part of PR #385 scope.
+- **`.drift-baseline.txt` still lists `20260617223949`/`20260619050843` as unresolved** — the
+  `qi_annual_register` migration files themselves are done (both merged to `main`, confirmed 11 Aug
+  2026), but the LOCKED plan's last step — pruning those two versions out of
+  `supabase/migrations/.drift-baseline.txt` — never happened. Small cleanup: remove both lines (363,
+  381) from the baseline file, same pattern `ea589f22d` used for its 6 resolved rows. Confirm Brian has
+  also run the two `migration repair` commands before touching the baseline file.
 - **Reconciliation follow-up queue** — 7 items in `reconciliationwork.md` § "Remaining work queue";
   item 1 (`sa_extend_trial_v2` guards) investigation complete, migration plan ready, awaiting sign-off
   (parked since 22 Jul 2026).
+- **Risk Register should get its own dedicated status lookup table, not share `dd_status`** — parked for **after demo**, logged 11 Aug 2026. Context: A-4 (Part 3 QA sweep, `feat/part3-onboarding-qa-sweep`) wired the Risk Register + Risk Dashboard status dropdown/filter to the shared `dd_status` table (previously a hardcoded Open/In Progress/Mitigated list). `dd_status` is also used by AVR and STR — it's a generic, shared vocabulary, not risk-specific. Immediate gap (risk had no "being worked on" state, only open/mitigated) fixed short-term same day by adding an `in_progress` row directly to the shared table (migration `20260811200200_part3_add_in_progress_dd_status.sql`) — cheap, but it also becomes selectable in AVR/STR's dropdowns since the table is shared, which is a mild pollution smell rather than a real bug. The correct long-term shape: give Risk its own dedicated status table, following the precedent already set by `ci_dd_status` and the `ofi_dd_*` family (each register owns its own vocabulary rather than falling back to a shared generic table) — new table + migration + RLS + re-wire `RiskRegister.tsx`/`RiskManagementDashboard.tsx` off `dd_status` onto the new table. Not attempted now — real scope, and not worth touching mid-demo-prep. Schedule as its own FRAME after the demo.
+- **`ci_register` dual columns (`priority` vs `priority_level`) have no single source of truth** — parked for **after demo**, logged 12 Aug 2026. Context: Part 3 QA sweep's A-6 fixed the live casing bug (backfilled both columns to lowercase, fixed writers/readers, fixed the main CI form's hardcoded Title Case options) — confirmed live 12 Aug 2026 that all non-null values in both columns are now lowercase and consistent. What's still open: two columns exist for the same concept with no sync guarantee going forward — decide which is canonical and migrate/deprecate the other. Full detail: `complyhub-kb/audit/2026-08-12_part3-onboarding-qa-sweep-risk-ci-ofi-complaints-ssr.md` § A-6.
+- **SSR seed-path permanent fix for `responsible_person`** — parked for **after demo**, logged 12 Aug 2026. Context: B-1's immediate fix (backfilling the 10 seeded Demo-tenant SSR rows to Angela Connell-Richards) was applied and verified 12 Aug 2026 — zero nulls remain on that tenant. Still open: (1) the demo/seed-data creation path must set `responsible_person` whenever SSR rows are seeded, so this doesn't recur for future demo tenants; (2) decide whether `ssr_register.responsible_person` should become DB `NOT NULL` (would need a full null backfill across all tenants first); (3) decide the fate of Direct Response's one remaining null row (excluded from the Demo-tenant backfill, not yet investigated). Full detail: `complyhub-kb/audit/2026-08-12_part3-onboarding-qa-sweep-risk-ci-ofi-complaints-ssr.md` § B-1.
 - **`training_product_units` reference data is 96% empty across production** — root cause of a data-loss-shaped bug in `rpc_bulk_upsert_trainer_units` that was fixed 07 Aug 2026 (see commit `f7fbcc79b` + migration `20260807124853_fix_rpc_bulk_upsert_trainer_units_missing_reference_data.sql`, on branch `fix/document-register-storage-and-attachments-batch`). 3,428 of 3,567 `training_products` rows have zero linked `training_product_units` rows; one real tenant (`a6a60268…`) has literally none for any of its 97 qualifications. The RPC fix means missing reference data no longer silently discards trainer unit assignments — units for a qualification with no data loaded now save anyway and are reported as "unverified" rather than blocked. But the underlying gap remains: ComplyHub has no unit-of-competency mapping loaded for the vast majority of qualifications, so the relevance guard can't actually do its intended job (flag genuinely wrong units) for those qualifications — it can only pass everything through. Needs a dedicated data-population effort (bulk import `training_product_units` from TGA / training.gov.au per qualification) — not a code fix, out of scope for a bug-fix PR. Scope/owner/priority not yet decided.
 
-## Diagnosis + Implementation Plans — LOCKED, ready for implementation in a new chat (07 Aug 2026)
+## Diagnosis + Implementation Plans — items 1-5 DONE (confirmed 11 Aug 2026, all merged to main)
 
-> Diagnosis-only pass per Brian's request — no code edited, no migrations applied, no commits made.
-> Items 1-4 are LOCKED (Brian has reviewed and approved each plan below) — a new chat with no prior
-> context can pick this file up cold and implement items 1-4 directly, one FRAME each, without needing
-> to re-diagnose. Item 5 is CLOSED (no action needed). Item 6 is PARKED for a separate dedicated batch.
-
-### 1. TrainerCredentialForm.tsx cross-tenant storage scoping bug — LOCKED
-
-Root cause confirmed real via code + live RLS read. `src/components/forms/TrainerCredentialForm.tsx` uploads to `compliance-evidence/validation-evidence/<file>` (lines 262-270) with no tenant/record scoping, lists that same flat shared folder in `fetchUploadedFiles()` (lines 207-214), and calls `getPublicUrl()` on a *private* bucket (lines 275-277, dead-URL pattern). Live RLS policy `compliance_evidence_select` requires the first path segment to cast to a `uuid` tenant_id — `validation-evidence` fails that cast, meaning the 9 existing flat objects are likely already inaccessible (broken, not just shared) rather than actively leaking.
-
-This exact bug is **already documented** in migration `20260805060601_add_validation_reports_path_role_grant.sql`'s header comment (05 Aug 2026), which deliberately deferred it as a separate fix and logged it to this same ledger.
-
-**Confirmed 07 Aug 2026: NOT caused by the document-repository-consolidation migration (PR #385).** This bug has existed in the form's own upload code since it was written — the 05 Aug 2026 migration that documents it was unrelated work that happened to notice a pre-existing bug in a different bucket while passing through, not something that migration introduced.
-
-**LOCKED plan — Option B (remove duplicate, not patch), approved by Brian 07 Aug 2026:** The form already renders a second, correctly-scoped upload widget (`RegisterEvidenceUpload`, lines 640-647) using the canonical tenant/record-scoped hook pattern. Delete the broken legacy path entirely: `handleFileUpload`, `fetchUploadedFiles`, the manual "Supporting Evidence" file list UI (lines 579-627), `uploadedFiles` state, and `evidence_upload_url` field wiring — rely solely on `RegisterEvidenceUpload`. ~120 lines removed, no new migration needed (existing RLS already accepts `{tenant_id}/{recordId}/...` shape).
-
-**Fallback — Option A (in-file fix, if Option B is rejected):** Rewrite path to `${effectiveTenantId}/${initialData?.id ?? 'new'}/${fileName}`, scope `.list()` the same way, replace `getPublicUrl()` with `createSignedUrl()` (pattern already used elsewhere in the same file at lines 220-222).
-
-**Open risk requiring a human decision (Dave/Angela):** the 9 pre-existing flat objects in `compliance-evidence/validation-evidence/` are "genuinely unscoped, ownerless" per the 05 Aug migration's own conclusion — before any deletion/migration of those objects, need to determine per-object tenant ownership (e.g. cross-reference `trainer_credentials.evidence_upload_url` values against filenames) — out of scope for the component-level code fix.
-
-**Scope:** single file, no DB changes for the code fix itself. Blast radius: any in-progress edit on a `trainer_credentials` record using the legacy uploader will lose its file-list view (files were arguably already unreadable via RLS anyway).
-
----
-
-### 2. ComplyBot chat attachments not wired to AI — LOCKED
-
-`EnhancedComplyBotWidget.tsx`'s `sendMessage()` (lines 466-470) never includes attachment data in the `callAI()` context — only `tenantId`/`pageContext` are sent, despite `attachedFiles` being fully uploaded/signed/displayed in the UI. `supabase/functions/ai-router/index.ts` (lines 630-748) has attachment-handling code, but expects inline base64 `content` (not a storage URL), and its own comment at line 745 admits "Full document content analysis requires the document parsing service... not built yet." Currently 100% dead code since the widget sends nothing.
-
-**No new parsing service needed** — the codebase already has a proven pattern for Claude-native document/image analysis: `supabase/functions/analyze-credential-certificate/index.ts` (lines 43-74, 201-220) downloads from Storage, base64-encodes via `_shared/base64.ts`, and sends as a Claude `document`/`image` content block. Same pattern reused in 8+ other edge functions (analyze-resume, ai-matrix-extract, extract-assessment-tool-fields, etc.).
-
-**LOCKED plan — two PRs in sequence, approved by Brian 07 Aug 2026:**
-- **PR 1 (small, near-zero risk):** Wire the currently-dead metadata pass-through. In `EnhancedComplyBotWidget.tsx` `sendMessage()` (~line 466-470), add `attachments: currentAttachments.map(f => ({name, url, type, size}))` to the `context` object. In `ai-router/index.ts` (lines 630-748), change expected shape from base64 `content` to `url`, drop the misleading "not built yet" wording, keep it as metadata-only guidance (matches today's actual behavior, just no longer silently dropped).
-- **PR 2 (medium, real content analysis):** Extend `ai-router/index.ts` to `fetch()` each attachment's signed URL, base64-encode, and build a Claude `document`/`image` content block attached to the user's actual message (not just system prompt) — reusing `_shared/base64.ts` and the `analyze-credential-certificate` pattern. PDF/image only (Claude's document block doesn't support DOCX — exclude DOCX from real analysis or add a conversion step later). **Must extract this into a new `supabase/functions/ai-router/attachments.ts` helper module** rather than adding more inline code — `ai-router/index.ts` is already ~1116 lines, over the repo's ~500-line/function guidance, and this must not make that worse. Preserve the existing role-gate (lines 644-693) faithfully inside the new module.
-
-**Scope:** 2 files for PR 1 (small), same 2 files + 1 new helper module for PR 2 (medium). No DB/migration changes.
-
----
-
-### 3. Document Register bulk-delete orphaned-files bug — LOCKED
-
-**Toast timing confirmed:** the success toast (`src/pages/admin/DocumentsRegister.tsx:1036-1050`) fires only *after* the full sequential 374-call file-cleanup loop resolves — the await chain is unbroken from `handleBulkDelete` → `mutateAsync` → `bulkDeleteDocuments()` → `deleteBulkDocumentFilesAfterRows()` → `deleteFiles()`. There is no `toast.loading(...)` progress indicator during the ~4-5 minute loop (unlike the upload flow, which does use one), so a user watching an apparently-idle UI for minutes has good reason to close the tab, which is the most likely explanation for the 257/374 partial completion (each per-file call is already individually try/caught, so a single failure shouldn't have silently stopped the loop — an interruption from outside the loop, e.g. tab close/nav-away/session drop, is more likely than an unhandled error).
-
-**LOCKED fix — batch the storage delete instead of one-file-per-HTTP-call, approved by Brian 07 Aug 2026 (parallel work with other items is fine):** Supabase Storage's `remove()` already accepts up to 1000 paths in a single call; the current code calls it with an array of length 1, 374 times, for no structural reason.
-- `supabase/functions/document-file-manager/index.ts` (new action alongside existing `'delete'` block at lines 282-292): add `'delete_batch'` accepting `paths: string[]` (capped at 1000, same `canWriteDocumentFile` role gate reused), call `adminClient.storage.from(BUCKET).remove(paths)` once, diff `paths` against the returned `data` array to report which specific paths failed (not all-or-nothing).
-- `src/lib/documentFiles.ts`: add `deleteDocumentFilesBatch({tenantId, paths})` near existing `deleteDocumentFiles` (lines 147-164); keep the sequential version for other callers (e.g. `downloadDocumentFiles`) untouched.
-- `src/hooks/useBulkDeleteDocuments.ts:65`: minimal-surface change — swap the injected `deleteFiles` callback from `deleteDocumentFiles` to `deleteDocumentFilesBatch`. No change needed to `documentsRegisterLogic.ts`'s DB-first ordering/contract (that reasoning is untouched by batching the storage side).
-- This collapses ~4-5 minutes / 374 round-trips down to ~1 round-trip (~1s), nearly eliminating the interruption window.
-
-**Residual risks to carry into implementation:** batch `remove()` is not transactional (partial failure still possible — must still surface a `failed: string[]` via the existing `resolveBulkDeleteToast` warning path, unchanged); a single batch call can still be interrupted mid-flight (much smaller window, not literally zero); new edge function action must sit inside the existing auth-gate chain (JWT → tenant_members → `canWriteDocumentFile`), reusing already-resolved `profileRole`/`membership`, not re-deriving it.
-
-**Scope:** 3 files (1 edge function, 1 lib, 1 hook), no migration. This is the highest-value fix of the six — directly closes a data-loss-shaped bug that already caused an incident.
-
----
-
-### 4. `qi_annual_register` missing from git — LOCKED, confirmed NOT already resolved by past PRs
-
-`.drift-baseline.txt` confirms both versions (`20260617223949`, `20260619050843`) as known production-only orphans. **Important: the first diagnosis pass drafted DDL/RLS policies from `types.ts` alone and got the policies wrong — a live `information_schema`/`pg_policies`/`pg_constraint` query was run afterward and is the corrected, authoritative version below.**
-
-**Checked 07 Aug 2026 against git history per Brian's request** ("I think I already resolved that, check past PRs"): two relevant reconciliation commits exist — `aea28da14` ("storage bucket repoints... + QI migration drift reconciliation", 06 Aug 2026) reconciled the 9 QI **phase0/1/2 campaign** migrations (`qi_phase0_*`, `qi_phase1_*`, `qi_phase2_*`, dated 05 Aug 2026), and `ea589f22d` ("reconcile 7 orphaned production migrations") reconciled Help Centre + billing-gate batches. **Neither touched `20260617223949` or `20260619050843`** — confirmed via `git log --all -p` on `.drift-baseline.txt`, which still lists both versions as unresolved. This item is a genuinely separate, still-open gap from the ones already fixed that week — not a duplicate of already-completed work.
-
-Verified live schema facts (NOT matching the types.ts-only draft):
-- `status` column default is `'in_progress'` (not `'draft'`), with a CHECK constraint: `status = ANY(ARRAY['in_progress','ready_for_review','submitted'])`
-- Two UNIQUE constraints: `(tenant_id, custom_id)` and `(tenant_id, survey_year)`
-- FKs: `tenant_id → tenants(tenant_id) ON DELETE CASCADE`; `created_by`/`updated_by`/`asqa_submitted_by` → `auth.users(id)`
-- RLS (row security enabled) uses real live policies, NOT generic tenant_members-role checks: `qi_annual_register_select` (`sec.is_super_admin() OR sec.is_tenant_member(tenant_id)`), `qi_annual_register_insert`/`_update` (`sec.has_tenant_role(tenant_id, ARRAY['Administrator','Compliance Manager'])`), `qi_annual_register_delete` (`sec.is_super_admin() OR sec.has_tenant_role(tenant_id, ARRAY['Administrator'])`), plus a `billing_gate` ALL-command policy (`sec.user_in_tenant(tenant_id) AND sec.tenant_is_active(tenant_id)`), a RESTRICTIVE `restrict_sa_select_qi_annual_register` (`sec.superadmin_tenant_gate(tenant_id)`), and RESTRICTIVE write-lock policies on insert/update/delete (`NOT sec.is_tenant_write_locked(tenant_id)`).
-
-**LOCKED plan, approved by Brian 07 Aug 2026:** write two backdated migration files matching this verified live DDL exactly (not the types.ts-only draft):
-- `supabase/migrations/20260617223949_create_qi_annual_register_table.sql` — full `CREATE TABLE IF NOT EXISTS` with all columns/defaults/constraints/FKs above, `ENABLE ROW LEVEL SECURITY`, and every policy listed above recreated with `DROP POLICY IF EXISTS` guards.
-- `supabase/migrations/20260619050843_add_asqa_report_columns_to_qi_annual_register.sql` — `ALTER TABLE ... ADD COLUMN IF NOT EXISTS` for the 5 `asqa_*` columns only.
-- Post-merge: do **not** re-run this DDL against production (it already exists there) — only repair the ledger: `supabase migration repair --status applied 20260617223949` then `...20260619050843`, then verify via `SELECT version, name FROM supabase_migrations.schema_migrations WHERE version IN (...)`.
-- Also reset/recreate any branch DB that failed at migration `20260805081059` once these two land (that migration self-guards with `IF to_regclass(...) IS NULL THEN RETURN`, so it currently no-ops safely rather than hard-failing — worth confirming this against the original "fails at phase-0 remap" report before treating it as urgent).
-- Prune both versions (`20260617223949`, `20260619050843`) out of `.drift-baseline.txt` once reconciled — same cleanup pattern `ea589f22d` used for its 6 resolved rows.
-
-**Scope:** 2 new migration files (DDL matches existing prod state, no functional change), plus 2 `migration repair` commands run by Brian from his terminal post-merge, per the interim procedure. No new tables/data actually created in production — purely ledger reconciliation.
-
----
-
-### 5. Anon-executable governance functions — CLOSED, no action needed
-
-Read both full function bodies (`gov_set_trainer_report_exemptions`, `gov_update_meeting_time`) via live `pg_get_functiondef` — both are `SECURITY DEFINER` but **both explicitly check `auth.uid() IS NULL` and raise `unauthenticated`** as their first action, so even if anon-executable at the GRANT level, an anonymous (no-JWT) caller could not get past that check.
-
-More importantly: a direct live query of `has_function_privilege()` for `anon` against all 7 functions named in this ledger item (`gov_set_trainer_report_exemptions`, `gov_update_meeting_time`, `get_clause_heatmap_data`, `get_clause_heat_timeline`, `get_clause_heatmap_trend`, `get_clause_signals`, `notify_meeting_scheduled`) shows **`anon` currently has NO execute privilege on any of them** — all 7 return `can_exec: false` for `anon`, `true` for `authenticated` only.
-
-**Conclusion: this ledger item's premise no longer matches live production state.** Either the anon grants were already revoked at some point after 22 Jul 2026 (e.g. as part of a later migration cleanup) without the ledger being updated, or the original finding was already incorrect. Either way, **no anon-execute revocation work is needed right now** — recommend closing this ledger item rather than scheduling a fix, but leave a note to spot-check `revoke_anon_execute_billing_rpcs`-style migrations to confirm which migration (if any) already fixed this, for the team's own record.
-
-**Scope:** none — investigation-only outcome, no code/migration change needed.
-
----
+> Items 1-4 (TrainerCredentialForm scoping, ComplyBot attachments, bulk-delete batching,
+> `qi_annual_register` migrations) confirmed merged to `main` via `89f00a31a` + follow-on hardening
+> commits. Item 5 (anon governance functions) was already CLOSED with no action needed. Removed from
+> this ledger 11 Aug 2026 — see git history / `f7fbcc79b` and `89f00a31a` for detail if needed. Item 4's
+> drift-baseline cleanup leftover moved back into the Backlog section above. Item 6 remains below.
 
 ### 6. Migration drift recount (19 unapplied / 213 orphaned) — PARKED for a separate dedicated batch (per Brian, 07 Aug 2026)
 
@@ -227,3 +124,10 @@ Checked `get_logs(service: 'edge-function')` for the 20-minute window around 202
 - `src/lib/documentFiles.ts` (`deleteDocumentFile`, `deleteDocumentFiles`)
 - `supabase/functions/document-file-manager/index.ts` (server-side delete action, line ~282-292)
 - Whatever page/component in `src/pages/` actually invokes `useBulkDeleteDocuments()` — not yet located, needed to check toast timing (see next step 1 above)
+
+## IN PROGRESS — PR review session (started 10 Aug 2026, resume here)
+
+**Context:** Working through the open rto-compass-hub PRs per `pr-review-open-prs.md` (workspace root) using the `/pr-review` skill and the Scout → Reviewer flow. Open PRs: #397 (see `pr-review-open-prs.md` for the full table — do not duplicate that tracking here, this section is just the resume pointer).
+
+**Next steps on resume:**
+1. Proceed to PR #397 (not yet started).

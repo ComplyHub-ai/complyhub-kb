@@ -46,7 +46,7 @@ Angela enabled Tier A/B labels, CODEOWNERS, auto-merge, and stale sweep on
 11. **Update `pr-review-open-prs.md`** with verdict, merge hash, deploy/migration notes
 12. `git checkout main && git pull` before next PR
 
-Full checklist: `.claude/commands/pr-review.md` (Tinker + Sentinel).
+Full checklist: `.claude/commands/pr-review.md` (Reviewer).
 
 ## Rules
 

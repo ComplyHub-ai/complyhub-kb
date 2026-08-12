@@ -14,8 +14,13 @@ description: Sync the complyhub-kb/active-work-sync/ mirror (root .md files, mem
 2. **Personal memory** — `C:\Users\brian\.claude\projects\c--Users-brian-complyhubworkspace\memory\` →
    mirrored into `complyhub-kb/active-work-sync/memory/`.
 3. **User-level skills** — `C:\Users\brian\.claude\skills\` → mirrored into
-   `complyhub-kb/active-work-sync/user-skills/`. (`user-commands/` covers any user-level slash-command
-   `.md` files, e.g. `pr-review.md`, if that's a separate directory on this machine.)
+   `complyhub-kb/active-work-sync/user-skills/`.
+
+There is no separate user-level slash-command directory on this machine — `pr-review` (previously
+mirrored as `user-commands/pr-review.md`) is actually the `pr-review` skill under
+`C:\Users\brian\.claude\skills\`, already covered by category 3. The `user-commands/` mirror folder and
+its "2d" diff step were removed 12 Aug 2026 as a result — don't recreate either unless Brian says a real
+user-level commands directory exists on this machine.
 
 This mirror drifts because Brian edits the real files (root `.md`s, memory, skills) far more often than
 he remembers to update the KB copy. This skill is the **one-way sync**: real workspace → KB mirror.
@@ -61,10 +66,6 @@ against `complyhub-kb/active-work-sync/memory/` the same way — updated / new /
 updated / new / orphaned. A skill directory present on disk but missing entirely from the mirror is a
 **new skill** — call this out explicitly, since that's the case most likely to matter to Brian (a whole
 capability the team KB doesn't know exists yet).
-
-**2d. User-level commands** (if `user-commands/` mirrors a real directory on this machine — confirm
-where slash-command `.md` files actually live before diffing; do not invent a path). Same
-updated/new/orphaned comparison.
 
 ### Step 3 — Report in plain English before touching anything
 
