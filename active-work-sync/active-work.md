@@ -3,7 +3,7 @@
 > Parked findings and follow-ups for a **later session** — not current in-progress work.
 > Promote to a real task only via a new FRAME. See `CLAUDE.md` § "The Loop."
 
-Last updated: 11 August 2026
+Last updated: 19 August 2026 (worktree C ledger cleanup — removed stale/completed items)
 
 ---
 
@@ -17,12 +17,11 @@ Last updated: 11 August 2026
 
 | Worktree | Path | Branch | Claimed by | Task | Since |
 |---|---|---|---|---|---|
-| A | `rto-compass-hub` | `main` (read-only) | this chat | PR review mode: PR #418 first, then PR #412 — no local branch checked out for either (both are Cursor-agent branches) | 12 Aug 2026 |
-| B | `rto-compass-hub-worktree-b` | `main` 
+| A | `rto-compass-hub` | `fix/tas-pdf-generation-remaining-paths` | Codex | TAS PDF generation remaining stale paths | 20 Aug 2026 |
+| B | `rto-compass-hub-worktree-b` | `fix/tas-pdf-metadata-pagination-cleanup` | Codex | Fix remaining TAS PDF metadata, placeholders, website/release normalisation, and pagination issues | 20 Aug 2026 |
+| C | `rto-compass-hub-C` | `main (synced to main @ 2b366b176)` | unclaimed | — (PR #541 merged: Sales Dashboard Created date column, Dave's request) | 20 Aug 2026 |
 
 ## Pending — awaiting reply
-
-- **Naduni (naduni@australiancollege.edu.au) — Monthly Trainer Report email claim, 11 Aug 2026.** Reported Natasha Green, Aimee Walters, Lauren Roennfeldt not receiving the report email for the 14 Aug 2026 governance meeting. Verified: Natasha + Lauren were sent the reminder 7 Aug 2026, confirmed delivered via Mailgun logs. Aimee submitted her report 23 Jul 2026 for this meeting, so no reminder was due — not a bug. Resent Natasha's and Lauren's emails 11 Aug 2026, confirmed delivered again via Mailgun. Reply sent to Naduni asking her to confirm with Aimee that her submission is on file. **Awaiting her response.**
 
 ---
 
@@ -31,7 +30,7 @@ Last updated: 11 August 2026
 _Adjacent issues surfaced during work but outside the task's Scope Line. Parked here so they
 aren't lost and aren't chased. Promote to a real task only via a new FRAME._
 
-- **PR #385 post-merge — manual QA + 14-day soak** — prod migrations, object copy (110 files), edge
+1. **PR #385 post-merge — manual QA + 14-day soak** — prod migrations, object copy (110 files), edge
   deploy, and DML backfills all applied 06 Aug 2026 (detail in `last.md` and audit index
   `complyhub-kb/audit/2026-08-06_document-repository-consolidation-index.md`; soak schedule in
   `document-repository-consolidation.md`). **Still Brian-gated:** manual QA as
@@ -39,40 +38,52 @@ aren't lost and aren't chased. Promote to a real task only via a new FRAME._
   Trainer/Student cannot write branding); **soak until ~20 Aug 2026** on source buckets
   (`branding`, `organisation-assets`, `avatars`, `dap-documents`, `industry-evidence`) before
   decommission; `organization-logos` (4 orphan objects) decommission after soak + explicit approval.
-- **19 migrations merged to `main` but never applied to production** (ops/deploy gap, not a code
-  defect). Date range 25 May–19 Jul 2026 — all recent, none Lovable-era. Surfaced during PR #259's
-  REVIEW via the Migration Drift Check; recount on 20 Jul 2026 after correcting for version-timestamp
-  drift (Supabase records actual execution time, not filename time) — original figure of 81 was
-  overcounted. Needs its own dedicated pass: batch-verify each one's actual DB state vs. expected,
-  then apply via MCP `apply_migration`, in dependency order. Full list captured in the 20 Jul 2026
-  conversation / CI log for PR #259.
-- **213 production migration records with no corresponding local file** (undocumented direct-to-prod
-  changes), dated 25 May–17 Jul 2026. Recount on 20 Jul 2026 after correcting for version-timestamp
-  drift — original figure of 286 was overcounted. Needs investigation per the reconciliation-migration
-  procedure in `supabase/migrations/CLAUDE.md`.
-- **`.drift-baseline.txt` still lists `20260617223949`/`20260619050843` as unresolved** — the
-  `qi_annual_register` migration files themselves are done (both merged to `main`, confirmed 11 Aug
-  2026), but the LOCKED plan's last step — pruning those two versions out of
-  `supabase/migrations/.drift-baseline.txt` — never happened. Small cleanup: remove both lines (363,
-  381) from the baseline file, same pattern `ea589f22d` used for its 6 resolved rows. Confirm Brian has
-  also run the two `migration repair` commands before touching the baseline file.
-- **Reconciliation follow-up queue** — 7 items in `reconciliationwork.md` § "Remaining work queue";
-  item 1 (`sa_extend_trial_v2` guards) investigation complete, migration plan ready, awaiting sign-off
-  (parked since 22 Jul 2026).
-- **Risk Register should get its own dedicated status lookup table, not share `dd_status`** — parked for **after demo**, logged 11 Aug 2026. Context: A-4 (Part 3 QA sweep, `feat/part3-onboarding-qa-sweep`) wired the Risk Register + Risk Dashboard status dropdown/filter to the shared `dd_status` table (previously a hardcoded Open/In Progress/Mitigated list). `dd_status` is also used by AVR and STR — it's a generic, shared vocabulary, not risk-specific. Immediate gap (risk had no "being worked on" state, only open/mitigated) fixed short-term same day by adding an `in_progress` row directly to the shared table (migration `20260811200200_part3_add_in_progress_dd_status.sql`) — cheap, but it also becomes selectable in AVR/STR's dropdowns since the table is shared, which is a mild pollution smell rather than a real bug. The correct long-term shape: give Risk its own dedicated status table, following the precedent already set by `ci_dd_status` and the `ofi_dd_*` family (each register owns its own vocabulary rather than falling back to a shared generic table) — new table + migration + RLS + re-wire `RiskRegister.tsx`/`RiskManagementDashboard.tsx` off `dd_status` onto the new table. Not attempted now — real scope, and not worth touching mid-demo-prep. Schedule as its own FRAME after the demo.
-- **`ci_register` dual columns (`priority` vs `priority_level`) have no single source of truth** — parked for **after demo**, logged 12 Aug 2026. Context: Part 3 QA sweep's A-6 fixed the live casing bug (backfilled both columns to lowercase, fixed writers/readers, fixed the main CI form's hardcoded Title Case options) — confirmed live 12 Aug 2026 that all non-null values in both columns are now lowercase and consistent. What's still open: two columns exist for the same concept with no sync guarantee going forward — decide which is canonical and migrate/deprecate the other. Full detail: `complyhub-kb/audit/2026-08-12_part3-onboarding-qa-sweep-risk-ci-ofi-complaints-ssr.md` § A-6.
-- **SSR seed-path permanent fix for `responsible_person`** — parked for **after demo**, logged 12 Aug 2026. Context: B-1's immediate fix (backfilling the 10 seeded Demo-tenant SSR rows to Angela Connell-Richards) was applied and verified 12 Aug 2026 — zero nulls remain on that tenant. Still open: (1) the demo/seed-data creation path must set `responsible_person` whenever SSR rows are seeded, so this doesn't recur for future demo tenants; (2) decide whether `ssr_register.responsible_person` should become DB `NOT NULL` (would need a full null backfill across all tenants first); (3) decide the fate of Direct Response's one remaining null row (excluded from the Demo-tenant backfill, not yet investigated). Full detail: `complyhub-kb/audit/2026-08-12_part3-onboarding-qa-sweep-risk-ci-ofi-complaints-ssr.md` § B-1.
-- **`training_product_units` reference data is 96% empty across production** — root cause of a data-loss-shaped bug in `rpc_bulk_upsert_trainer_units` that was fixed 07 Aug 2026 (see commit `f7fbcc79b` + migration `20260807124853_fix_rpc_bulk_upsert_trainer_units_missing_reference_data.sql`, on branch `fix/document-register-storage-and-attachments-batch`). 3,428 of 3,567 `training_products` rows have zero linked `training_product_units` rows; one real tenant (`a6a60268…`) has literally none for any of its 97 qualifications. The RPC fix means missing reference data no longer silently discards trainer unit assignments — units for a qualification with no data loaded now save anyway and are reported as "unverified" rather than blocked. But the underlying gap remains: ComplyHub has no unit-of-competency mapping loaded for the vast majority of qualifications, so the relevance guard can't actually do its intended job (flag genuinely wrong units) for those qualifications — it can only pass everything through. Needs a dedicated data-population effort (bulk import `training_product_units` from TGA / training.gov.au per qualification) — not a code fix, out of scope for a bug-fix PR. Scope/owner/priority not yet decided.
+2. **"Supabase Preview" branch-DB build fails on every PR, not just drift-affected ones** — confirmed 19 Aug 2026 during PR #500 (ComplyBot Phase 0). Error: `duplicate key value violates unique constraint "schema_migrations_pkey" — Key (version)=(20260814061750) already exists`. Verified live: production's ledger already has this exact version/name (`reschedule_fixed_tga_ingest_crons_avoid_race`) matching the git file — not a naming collision. Root cause: the preview-branch builder clones a production snapshot (which already has this version recorded) then replays all local migration files on top, including ones the snapshot already has, instead of skipping already-applied versions. This is the branch-DB-fails symptom `supabase/migrations/CLAUDE.md`'s "supabase db push is currently unusable" section already documents. **Confirmed pre-existing and universal**: PR #496 and #494 (both already merged last week, unrelated changes) show the identical "Supabase Preview: fail." Does not block merge (`mergeStateStatus: MERGEABLE`, not a required check) but means no PR gets a working preview branch DB right now. Full fix is the same ~2,000-version reconciliation project below — not a quick patch.
+3. **types.ts hand-patching practice gap** — surfaced 18 Aug 2026 during PR #472 (post-457/467
+  cleanup). `types.ts` hadn't had a full `generate_typescript_types` regen since 5 Aug 2026 — every
+  PR since (including #457 itself) only hand-added the specific column(s) it needed, so tables added
+  purely via migration (no matching hand-edit) never appeared: the whole `intelligence_*` subsystem
+  (added 12 Aug), `qi_campaigns`/`qi_campaign_recipients` (added 5 Aug, same day as the last regen but
+  after it), `governance_thresholds`, `meeting_duplicate_candidates`, `driver_register_map`, and more.
+  PR #472 did a full regen to catch up. No process fix yet decided (e.g. a CI check that flags
+  types.ts drift against `list_migrations`, or a habit of always running the full regen instead of
+  hand-patching) — needs a FRAME if Brian wants one.
+4. **Retire `fix-user-deletion-recursion` edge function** — surfaced 17 Aug 2026 during PR #454 review.
+  This function's only job is to `CREATE OR REPLACE` `sa_delete_user` from a hardcoded, out-of-date SQL
+  string (deletes only from `organization_members`/`user_invitations`/`profiles`). The **live**
+  `sa_delete_user` has since been substantially rewritten (also cleans up `tp_trainers`, evidence
+  documents/links, and a dozen deprecated tables) — confirmed via `pg_get_functiondef` on 17 Aug 2026.
+  If this endpoint is ever invoked, it would silently regress `sa_delete_user` back to the old, far less
+  thorough version. Confirmed via `main` (post PR #462) that someone already patched the one column-name
+  bug in this file's embedded SQL (`organization_id` → `tenant_id`) but did **not** address the deeper
+  staleness — the embedded fix is still years behind the live function. Nothing calls this endpoint today
+  (`fixUserDeletionRecursion()` in `src/utils/` is exported but never imported anywhere in `src/`), so it's
+  not click-reachable, but it's still a live, deployed endpoint (`verify_jwt = true` in `config.toml`)
+  reachable directly with a super-admin token.
+  **Plan (not yet executed — do this on a fresh branch off current `main`, not stacked onto PR #454):**
+  delete `supabase/functions/fix-user-deletion-recursion/index.ts`, delete
+  `src/utils/fixUserDeletionRecursion.ts`, and remove the `[functions.fix-user-deletion-recursion]` entry
+  from `supabase/config.toml`. Small, single-purpose PR — re-verify against current `main` first in case
+  it's been touched again since 17 Aug 2026.
+5. **Dead `GovernancePrioritySection` imports pre-existing on `main`** — surfaced 18 Aug 2026 during PR
+  #443 review. `src/components/pli/PLIForm.tsx` and `src/pages/registers/audit/AIRRegisterForm.tsx`
+  both import `GovernancePrioritySection` but never render it anywhere in the file — confirmed via
+  `git show main:<file> | grep -c GovernancePrioritySection` returning exactly 1 (the import line) on
+  both, i.e. this predates PR #443 and isn't introduced by it. Harmless (unused import, not a runtime
+  bug) but worth a trivial cleanup PR at some point — remove the unused import line from both files.
+6. **Possible `super_admin` role-casing bug in `canAccessPath` (`src/config/permissions.ts`)** — surfaced
+  19 Aug 2026 during ci-gate on PR #498's frontend-only rebuild (`feat/standalone-forms-frontend-only`,
+  worktree C). `canAccessPath` checks `userRoles?.includes('super_admin')` alongside Proper-Case
+  literals (`'Administrator'`, `'Consultant'`, `'Consultant Assistant'`) — but `ROLES.SUPER_ADMIN` is
+  defined as lowercase `'super_admin'` in `src/lib/constants/roles.ts`, while this codebase's other
+  role storage is Proper Case (per [[feedback_role_casing_proper_case]] precedent — same bug class as
+  PR #310/`generate-audit-pack`). Confirmed this line is **pre-existing, unchanged** by PR #498 (only
+  whitespace-reformatted in the diff) — not this branch's fix to make. Needs its own check: what value
+  is actually stored for super-admin users on `tenant_members.role`/`profiles.role` — if it's not
+  literally `'super_admin'`, every super-admin bypass check in `canAccessPath` silently fails.
+7. **Missing role gate at DB/RPC layer on `training_product_transition_cases`/`_tasks`** — surfaced 18 Aug 2026 during PR #446 review (Training Product Transitions page). The RLS write policies and `rpc_close_transition_case` only check tenant membership + active billing + write-lock status — never caller role. UI correctly disables writes for Regulatory Officer (`useCanWriteTenantContent`/`OPERATIONAL_WRITE_ROLES` excludes that role), but nothing server-side backs that up — any authenticated tenant member could call the RPC or table update directly via devtools and bypass the read-only restriction. Confirmed via live `pg_policies`/`pg_get_functiondef` on 18 Aug 2026 — not unique to this PR, the same "role-gated read, ungated write" shape exists across ~69 tables using the same `write_lock_*` pattern already in production (e.g. `governance_actions`). Brian confirmed 18 Aug 2026 this is fine to ship as-is and fix later. Needs its own dedicated FRAME: likely a new migration adding a role check to the RESTRICTIVE write-lock policies (or the RPC itself), possibly scoped as a wider audit across all 69 affected tables rather than a one-table patch.
 
-## Diagnosis + Implementation Plans — items 1-5 DONE (confirmed 11 Aug 2026, all merged to main)
-
-> Items 1-4 (TrainerCredentialForm scoping, ComplyBot attachments, bulk-delete batching,
-> `qi_annual_register` migrations) confirmed merged to `main` via `89f00a31a` + follow-on hardening
-> commits. Item 5 (anon governance functions) was already CLOSED with no action needed. Removed from
-> this ledger 11 Aug 2026 — see git history / `f7fbcc79b` and `89f00a31a` for detail if needed. Item 4's
-> drift-baseline cleanup leftover moved back into the Backlog section above. Item 6 remains below.
-
-### 6. Migration drift recount (19 unapplied / 213 orphaned) — PARKED for a separate dedicated batch (per Brian, 07 Aug 2026)
+### 8. Migration drift recount (214 unapplied / 218 orphaned) — PARKED for a separate dedicated batch (per Brian, 07 Aug 2026)
 
 Full recount against live `list_migrations` + local `supabase/migrations/*.sql` + `.drift-baseline.txt`:
 - **"Merged but never applied to production"**: **214** (was 19) — 208 of these are still the original 25 May–19 Jul 2026 backlog, untouched by the 06 Aug 2026 PR #385 production-apply run (which only cleared the newest batch through `20260806121200`); 6 more have accumulated since 22 Jul 2026. This is NOT a shrinking problem — the backlog is essentially unchanged and 6 new items have piled on top.
@@ -86,19 +97,20 @@ Full recount against live `list_migrations` + local `supabase/migrations/*.sql` 
 
 ---
 
-## Context
+### 9. Document Register bulk-delete storage-orphan bug — root cause diagnosed, fix not yet designed
+
 Tenant: Australian Institute of Accreditation Pty Ltd (`tenant_id = aca3d0ab-b1e7-4b70-9d27-f4b8efd5f46a`), project `gdwhlstfguxarnxasrrs` (ComplyHub Project).
 
 Triggered by: AJ (consultant, aj@vivacity.com.au) noticed all this tenant's Document Register entries were gone. Investigated as a possible regression from PR #384 — **ruled out** (PR #384 merged 2026-08-06 01:13 UTC; the incident happened 2026-08-05 02:43:07 UTC, a full day earlier, and PR #384 never touched `documents_register`, `TenantDocuments.tsx`, or `useTenantDocumentsRegister`).
 
-## What actually happened
+#### What actually happened
 - `erin@aia.edu.au` (Administrator on this tenant) ran a bulk-delete in the Document Register UI.
 - `document_audit_log` shows 374 rows deleted from `documents_register`, all stamped `metadata: {"bulk_delete": true}`, all at the same insert timestamp `2026-08-05 02:43:07.114268+00`.
 - All 374 database rows are confirmed gone (`select count(*) from documents_register where tenant_id = 'aca3d0ab-...'` → 0).
 - But storage still had 124 orphaned objects under `tenant-documents/aca3d0ab-.../` with no matching register row. 117 of those were flat-path Document Register uploads (`{tenantId}/{timestamp}-{uuid}-{filename}`); the other 7 are under `trainers/.../evidence/` — a different, unrelated feature (trainer credential uploads) that is **also separately orphaned** against `trainer_document_items`, cause not yet investigated, out of scope for this ticket.
 - I hard-deleted the 117 Document Register orphans from storage on 2026-08-06 via the Storage API (`DELETE /storage/v1/object/tenant-documents` with a `prefixes` list) after confirming via `supabase.com/docs/guides/storage/management/delete-objects` that raw SQL delete against `storage.objects` does NOT free the underlying object — only the Storage API does. Confirmed clean afterward (0 flat-path files remaining, 7 trainer files untouched).
 
-## Root cause (confirmed via Supabase logs, not just code reading)
+#### Root cause (confirmed via Supabase logs, not just code reading)
 Code path: `src/hooks/useBulkDeleteDocuments.ts` → `bulkDeleteDocuments()`:
 1. Inserts audit-log entries for all documents being deleted.
 2. Calls `deleteBulkDocumentFilesAfterRows()` (`src/pages/admin/documentsRegisterLogic.ts:107`), which:
@@ -109,7 +121,7 @@ Checked `get_logs(service: 'edge-function')` for the 20-minute window around 202
 
 374 rows were deleted but only 117 of the corresponding files were left orphaned (374 − 117 = 257 file-delete calls apparently succeeded before something stopped the loop). This pattern — partial completion, no error surfaced, nothing resumed — is consistent with the browser tab being closed, navigated away from, refreshed, or losing network partway through the multi-minute serial cleanup loop. There is no persistence/resume mechanism for step 2 if it's interrupted: the DB half is already committed and irreversible by the time file cleanup even starts, and whatever files haven't been reached yet when the tab dies are stranded forever with **no error shown to the user and no retry**.
 
-## Not yet confirmed / next steps
+#### Not yet confirmed / next steps
 1. **Whether the UI shows a "success" toast before or after the file-cleanup loop finishes.** If the toast fires as soon as `bulkDeleteDocuments()` resolves (i.e., after cleanup), the user wouldn't be able to close the tab "too early" under normal UI feedback — meaning the interruption was more likely an actual crash/nav-away/refresh mid-loop, not a race with the success message. If the toast is optimistic and fires early (e.g., driven by the DB delete alone or a different code path), that's a separate contributing bug worth flagging. Check the component that calls `useBulkDeleteDocuments()` (likely in or near `src/pages/Documents.tsx`) for the `onSuccess`/toast wiring.
 2. **No fix has been designed or applied yet** — this handover is diagnosis only. Candidate directions (not decided, for discussion):
    - Make storage cleanup resumable/idempotent from a durable list (e.g., a small "pending deletion" table) instead of an in-memory JS loop, so a page refresh doesn't strand files.
@@ -118,16 +130,9 @@ Checked `get_logs(service: 'edge-function')` for the 20-minute window around 202
    - Add a background reconciliation job that periodically finds storage objects with no matching register row (per tenant, via the same path-prefix / `documents_register.file_path` join used in this investigation) and either alerts someone or auto-cleans after a grace period.
 3. **The 7 trainer-evidence orphans are a separate, unrelated bug** (different table, different upload path) — worth its own investigation, not folded into this one.
 
-## Key files
+#### Key files
 - `src/hooks/useBulkDeleteDocuments.ts`
 - `src/pages/admin/documentsRegisterLogic.ts` (`deleteBulkDocumentFilesAfterRows`, `assertBulkDeleteRowCount`)
 - `src/lib/documentFiles.ts` (`deleteDocumentFile`, `deleteDocumentFiles`)
 - `supabase/functions/document-file-manager/index.ts` (server-side delete action, line ~282-292)
 - Whatever page/component in `src/pages/` actually invokes `useBulkDeleteDocuments()` — not yet located, needed to check toast timing (see next step 1 above)
-
-## IN PROGRESS — PR review session (started 10 Aug 2026, resume here)
-
-**Context:** Working through the open rto-compass-hub PRs per `pr-review-open-prs.md` (workspace root) using the `/pr-review` skill and the Scout → Reviewer flow. Open PRs: #397 (see `pr-review-open-prs.md` for the full table — do not duplicate that tracking here, this section is just the resume pointer).
-
-**Next steps on resume:**
-1. Proceed to PR #397 (not yet started).

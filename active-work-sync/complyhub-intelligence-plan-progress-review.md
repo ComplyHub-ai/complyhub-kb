@@ -290,3 +290,349 @@ changes:
   and update the registry block.
 - Nothing in this document has been actioned. Each of the six "immediate next steps" needs its own FRAME
   before any branch work starts.
+
+---
+---
+
+# Part 2 — Direction update, 13 August 2026 (Angela's MVP reframe)
+
+> **Created:** 13 August 2026 · **Type:** read-only analysis and planning — no code, DB, or config
+> changes were made in producing this section.
+> **Status of Part 1:** unedited and still standing. Where Part 2 supersedes, downgrades, or elevates a
+> Part 1 conclusion, it says so by name. Nothing above this line has been altered.
+> **Evidence base:** Part 1's verified production findings, plus Angela's MVP statement and Brian's
+> direction of 13 Aug 2026. Items marked **[UNVERIFIED]** are reasoning, not confirmed facts — they need
+> a live check before anything is built on them.
+
+---
+
+## 1. The reframe
+
+Angela's MVP statement for this programme:
+
+> **Not the user working for ComplyHub — ComplyHub working for the user.**
+
+Concretely: when someone logs in, the system tells them what needs their attention, what happened while
+they were away, and what they specifically are responsible for in this tenant. Her worked example:
+
+> A trainer submits a credential for verification. The Administrator is the one who must approve it. So
+> when that Administrator next logs in, ComplyHub says *"X trainer just uploaded Y and needs your
+> verification."*
+
+This is a stronger organising idea than the current 10-phase plan's own framing, and it should sit above
+the phases as the programme thesis rather than living inside Phase 1. Every phase can then be judged
+against a single question: *does this make ComplyHub work for the user, or does it make the user work
+for ComplyHub?*
+
+**Confirmed with Brian, 13 Aug 2026:** this reframe is **additive, not a replacement**. Angela's instinct
+that we also have to check what's late is correct and stays in scope. The homepage must answer both
+"what is waiting on me right now" and "what has quietly gone overdue".
+
+---
+
+## 2. What this changes structurally — two engines, not one
+
+The single most consequential finding of this session. What shipped in #411/#412 is a **state scanner**.
+Angela's example requires an **event feed**. They are different machines that happen to share a screen.
+
+| | **State scanner** (shipped in #412) | **Event feed** (required by the MVP) |
+|---|---|---|
+| Trigger | Scheduled run over table state | The moment the domain action occurs |
+| Question answered | "What is overdue *right now*?" | "What happened, and whose job is it now?" |
+| Source | `WHERE due_date < now()` predicates | Emitted inside the transaction that caused it |
+| Resolution | Next scan observes it fixed | The obligation is explicitly discharged |
+| Time semantics | Point-in-time snapshot; no history | Inherently timestamped and ordered |
+| "While you were away" | Cannot be reconstructed | Falls out for free |
+| Addressing | Tenant-wide | Person-specific |
+
+You cannot produce the sentence *"X trainer **just** uploaded Y and needs **your** verification"* from a
+nightly state scan. The scan loses the *just* (no event time — only "this row currently exists in a
+pending state") and it loses the *your* (no routing — insights today are tenant-scoped, not
+person-scoped).
+
+**Both engines are required. Neither substitutes for the other.** Overdue detection genuinely needs
+periodic scanning, because "nothing happened" is exactly the condition that makes something overdue —
+there is no event to emit when a deadline passes unattended.
+
+### Immediate open question **[UNVERIFIED]**
+
+`intelligence_events` already exists from PR #411. It has **not** been confirmed whether that table is a
+domain event stream (usable as the event feed's backbone) or an engine-run audit log (in which case the
+event feed needs its own table). Part 1 describes it as engine-adjacent. **This must be checked before
+any design is finalised** — it is the difference between extending a table and adding one.
+
+---
+
+## 3. Impact on Part 1's findings
+
+### Supersedes — Part 1 § 4 ("While You Were Away has an unflagged hard blocker")
+
+Part 1 correctly identified that `auth.users.last_sign_in_at` is overwritten at login, leaving no
+"previous login" to diff against, and that history cannot be reconstructed from `audit_logs`.
+
+**The per-user watermark half of that finding still stands** and still needs a new table. But the harder
+half — *"there is no history to diff against"* — is **solved by the event feed**, not blocked by it.
+Given a durable, timestamped event log plus a per-user watermark, "while you were away" is simply
+*events since your watermark*.
+
+**Revised status:** downgraded from *hard blocker* to *sequencing constraint*, conditional on emitters
+shipping early (see § 6, G2). The event feed does not depend on Phase 4 — it **is** the mechanism that
+makes Phase 4 possible.
+
+### Elevates — Part 1 § 5 (tenant users can write and delete their own "AI findings")
+
+Part 1 ranked this first of six immediate next steps. Under the MVP reframe it becomes a **hard
+prerequisite**, not merely first-in-queue.
+
+The reasoning hardens: the state scanner produces *derived observations* ("this action is overdue"),
+which are re-derivable if tampered with — the next scan regenerates them. An event feed produces
+*historical assertions* ("at 3:14 pm on 11 August, this trainer submitted this credential, and it sat
+unactioned for nine days"). Those are **not re-derivable**. If a tenant Administrator can edit or delete
+them, then a record the product attributes to ComplyHub can be silently rewritten by the party it
+describes.
+
+In an ASQA audit context that is materially worse than having no record at all — it is a monitoring
+trail that cannot be relied upon, presented as though it can. Fix at 0 rows, before any emitter ships.
+
+### Unchanged — Part 1 § 1 (both shipped rules run against empty tables)
+
+Still true, still the largest single problem, and the MVP reframe does not rescue it. The Phase 2.5
+"Data Reality Pass" recommendation stands, but it now needs **two** queries rather than one:
+
+1. **Overdue volume** (as Part 1 specified) — rows matching each rule predicate, per tenant.
+2. **Pending-state volume** (new) — how many records are currently sitting in a *submitted / awaiting
+   someone* state, per tenant, per event type.
+
+The second query decides which event types are worth building first. **Do not assume trainer credentials
+carries the demo** — Part 1 found only 5 expired and 2 expiring-within-90-days credentials
+platform-wide. It may still be the right *first* event type for narrative reasons, but that should be a
+deliberate choice made against the number, not an accident.
+
+### Unchanged — Part 1 § 3 (inverted scoring) and the scoring contract
+
+Unaffected by the reframe, and arguably more urgent under it. If the homepage merges scanner insights and
+feed events into one ranked list, then a shared 0–100 scale defined **once, centrally** is no longer a
+nicety — the two engines produce fundamentally different kinds of item and they have to be comparable to
+sit in one list. Define the contract before rule #3 *and* before event type #1.
+
+---
+
+## 4. The genuinely new problem — routing
+
+Nothing in the existing plan or in the shipped code addresses this, and it is the load-bearing piece of
+Angela's MVP. "This needs **you**" requires resolving three layers:
+
+1. **Event type → responsible role.** Product knowledge, not engineering knowledge. This is Angela's to
+   define (see § 7).
+2. **Role → actual users in this tenant.** Resolved against `tenant_members`. **[UNVERIFIED]** — note
+   that `tenant_members.role` is Proper Case in production today, not snake_case; the CLAUDE.md snake_case
+   table is a future-migration target, not current state. Any routing resolver must be written against
+   the casing that is actually live, and re-verified at build time rather than trusted from this document.
+3. **Named assignee overrides role broadcast.** If a task has a specific assignee, it goes to them, not
+   to everyone holding the role. Without this, every Administrator in a multi-admin tenant gets every
+   item and the feature becomes noise on day one.
+
+### The fallback chain — a product decision, not an engineering one
+
+Many RTO tenants have one person wearing several hats, and some will have **zero** users holding a given
+role. An unroutable obligation must not silently vanish. Proposed chain, to be confirmed by Angela:
+
+> named assignee → users holding the responsible role → Administrator → tenant owner
+
+### Negative routing — what a role must *not* see
+
+Equally part of the matrix. A Trainer should not be shown "3 trainers have expired credentials". Scoping
+rules are as much a part of the responsibility map as routing rules, and they are easier to get from
+Angela up front than to retrofit after a scoping complaint from a client.
+
+---
+
+## 5. Supporting architecture decisions
+
+### 5.1 Per-user delivery layer (new table required)
+
+Insights today are tenant-scoped rows. Everything in the MVP framing is per-user: *is it mine, have I
+seen it, did I act on it, what is new since I was last here.* Proposed shape:
+
+`intelligence_user_delivery` — `user_id`, `tenant_id`, `insight_id` / `event_id`, `delivered_at`,
+`seen_at`, `acted_at`, plus the per-user watermark (`last_seen_at`, `previous_seen_at`) Part 1 § 4 already
+called for. Small table, but nothing in the MVP functions without it.
+
+### 5.2 Emit from the RPC, not from database triggers
+
+The tempting implementation is `AFTER INSERT` triggers on every relevant table. **Recommend against**, for
+three reasons: trigger sprawl across a schema this size becomes impossible to reason about; triggers fire
+during migrations and backfills, producing phantom "just happened" events for records that are years old;
+and a trigger cannot easily know *who* performed the action in a way the feed can attribute.
+
+Emit explicitly from the same function that performs the submit/approve/assign action, so the event is
+written in the same transaction as the change that caused it.
+
+### 5.3 Suppression against what already runs
+
+Part 1 already flagged that Phase 6 collides with roughly eight existing reminder/nudge crons plus an
+`email_outbox` worker firing every minute. Under the MVP this collision arrives **earlier**, because the
+first event types we would pick are precisely the ones existing crons already nag about (credential
+expiry, governance meetings, trainer reports).
+
+**Rule:** if an existing cron already notifies about an event, the homepage card must be the *same*
+event surfaced in a better place — never a second, independent notification. **[UNVERIFIED]** — whether
+credential submission currently triggers an email to the Administrator has **not** been checked. It must
+be, before that event type ships.
+
+Double-emailing paying RTO clients is the most visible failure mode available to this programme.
+
+### 5.4 Empty state as a first-class deliverable
+
+Part 1 found that only 22 of 88 tenants have any overdue signal at all. Under the MVP framing this stops
+being a gap and becomes an opportunity: *"ComplyHub checked 41 deadlines overnight — nothing needs you
+today"* is arguably a **stronger** demonstration that the platform is working for you than a list of
+problems is. But it only works if the monitoring counters are real, which means they depend on run
+history, which means they depend on scheduling (Part 1's resequencing point 2). A blank card reads as
+broken; a proof-of-monitoring card reads as the product doing its job.
+
+---
+
+## 6. Proposed groundwork sequence
+
+Five items to complete **before** resuming the numbered phases. Three of them get materially harder the
+longer they are deferred, which is the argument for doing them now rather than after the next visible
+feature.
+
+| | Item | Why now | Gets harder with time? |
+|---|---|---|---|
+| **G1** | Revoke tenant write/delete on insights + events; route user actions through a narrow RPC | Attribution integrity; audit defensibility (§ 3) | **Yes** — trivial at 0 rows, a data migration later |
+| **G2** | Ship event emitters **dark** — recording only, nothing rendered | History cannot be reconstructed; WYWA needs accumulated history to have anything to show at launch | **Yes** — every day not emitting is a day of history permanently lost |
+| **G3** | Data Reality Pass, both halves — overdue volume **and** pending-state volume, per tenant | Decides which rules and which event types are worth building; prevents a repeat of the empty-tables outcome | No, but it gates G5 |
+| **G4** | Define the single scoring/ranking contract across both engines | Two engines merging into one ranked list; fixing the inversion and the unreachable `critical` threshold | **Yes** — every new rule written against the old contract adds migration cost |
+| **G5** | Resolve the routing model — event → role → user, plus fallback chain and negative scoping | Load-bearing for the whole MVP; blocked on Angela's input | Blocked externally |
+
+**G1, G2 and G4 are engineering-side and can start without Angela.** G5 is blocked on her responsibility
+map. G3 is a read-only query exercise that can run in parallel with everything.
+
+**Recommended order:** G1 → G3 (parallel with G4) → G2 once G3 has picked the first event types → G5 when
+Angela's map arrives → then the homepage itself.
+
+Each of these still needs its own FRAME and Brian's approval before any branch work starts — nothing here
+is authorisation to begin.
+
+---
+
+## 7. What we need from Angela
+
+Requested 13 Aug 2026. The ask is deliberately **not** "map out what each role does" — that returns prose,
+and prose does not route notifications. What is needed is a responsibility matrix keyed to system events:
+
+| What happened | Who must act | Who should know | How urgent | What goes wrong if ignored | Time to act |
+|---|---|---|---|---|---|
+| Trainer submits a credential for verification | Administrator | Compliance Manager | Normal | Trainer can't be scheduled; gap shows at audit | 5 business days |
+
+Plus two judgement calls that are product decisions, not engineering ones:
+
+1. **Who picks it up when nobody in the tenant holds the responsible role** (the fallback chain, § 4).
+2. **What each role must not be shown** (negative scoping, § 4).
+
+Optional but useful: mapping each situation back to the relevant **Critical Driver**, which would give a
+natural grouping for how items are organised on screen and keeps the taxonomy tied to an existing frame
+rather than inventing a new one.
+
+---
+
+## 8. What could happen — scenarios and failure modes
+
+Written deliberately, because most of these are avoidable *only* if they are named before the build
+starts.
+
+### If the groundwork lands first (the good case)
+
+The homepage launches onto a tenant that already has weeks of accumulated event history, so "while you
+were away" has genuine content on day one rather than being an empty promise. Users see items addressed
+to them personally, which is the entire difference between a dashboard and an assistant. Tenants with
+nothing outstanding get a proof-of-monitoring message rather than a blank card, so the feature
+demonstrates value on 88 tenants rather than on the 22 that have problems. And every record the system
+attributes to itself is defensible in an audit because no tenant user could have written it.
+
+### Failure modes, ranked by how likely and how visible
+
+**1. Launch-empty.** Highest probability. If emitters ship at the same time as the UI, then on launch day
+every "while you were away" panel is blank, because there is no history yet — the feature has to run for
+weeks before it has anything to say. Users form their impression in the first session. *Mitigation: G2 —
+emit dark, early.*
+
+**2. Double-notification.** Highest visibility. Roughly eight reminder crons already email clients. If the
+first event types duplicate what those already send, paying RTO clients get nagged twice about the same
+thing by the same product. *Mitigation: § 5.3 — verify existing notification coverage per event type
+before shipping it; one suppression check.*
+
+**3. Repeat of the empty-tables outcome.** Moderate probability, low visibility until launch. Choosing
+event types on schema quality rather than data volume is exactly the mistake that produced two rules that
+cannot fire. The pending-state query in G3 exists specifically to prevent the same error recurring in the
+event feed. *Mitigation: G3, and no event type promoted to "first to build" without its volume number
+attached.*
+
+**4. Notification fatigue and the dismissal spiral.** Moderate probability, slow-burn damage. If routing
+broadcasts to every role-holder instead of the named assignee, three Administrators each receive every
+item, all three assume one of the others has it, and the dismissal rate climbs. Once users learn to clear
+the panel without reading it, the feature is dead and very hard to revive. *Mitigation: § 4 layer 3
+(assignee overrides role) and an explicit dismissal-rate acceptance criterion — Part 1 already noted the
+plan has no measurable exit conditions anywhere.*
+
+**5. Role collapse in small tenants.** Moderate probability. One person holding Administrator, Compliance
+Manager and Consultant receives the same item three times through three routing paths, or receives
+nothing because the routing assumed distinct holders. *Mitigation: de-duplicate at the delivery layer, per
+user, not per role — and confirm the fallback chain with Angela rather than inferring it.*
+
+**6. Fabricable audit trail.** Low probability of exploitation, severe if it ever matters. Covered at § 3
+and G1. The exposure is not primarily malice — it is a well-meaning Administrator tidying up a panel and
+destroying the record that ComplyHub was monitoring at all.
+
+**7. Angela's matrix arrives as prose.** Moderate probability, cheap to recover from but delays G5. This is
+why the ask went out as a filled-in example table rather than an open question — a blank template comes
+back blank.
+
+**8. Namespace sprawl.** Already live, already noted in Part 1: four unrelated meanings of "intelligence"
+in one codebase. The event feed adds a fifth surface. Still a 41-file rename today; it will not be for
+long.
+
+### The strategic risk if the groundwork is skipped
+
+The programme ships a visible feature quickly, it demonstrates well on a prepared tenant, and it produces
+nothing for the majority of real ones. The failure would not be loud — no errors, no outage. It would look
+exactly like a working feature that users quietly stop opening. That is a much harder problem to detect
+and a much harder one to argue for fixing than a delay of a fortnight is.
+
+---
+
+## 9. Open decisions for Brian
+
+- **Sequencing conflict.** Part 1 recommended retargeting the rules onto `tasks` / `ci_register` /
+  `risk_register` because that is where the data is. The MVP reframe pushes toward event-driven approval
+  flows. These are not in conflict in principle, but they compete for the same build slot. **Recommendation:
+  resolve with the G3 numbers rather than by preference** — build the event *infrastructure* against
+  Angela's model, but populate the first homepage from whichever sources actually have rows.
+- Whether the event feed extends `intelligence_events` or gets its own table — blocked on the
+  **[UNVERIFIED]** check in § 2.
+- Whether to commit to a timeframe for the groundwork. The message to Angela deliberately carries no dates.
+- Whether the naming/namespace cleanup happens now, alongside the event feed, or is accepted as debt.
+- Whether Release 1 automations may ever mutate a register. Part 1's recommendation stands and is
+  strengthened under the MVP framing: **notify and flag, never mutate**. A compliance platform that
+  silently changes a compliance record is a far bigger trust problem than one that only nags.
+
+---
+
+## 10. Verification still outstanding
+
+Explicitly listed so nothing in Part 2 is mistaken for confirmed fact. None of these were checked in this
+session:
+
+- What `intelligence_events` actually holds — domain event stream or engine-run audit log (§ 2).
+- Pending-state volumes per tenant, per candidate event type (§ 3, G3).
+- Live `tenant_members` role coverage — how many tenants have zero holders of each role, and how many have
+  one user holding several (§ 4).
+- Whether trainer credential submission already triggers a notification through the existing cron/outbox
+  path (§ 5.3).
+- Whether any existing table already carries a per-user seen/read concept that the delivery layer could
+  extend rather than duplicate (§ 5.1).
+
+**Nothing in Part 2 has been actioned.** No code, database, configuration or branch work has been done.
+Each groundwork item needs its own FRAME and Brian's explicit approval before anything starts.
