@@ -1,49 +1,98 @@
-# Memory Index
+# Task Group: rto-compass-hub / ComplyBot RAG Phase 2 agentic retrieval
 
-- [read CLAUDE.md] (renamed from CLAUDE.local.md 16 Jul 2026 — the old filename wasn't auto-loaded by Claude Code's native convention, which is why the orchestration workflow wasn't recognized in fresh sessions before)
+scope: Plan, implement, review, deploy, and ring-roll out Compliance-mode agentic tool retrieval in `ai-router`; use for follow-on Phase 3/PR 6 or tenant rollout/flag investigations.
+applies_to: cwd=C:\Users\brian\complyhubworkspace\rto-compass-hub; reuse_rule=repo- and deployment-specific facts apply to this checkout/Supabase project; retain the production-gating and CI lessons for similar edge-function work.
 
-## Personal (stays here — how Claude works with Brian specifically)
+## Task 1: Replace Compliance-mode ILIKE retrieval with agentic directory/tool retrieval; merged, deployed, and enabled for Vivacity testing
 
-- [Plain English always — no jargon](feedback_plain_english_always.md) — After every technical explanation, follow immediately with a plain English summary; no file paths, no code snippets, no waiting to be asked
-- [UI navigation instructions](feedback_ui_navigation_instructions.md) — When telling Brian to test the platform, give click-path instructions (menu → item), not raw URLs
-- [Check migrations CLAUDE.md first](feedback_check_migrations_claude_md_first.md) — always Read rto-compass-hub/supabase/migrations/CLAUDE.md fresh before writing any migration file, don't rely on memory of naming convention
-- [The Loop + no popups](feedback_the_loop_and_no_popups.md) — consolidated workflow (FRAME→SCOUT→PLAN→FIX→REVIEW→SHIP), active-work.md ledger, Scope Line anti-rabbit-hole rule, state-and-proceed instead of AskUserQuestion, cursor CLI kept as token-budget handoff
-- [Three-agent model: Scout/Fixer/Reviewer](feedback_three_agent_model.md) — collapsed 6 callsigns to 3: Scout (recon+root-cause+plan), Fixer (Claude Code only, edits/commits), Reviewer (adversarial review+mechanical gauntlet+verdict)
-- [Post-Push Watch beat](feedback_post_push_watch_beat.md) — added WATCH beat: ScheduleWakeup instead of eager CI polling, verify-bot-fix skill guards every Bugbot finding, mandatory living-rules line after each confirmed fix, ci.yml concurrency-cancel added
-- [No autonomous CI polling](feedback_no_autonomous_ci_polling.md) — don't ScheduleWakeup to auto-check CI/PR status; don't act on a stale wakeup once the situation's moved on — only check when Brian asks. Recurred a 3rd time 20 Jul 2026 because CLAUDE.md itself told Claude to do it — CLAUDE.md's WATCH beat is now fixed to match this rule
-- [Migration drift baseline](reference_migration_drift_baseline.md) — `.drift-baseline.txt` in rto-compass-hub is the authoritative CI-tracked list of already-known orphaned production migrations; check it BEFORE any drift reconciliation investigation, don't rebuild it from scratch. Also now codified in CLAUDE.md directly
-- [Don't trust doc snippets uncritically](feedback_dont_trust_doc_snippets_uncritically.md) — a locked living-doc's "exact code" can still contain a scoping bug (CB6, PR #334); trace try/catch/loop variable scope yourself before pasting, "LOCKED" means the decision is final, not the code
-- [One branch per session, not per task](feedback_one_branch_per_session.md) — don't `git checkout -b` a new branch for each new fix within a session; confirm and reuse one branch unless Brian explicitly says otherwise (corrected sharply 05 Aug 2026)
+### rollout_summary_files
 
-## Imported 27 Jul 2026 (cross-machine sync from home PC — see complyhub-kb/handoffs/memory-export-2026-07-27.md)
+- rollout_summaries/2026-08-20T03-07-18-KCbH-complybot_phase2_agentic_retrieval_shipped.md (cwd=C:\Users\brian\complyhubworkspace\rto-compass-hub, rollout_path=C:\Users\brian\.codex\sessions\2026\08\20\rollout-2026-08-20T11-07-18-01a01d23-26f5-7fd2-b98a-d184e3030e0d.jsonl, updated_at=2026-08-19T06:45:17+00:00, thread_id=01a01d23-26f5-7fd2-b98a-d184e3030e0d, shipped PR #523; manual tenant QA remains)
 
-- [Fable Audit Prompt](project_fable_audit.md) — full-spectrum audit prompt for Fable at complyhub-kb/reference/fable-audit-prompt.md
-- [Connection Test Preference](feedback_connection_tests.md) — use minimal read calls (e.g. get_project_url) to test MCP connections, not list_tables/data pulls
-- [Handover Scope](feedback_handover_scope.md) — handover text = next single step/PR only, never restate the full remaining roadmap
-- [PR Audit Functional Deps](feedback_pr_audit_functional_deps.md) — check runtime/build dependencies between PRs, not just file-line conflicts
-- [Multi-Item Fix Completeness](feedback_multi_item_fix_completeness.md) — before shipping a multi-part fix, re-derive the original full list, don't trust conversation memory
-- [CREATE OR REPLACE: Check Git History Too](feedback_create_or_replace_check_git_history_too.md) — both the live pg_get_functiondef AND the 00000000000000_baseline.sql copy can be stale vs git; check migration history for the object before replacing it, do it while authoring not just at ci-gate
-- [No AskUserQuestion / No Monitor](feedback_no_askuserquestion.md) — never use AskUserQuestion, Monitor, or ScheduleWakeup; plain-text options, single direct status checks instead of watch loops or self-scheduled wakeups
-- [Living Doc Decision Tracking](feedback_living_doc_decision_tracking.md) — root-level .md per body of work, one-at-a-time locked decisions written into file, ci-gate before commit/PR, delete after audit
-- [ci-gate: Exhaustive Service-Role Check](feedback_ci_gate_exhaustive_service_role_check.md) — grep ALL changed edge functions for SUPABASE_SERVICE_ROLE_KEY in one pass, never a remembered subset
-- [Role Casing: Proper Case, Not Snake_case](feedback_role_casing_proper_case.md) — tenant_members.role is Proper Case today; CLAUDE.md's snake_case table is a future-migration target, not current state
-- [generate-audit-pack Role Bug](project_generate_audit_pack_role_bug.md) — casing bug (lowercase vs Proper Case) + profiles.role staleness confirms 403 for every real Admin/CM, corrected 27 Jul 2026
-- [Tenant Context Race in Effects](feedback_tenant_context_race_effect_deps.md) — tenant-scoped fetch effects must depend on useEffectiveRole's ready + effectiveTenantId, not just route params
-- [Status Enum vs CHECK Constraint](feedback_status_enum_vs_check_constraint.md) — grep the table's CHECK constraint for the full status enum before trusting a copied allowlist; Fresh-Eyes (formerly Checker) missed this on PR #311 too
-- [ci-gate Skill](project_ci_gate_skill.md) — location/purpose of the ci-gate skill (renamed from cichecker 29 Jul 2026, user-level at C:\Users\brian\.claude\skills\ci-gate\SKILL.md), run before commit/push/PR
+### keywords
 
-Note: the source `user_role.md` reference in the original index was a dangling link (file never existed at export time) — not recreated here, consistent with how [[feedback_living_doc_decision_tracking]] already tolerates unresolved `[[name]]` links.
+- ai-router, complybot_tool_retrieval, feature_flags, claude-sonnet-4-6, toolLoop.ts, tool_choice, deno test supabase/functions/ai-router, PR-523, Vivacity, gdwhlstfguxarnxasrrs, fresh-eyes
 
-## Migrated to complyhub-kb (20 Jul 2026) — read these there, not here
+## User preferences
 
-Team-durable facts don't live in personal memory anymore — they were moved into the shared, git-tracked KB so Carl/RJ/Dave see them too. This index only points at where to look:
+- When production work begins, the user asked: “Scout first, then plan” and “plain english first on the plan” -> inspect the current implementation and live schema first, then explain architecture and rollout impact simply before technical detail. [Task 1]
+- For substantial production changes, the user requested three rounds of “fresh eyes” review before proceeding -> use independent adversarial reviews at meaningful gates (before commit and before rollout). [Task 1]
+- For new production behavior, the user chose enablement only for the “Vivacity testing tenant” before widening -> default to a dark launch/ring rollout with live validation before global enablement. [Task 1]
 
-- **`complyhub-kb/pinned/conventions.md`** — migration discipline (drift prevention, idempotency-on-rerun check, archive-never-read, baseline-first rule), unit test expectations, pre-push adversarial self-review checklist (status enums, role column dual-storage, AEST/AEDT timezone), never-run-npm-build, existing-data impact check for PR review (auto-wipe effects, mutation atomicity, edit pre-population fallback), never-hardcode-URLs/credentials
-- **`complyhub-kb/pinned/decisions.md`** — Brian's full merge authority on rto-compass-hub PRs (no Carl/Angela sign-off required), the two deploy paths (GitHub main-merge auto-deploys production via Vercel; Lovable/staging is a separate publish path)
-- **`complyhub-kb/reference/diagnosis-discipline.md`** — full bug-tracing method (trace execution path end to end, DB data-state check first, audit every switch/case and every sibling file, NEW-013 lessons)
-- **`complyhub-kb/reference/supabase-mcp.md`** — targeted DB queries over bulk list dumps (scoped execute_sql/grep, never list_migrations/list_* for a single-record check), list_tables timeout workaround
-- **`complyhub-kb/reference/db-schema-cheatsheet.md`** — before every Supabase MCP read, check this first so AI doesn't have to list all tables; re-verify weekly/fortnightly for accuracy
-- **`complyhub-kb/pinned/conventions.md`** § "tsc --noEmit checks 0 files" — rto-compass-hub's `npm run type-check`/pre-push hook/CI type-check job are all vacuous (solution-style tsconfig without `--build`); real compile bugs (e.g. try/catch scope violations) pass silently. See [[feedback_vacuous_typecheck_command]] for the personal-workflow angle (how to actually verify a change compiles).
-- `.cursor/orchestrate/roles.md` § "Known incident" — Tinker/dry-run-merge crash-safety mitigation (now folded into the Reviewer mechanical-gauntlet docs); `CLAUDE.md`/`roles.md`/`.cursor/rules/ai-orchestration.mdc` — the current 3-agent orchestration model itself (superseded the old 6-callsign build notes)
+## Reusable knowledge
 
-**Why this split:** feedback about how Claude should communicate/behave toward Brian stays personal (not useful to a team-wide KB); facts about the codebase, process, or permissions are team-durable and belong where Carl/RJ/Dave can read them too. See [[feedback_the_loop_and_no_popups]] for the fuller rationale.
+- Phase 2 shipped in PR #523 (`8b617cbb9`; merge `e59a7bea33350df506ec0fd780f7831d6624a629`). The new sibling modules under `supabase/functions/ai-router/` are `featureFlags.ts`, `retrieval.ts`, `toolDefinitions.ts`, `toolDispatch.ts`, and `toolLoop.ts`, with four co-located `_test.ts` files; this repo had no existing edge-function flag reader or Anthropic prompt-cache pattern to reuse from `_shared/`. [Task 1]
+- Compliance mode uses `claude-sonnet-4-6` only when tenant flag `complybot_tool_retrieval` is `status = 'active'` and `is_enabled = true`; missing/read-error fails safe to legacy ILIKE. Help mode and legacy ILIKE remain available. [Task 1]
+- Preserve the agentic safeguards: clause-directory retrieval/tool dispatch, six-iteration cap, forced final answer with `tool_choice: { type: 'none' }`, typed 429/402 handling, tool failures returned as tool results, prompt caching, deduplication, structured logging, and separate retrieval-error versus KB-miss telemetry. [Task 1]
+- Validate this edge-function suite with `deno test supabase/functions/ai-router`; the real merge-commit run reported `28 passed | 0 failed`. Merging changed edge functions to `main` auto-deploys them; `ai-router` was confirmed deployed to Supabase project `gdwhlstfguxarnxasrrs`. [Task 1]
+- `feature_flags` is tenant-scoped (`flag_key`, `tenant_id`, `is_enabled`, `status`). Vivacity Testing Tenant is `bc515b64-d24f-4e9d-811b-1f5c0f62a3f7` and was enabled as the test ring. The living plan is `C:\Users\brian\complyhubworkspace\complybot-rag-improvement.md`; the audit record is `C:\Users\brian\complyhubworkspace\complyhub-kb\audit\2026-08-19_pr523_complybot-phase2-agentic-retrieval.md` (written but not committed/pushed to the KB). [Task 1]
+
+## Failures and how to do differently
+
+- Symptom: a tenant-scoped feature flag cannot be provisioned through the admin UI, or raw SQL fails with `feature_flag_audit_events.actor_id` NOT NULL. Cause: the UI does not scope creation correctly and the audit trigger requires an authenticated actor. Fix: use a workaround only after confirming the actor identity and verify the resulting audit event; do not use unauthenticated insertion. [Task 1]
+- Symptom: CI appears green after a cancelled or no-op run. Cause: the edge-function tests did not execute. Fix: rerun/inspect the actual merge-commit workflow and the test-step output before claiming CI success. [Task 1]
+- Symptom: `deno test supabase/functions` discovers unrelated integration tests. Cause: test discovery is too broad. Fix: keep the CI scope at `deno test supabase/functions/ai-router`. [Task 1]
+- Fresh-eyes uncovered invalid final-turn API shape, dropped attachment/page context, duplicate citations, unknown-tool classification, raw console logging, stale branch state, and outage-vs-miss telemetry confusion. Treat these as a focused review checklist for future agentic retrieval changes. [Task 1]
+
+# Task Group: rto-compass-hub / dependency PR triage
+
+scope: Review Copilot/dependency PR batches for real risk and safely close stale, superseded, or empty items; use before deciding whether to merge vulnerability automation.
+applies_to: cwd=C:\Users\brian\complyhubworkspace; reuse_rule=the PR numbers and resolved versions are historical to this repository state; reuse the lockfile-path verification workflow for future dependency batches.
+
+## Task 1: Triage Copilot dependency PRs #505–#519; closed stale and empty candidates
+
+### rollout_summary_files
+
+- rollout_summaries/2026-08-20T03-07-18-89pv-pr_triage_and_standalone_forms_frontend_rebuild.md (cwd=C:\Users\brian\complyhubworkspace, rollout_path=C:\Users\brian\.codex\sessions\2026\08\20\rollout-2026-08-20T11-07-18-01a01d23-26fb-7011-bff1-a52e46932a11.jsonl, updated_at=2026-08-19T06:12:27+00:00, thread_id=01a01d23-26fb-7011-bff1-a52e46932a11, closed #505/#507/#509/#510/#511/#512)
+
+### keywords
+
+- gh pr view, gh pr diff, Copilot, brace-expansion, lockfile, minimatch, eslint, archiver-utils, PR-505, PR-519, dependency-risk
+
+## User preferences
+
+- When assessing Copilot PRs, the user asked what they are “about and whether risky dependency changes are worth merging” -> prioritize security impact, redundancy, actual lockfile state, and diff paths over PR titles. [Task 1]
+- The user approved “closing dead items first” and reviewing real candidates “one at a time” -> clear stale/empty work before deeper review and do not launch concurrent dependency-review runs. [Task 1]
+
+## Reusable knowledge
+
+- Use `gh pr view <n> --repo ComplyHub-ai/rto-compass-hub --json ...` and `gh pr diff <n> --repo ComplyHub-ai/rto-compass-hub`, then compare each affected dependency path with current `main`. Copilot vulnerability automation can open competing PRs for different transitive paths or repeated alerts. [Task 1]
+- At this historical check, `main` already had patched brace-expansion versions: top-level `2.1.4`, `5.0.9` beneath `minimatch`, and `1.1.18` beneath `eslint`/`archiver-utils`; #506 and #508 were already merged, #505/#507/#509/#511 were superseded, and #510/#512 had zero changed files. [Task 1]
+
+## Failures and how to do differently
+
+- Symptom: several PR titles look like duplicate brace-expansion fixes. Cause: titles hide which direct/transitive lockfile path each patch targets. Fix: inspect the diff and current lockfile paths before labeling anything redundant or closing it. [Task 1]
+
+# Task Group: rto-compass-hub / standalone Forms frontend-only replacement and migration safety
+
+scope: Safely separate a standalone Forms frontend change from already-shipped database work, including worktree selection, live-contract verification, CI limits, and post-merge QA.
+applies_to: cwd=C:\Users\brian\complyhubworkspace; reuse_rule=the Forms database/RPC/storage contracts and PR history are checkout-specific; reuse the no-duplicate-migrations and claimed-worktree safeguards for related work.
+
+## Task 1: Replace urgent PR #498 with frontend-only PR #521; merged without duplicate migrations
+
+### rollout_summary_files
+
+- rollout_summaries/2026-08-20T03-07-18-89pv-pr_triage_and_standalone_forms_frontend_rebuild.md (cwd=C:\Users\brian\complyhubworkspace, rollout_path=C:\Users\brian\.codex\sessions\2026\08\20\rollout-2026-08-20T11-07-18-01a01d23-26fb-7011-bff1-a52e46932a11.jsonl, updated_at=2026-08-19T06:12:27+00:00, thread_id=01a01d23-26fb-7011-bff1-a52e46932a11, replacement PR #521 merged)
+
+### keywords
+
+- standalone-forms, PR-498, PR-521, frontend-only, migrations, public_get_form_by_token, public_submit_form, can_upload_standalone_form_file, active-work.md, git worktree list, ci-gate, userRoles?.includes('super_admin')
+
+## User preferences
+
+- When priorities change, the user said “do first 498 as it is needed urgently” -> urgent stated work preempts the prior batch sequence. [Task 1]
+- The user asked to “park the superadmin casing in @active-work.md then commit and push and pr” -> record confirmed out-of-scope findings in the active-work registry, then complete the requested commit/push/PR handoff. [Task 1]
+
+## Reusable knowledge
+
+- `main` already contained the standalone Forms database, storage, and token-generation layer through reconciled migrations; PR #498 mixed the missing frontend with competing migration filenames. Create a frontend-only replacement when live database objects already exist, rather than merging duplicate migrations. [Task 1]
+- PR #521 (`feat/standalone-forms-frontend-only`, commit `6ff09df78`, merge `4ff3d2ddc`) added the frontend pages `src/pages/forms/StandaloneFormsPage.tsx` and `src/pages/public/StandaloneFormResponse.tsx`, plus routes, sidebar/permissions, types, docs, and tests, without migrations or edge functions. Thus post-merge required no migration apply, drift reconciliation, or edge deployment. [Task 1]
+- Live contract verified: storage paths use `token/uploadSession/fieldId/filename` and call `can_upload_standalone_form_file(token, field_id)`; `public_get_form_by_token` and `public_submit_form` enforce published/active forms, active tenants, write-lock status, and anonymous access. Token generation uses `gen_random_bytes(16)`. [Task 1]
+- Consult `active-work.md` and `git worktree list` before editing. Worktree A was already claimed, so clean unclaimed worktree `rto-compass-hub-C` was used and released after merge. Record the known pre-existing `userRoles?.includes('super_admin')` casing concern as not introduced by #521. [Task 1]
+- Applicable `ci-gate` checks passed: lint, `.single()` guard, hardcoded-project-ID, deletion, and status-enum coverage. The standard type-check was vacuous and full `tsc --build` hung, so its omission was explicitly recorded. Follow-up manual QA: create/publish/submit a form, test uploads, and verify tenant isolation. [Task 1]
+
+## Failures and how to do differently
+
+- Symptom: migration-bearing PR looks ready but overlaps reconciled live work. Cause: already-shipped database objects use different migration filenames. Fix: verify live schema and `main` first, then exclude duplicate migrations; duplicate objects can fail deployment or create version drift. [Task 1]
+- Symptom: entering a worktree fails with a relative-path error. Cause: path guessed from the wrong location. Fix: start from workspace root or locate it with `git worktree list`. [Task 1]
+- Do not modify a claimed worktree for unrelated work; use an unclaimed clean worktree and update the `active-work.md` registry. [Task 1]
