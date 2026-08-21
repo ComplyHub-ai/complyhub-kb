@@ -23,6 +23,22 @@ Last updated: 19 August 2026 (worktree C ledger cleanup — removed stale/comple
 
 ## Pending — awaiting reply
 
+### Playwright QA automation reference
+
+For future feature QA, use the Playwright test suite under `rto-compass-hub/tests/e2e/` and add a
+focused spec for the user journey being protected. The baseline sample is
+`tests/e2e/tas-pdf-pagination.spec.ts`, the TAS PDF QA checker. It demonstrates authenticated
+setup, stable UI test IDs, generation/download verification, PDF text/layout inspection with
+`pdfjs-dist`, footer-overlap assertions, and attaching the generated PDF to the Playwright report.
+
+Useful references:
+
+- Run a focused check: `npx playwright test tests/e2e/<feature>.spec.ts --project=chromium`
+- Force a clean local Vite server: prefix the command with `CI=1`
+- View attached artifacts: `npx playwright show-report`
+- Add new feature specs beside the TAS checker in `rto-compass-hub/tests/e2e/`; reuse its setup,
+  diagnostics, download handling, and artifact attachment patterns where applicable.
+
 ---
 
 ## Backlog — PARKED findings (NOT scheduled work)
