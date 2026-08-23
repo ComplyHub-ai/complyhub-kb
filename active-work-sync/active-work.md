@@ -3,7 +3,7 @@
 > Parked findings and follow-ups for a **later session** — not current in-progress work.
 > Promote to a real task only via a new FRAME. See `CLAUDE.md` § "The Loop."
 
-Last updated: 19 August 2026 (worktree C ledger cleanup — removed stale/completed items)
+Last updated: 21 August 2026 (claimed Worktree A for Claude Code session)
 
 ---
 
@@ -17,9 +17,9 @@ Last updated: 19 August 2026 (worktree C ledger cleanup — removed stale/comple
 
 | Worktree | Path | Branch | Claimed by | Task | Since |
 |---|---|---|---|---|---|
-| A | `rto-compass-hub` | `fix/tas-pdf-generation-remaining-paths` | Codex | TAS PDF generation remaining stale paths | 20 Aug 2026 |
-| B | `rto-compass-hub-worktree-b` | `fix/tas-pdf-metadata-pagination-cleanup` | Codex | Fix remaining TAS PDF metadata, placeholders, website/release normalisation, and pagination issues | 20 Aug 2026 |
-| C | `rto-compass-hub-C` | `main (synced to main @ 2b366b176)` | unclaimed | — (PR #541 merged: Sales Dashboard Created date column, Dave's request) | 20 Aug 2026 |
+| A | `rto-compass-hub` | `standby/worktree-A (synced to main @ e7f07acbd)` | Khian (this chat) | Reviewing open PRs #575, #572, #571, #561 — read-only recon, updating pr-review-open-prs.md | 21 Aug 2026 |
+| B | `rto-compass-hub-B` | `standby/worktree-B (synced to main @ 2ab5242ea)` | Khian (this chat) | Bug report — TTS Education (Erolyn Blythe): Trainer Matrix evidence files attached but not recognised/accessible for TAS, so evidence can't be assigned to Units of Competency for Erolyn's and Christine's Trainer Matrices. Same tenant as prior PR #581 QA item above. | 21 Aug 2026 |
+| C | `rto-compass-hub-C` | `main (synced @ f5074157d, includes PR #583)` | Khian (this chat) | PR #583 merged: Phase 4 (`complybot-rag-improvement.md` §4 Phase 4 / PR 8) — `ai_eval_questions` table + 48 seeded questions, applied to production via the interim MCP `execute_sql` procedure and verified (48/48 rows, all 4 response-log FKs resolved, RLS confirmed on). Ledger reconciled — confirmed both `version`+`name` rows in `supabase_migrations.schema_migrations` match the filenames exactly. **Still pending:** run `scripts/complybot-eval-retrieval.ts` against the Vivacity Testing Tenant with a real user JWT for the first baseline accuracy reading | 21 Aug 2026 |
 
 ## Pending — awaiting reply
 
@@ -46,14 +46,20 @@ Useful references:
 _Adjacent issues surfaced during work but outside the task's Scope Line. Parked here so they
 aren't lost and aren't chased. Promote to a real task only via a new FRAME._
 
-1. **PR #385 post-merge — manual QA + 14-day soak** — prod migrations, object copy (110 files), edge
-  deploy, and DML backfills all applied 06 Aug 2026 (detail in `last.md` and audit index
-  `complyhub-kb/audit/2026-08-06_document-repository-consolidation-index.md`; soak schedule in
-  `document-repository-consolidation.md`). **Still Brian-gated:** manual QA as
-  **non-SuperAdmin** tenant user (admin logo, GP org logo, onboarding logo, avatar upload; confirm
-  Trainer/Student cannot write branding); **soak until ~20 Aug 2026** on source buckets
-  (`branding`, `organisation-assets`, `avatars`, `dap-documents`, `industry-evidence`) before
-  decommission; `organization-logos` (4 orphan objects) decommission after soak + explicit approval.
+0. **Industry Consultation plan/engage/outcomes/review wizard is unreachable dead code** — surfaced
+  21 Aug 2026 while fixing IC bug 5 (`fix/ic-av-findings-batch1`, worktree A). `src/pages/registers/industry-consultation/index.tsx`
+  (which renders `EngageStage`/`OutcomesStage`/`ReviewStage`/`PlanStage`) is imported in `AppRoutes.tsx:359`
+  but never used as a route element anywhere in the file — confirmed via `grep -n "IndustryConsultation"`
+  returning only the lazy-import line. The only live route at a related path, `/industry-engagement`,
+  renders a completely different component (`IENRegisterPage`) with unrelated tabs
+  (`plans|register|surveys|coverage|dashboard|legacy`, not `plan|engagement|currency|outcomes`).
+  Practical effect: none of the createPlan/createEngagement/createOutcome flows fixed in this branch are
+  reachable through the UI today — engagement data only surfaces read-only via the `legacy` tab
+  (`LegacyEngagementsTab`). `useICEnforcement`'s "fix now" links were repointed to the closest real tabs
+  on `/industry-engagement` as a stopgap (no longer 404 to `/login`-via-catchall), but this doesn't restore
+  the actual wizard. **Needs a FRAME:** either mount `registers/industry-consultation` as a real route (and
+  reconcile it with `/industry-engagement`), or confirm it's superseded/retire it and repoint any surviving
+  callers. Until decided, the entire plan/engage/outcomes/review UI is inert.
 2. **"Supabase Preview" branch-DB build fails on every PR, not just drift-affected ones** — confirmed 19 Aug 2026 during PR #500 (ComplyBot Phase 0). Error: `duplicate key value violates unique constraint "schema_migrations_pkey" — Key (version)=(20260814061750) already exists`. Verified live: production's ledger already has this exact version/name (`reschedule_fixed_tga_ingest_crons_avoid_race`) matching the git file — not a naming collision. Root cause: the preview-branch builder clones a production snapshot (which already has this version recorded) then replays all local migration files on top, including ones the snapshot already has, instead of skipping already-applied versions. This is the branch-DB-fails symptom `supabase/migrations/CLAUDE.md`'s "supabase db push is currently unusable" section already documents. **Confirmed pre-existing and universal**: PR #496 and #494 (both already merged last week, unrelated changes) show the identical "Supabase Preview: fail." Does not block merge (`mergeStateStatus: MERGEABLE`, not a required check) but means no PR gets a working preview branch DB right now. Full fix is the same ~2,000-version reconciliation project below — not a quick patch.
 3. **types.ts hand-patching practice gap** — surfaced 18 Aug 2026 during PR #472 (post-457/467
   cleanup). `types.ts` hadn't had a full `generate_typescript_types` regen since 5 Aug 2026 — every
@@ -64,39 +70,6 @@ aren't lost and aren't chased. Promote to a real task only via a new FRAME._
   PR #472 did a full regen to catch up. No process fix yet decided (e.g. a CI check that flags
   types.ts drift against `list_migrations`, or a habit of always running the full regen instead of
   hand-patching) — needs a FRAME if Brian wants one.
-4. **Retire `fix-user-deletion-recursion` edge function** — surfaced 17 Aug 2026 during PR #454 review.
-  This function's only job is to `CREATE OR REPLACE` `sa_delete_user` from a hardcoded, out-of-date SQL
-  string (deletes only from `organization_members`/`user_invitations`/`profiles`). The **live**
-  `sa_delete_user` has since been substantially rewritten (also cleans up `tp_trainers`, evidence
-  documents/links, and a dozen deprecated tables) — confirmed via `pg_get_functiondef` on 17 Aug 2026.
-  If this endpoint is ever invoked, it would silently regress `sa_delete_user` back to the old, far less
-  thorough version. Confirmed via `main` (post PR #462) that someone already patched the one column-name
-  bug in this file's embedded SQL (`organization_id` → `tenant_id`) but did **not** address the deeper
-  staleness — the embedded fix is still years behind the live function. Nothing calls this endpoint today
-  (`fixUserDeletionRecursion()` in `src/utils/` is exported but never imported anywhere in `src/`), so it's
-  not click-reachable, but it's still a live, deployed endpoint (`verify_jwt = true` in `config.toml`)
-  reachable directly with a super-admin token.
-  **Plan (not yet executed — do this on a fresh branch off current `main`, not stacked onto PR #454):**
-  delete `supabase/functions/fix-user-deletion-recursion/index.ts`, delete
-  `src/utils/fixUserDeletionRecursion.ts`, and remove the `[functions.fix-user-deletion-recursion]` entry
-  from `supabase/config.toml`. Small, single-purpose PR — re-verify against current `main` first in case
-  it's been touched again since 17 Aug 2026.
-5. **Dead `GovernancePrioritySection` imports pre-existing on `main`** — surfaced 18 Aug 2026 during PR
-  #443 review. `src/components/pli/PLIForm.tsx` and `src/pages/registers/audit/AIRRegisterForm.tsx`
-  both import `GovernancePrioritySection` but never render it anywhere in the file — confirmed via
-  `git show main:<file> | grep -c GovernancePrioritySection` returning exactly 1 (the import line) on
-  both, i.e. this predates PR #443 and isn't introduced by it. Harmless (unused import, not a runtime
-  bug) but worth a trivial cleanup PR at some point — remove the unused import line from both files.
-6. **Possible `super_admin` role-casing bug in `canAccessPath` (`src/config/permissions.ts`)** — surfaced
-  19 Aug 2026 during ci-gate on PR #498's frontend-only rebuild (`feat/standalone-forms-frontend-only`,
-  worktree C). `canAccessPath` checks `userRoles?.includes('super_admin')` alongside Proper-Case
-  literals (`'Administrator'`, `'Consultant'`, `'Consultant Assistant'`) — but `ROLES.SUPER_ADMIN` is
-  defined as lowercase `'super_admin'` in `src/lib/constants/roles.ts`, while this codebase's other
-  role storage is Proper Case (per [[feedback_role_casing_proper_case]] precedent — same bug class as
-  PR #310/`generate-audit-pack`). Confirmed this line is **pre-existing, unchanged** by PR #498 (only
-  whitespace-reformatted in the diff) — not this branch's fix to make. Needs its own check: what value
-  is actually stored for super-admin users on `tenant_members.role`/`profiles.role` — if it's not
-  literally `'super_admin'`, every super-admin bypass check in `canAccessPath` silently fails.
 7. **Missing role gate at DB/RPC layer on `training_product_transition_cases`/`_tasks`** — surfaced 18 Aug 2026 during PR #446 review (Training Product Transitions page). The RLS write policies and `rpc_close_transition_case` only check tenant membership + active billing + write-lock status — never caller role. UI correctly disables writes for Regulatory Officer (`useCanWriteTenantContent`/`OPERATIONAL_WRITE_ROLES` excludes that role), but nothing server-side backs that up — any authenticated tenant member could call the RPC or table update directly via devtools and bypass the read-only restriction. Confirmed via live `pg_policies`/`pg_get_functiondef` on 18 Aug 2026 — not unique to this PR, the same "role-gated read, ungated write" shape exists across ~69 tables using the same `write_lock_*` pattern already in production (e.g. `governance_actions`). Brian confirmed 18 Aug 2026 this is fine to ship as-is and fix later. Needs its own dedicated FRAME: likely a new migration adding a role check to the RESTRICTIVE write-lock policies (or the RPC itself), possibly scoped as a wider audit across all 69 affected tables rather than a one-table patch.
 
 ### 8. Migration drift recount (214 unapplied / 218 orphaned) — PARKED for a separate dedicated batch (per Brian, 07 Aug 2026)
@@ -110,6 +83,49 @@ Full recount against live `list_migrations` + local `supabase/migrations/*.sql` 
 **PARKED plan (Brian confirmed 07 Aug 2026 this will be a separate batch, not part of this implementation round):** this needs its own dedicated session per the existing rule in `supabase/migrations/CLAUDE.md` — batch-verify each of the 214 files' actual DB state, then apply via MCP in dependency order (only for genuinely-new schema; be alert for any that, like item 4, may already exist in production under a different reconciliation path), AND refresh `.drift-baseline.txt` itself. Not something to fold into a normal PR. Schedule as its own FRAME when ready.
 
 **Scope:** dedicated session, not a quick fix — do not attempt inline.
+
+---
+
+10. **`permissions.ts` confirmed largely (not fully) dead code** — surfaced 21 Aug 2026 while
+  investigating (now closed) backlog #6; further diagnosed 21 Aug 2026. Full grep of every export in
+  `src/config/permissions.ts` (487 lines) against all of `src/`: **live** — `canAccess` (used by
+  `useSidebarPermissions.ts` → `SidebarV3.tsx`, rendered from `SharedShell.tsx`) and
+  `setDynamicPermissions` (used by `useLoadDynamicPermissions.ts` → `RbacProvider.tsx`, mounted from
+  `App.tsx`). **Dead** — `canAccessPath`, `hasFullAccess`, `getMergedPermissions`,
+  `PATH_TO_PERMISSION`, `AVAILABLE_PERMISSIONS`, `PERMISSION_KEYS`: zero callers anywhere. **Dead
+  chain** — `DEFAULT_ROLE_CONFIGS` has one caller, `useRoleConfigManagement`/`useMultiRolePermissions`,
+  which itself has zero callers anywhere in `src/` (dead code calling into a dead hook). No single
+  "superseded by RBAC" commit found via `git log --follow` — this looks like an older permission layer
+  left alongside the newer `get_my_app_context` RPC → `useEffectiveRole()` path rather than a clean
+  replacement. **Recommendation:** a trim (not delete-the-file) cleanup PR is worth it — remove
+  `canAccessPath`, `hasFullAccess`, `getMergedPermissions`, `PATH_TO_PERMISSION`, and the
+  `useRoleConfigManagement`/`useMultiRolePermissions`/`DEFAULT_ROLE_CONFIGS` dead chain together. Double
+  check `AVAILABLE_PERMISSIONS`/`PERMISSION_KEYS` aren't consumed as a literal shape (not just by
+  identifier) by a role-editor UI before deleting those two. Needs a FRAME to execute as a real PR.
+11. **45 `profiles.role` NULL rows — mostly harmless, but a narrow latent bug for 4 staff `qa_tester`
+  accounts** — surfaced 21 Aug 2026 during backlog #6 investigation; further diagnosed 21 Aug 2026 via
+  live DB query on project `gdwhlstfguxarnxasrrs`. Breakdown of the 45: **18 real external tenant
+  users** — all harmless, gated correctly by a live `tenant_members.role` row regardless of
+  `profiles.role` (one has a `deactivated` membership, unrelated to the NULL). **~22 abandoned
+  signups** — personal/gmail addresses with no `active_tenant_id` and no tenant membership; harmless,
+  nothing depends on their role. **5 staff/test accounts**
+  (`hambert`/`bonnie`/`ceo`/`test2@vivacity.com.au`, `angela+phase7test@complyhub.ai`) — confirmed via
+  `pg_get_functiondef` that `get_my_app_context`'s superadmin check is
+  `role = 'super_admin' OR global_role = 'platform_owner'` (no separate allowlist table exists); these
+  4 vivacity accounts have `global_role = 'qa_tester'` and `is_internal_staff = true`, which satisfies
+  **neither** branch — so the NULL `profiles.role` isn't actually what blocks them from this RPC, a
+  `qa_tester` global_role was never going to pass either way. However, `RootLanding.tsx:34` and
+  `LandingRedirect.tsx:25` still gate superadmin dashboard routing on the legacy
+  `profile.role === 'super_admin'` anti-pattern (the one `CLAUDE.md` already documents as banned) — for
+  these 4 accounts that evaluates false, so a login attempt would silently fall through to a
+  `tenants.owner_id` lookup (no row → error → `catch` defaults to `/dashboard`) instead of routing to
+  `/superadmin/dashboard`. No crash, no error surfaced — just silently wrong destination. These look
+  like dormant test accounts, not ones anyone is actively logging into today, so this is a **latent**
+  bug, not an active one. **Recommendation:** not urgent, but worth keeping — either backfill
+  `role='super_admin'` for the genuinely-staff accounts that should route as superadmin, or migrate
+  `RootLanding.tsx`/`LandingRedirect.tsx` off the legacy `profile.role` check onto
+  `is_internal_staff`/`global_role` (or `useEffectiveRole()`) so this bug class can't recur. Needs a
+  FRAME if Brian wants it actually fixed.
 
 ---
 

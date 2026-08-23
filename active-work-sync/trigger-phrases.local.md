@@ -62,8 +62,6 @@ npm run preview
 
 **"start a context doc for [task]"** — see `complyhub-kb/handoffs/context-doc-handover.md`.
 
-**"director mode"** / **"use engineering director"** - run the AI Engineering Director workflow: classify task tier, state scope, select only required specialists, define Scout questions, produce a plain-English plan with acceptance criteria, and stop before edits. Full procedure: `complyhub-kb/reference/ai-engineering-director.md` and `complyhub-kb/handoffs/engineering-director-task-flow.md`.
-
 **"/audit-branch-drift"** / **"/branch-catchup"** — staging/main sync skills. Run drift audit first, then catchup when confirmed. Staging diverging again afterward is expected — Lovable keeps writing to it.
 
 **"sync work to home/work pc"** / **"push active work"** — copy the current workspace-root docs, `AGENTS.md`/`CLAUDE.md`, user-level Claude Code skills, and Claude Code memory files into `complyhub-kb/active-work-sync/`, then commit and push. Full mechanism: `complyhub-kb/active-work-sync/README.md`.

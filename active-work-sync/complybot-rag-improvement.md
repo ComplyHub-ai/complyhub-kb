@@ -1,6 +1,111 @@
 # ComplyBot RAG Improvement — Living Decision Doc
 
-> **Created:** 14 August 2026 · **Owner:** Brian (Khian) · **Status:** ✅ PR #435 done, ✅ PR #500 done, ✅ PR #523 (Phase 2) done and deployed, ✅ PR #537 (latency + logging + formatting follow-up) done and deployed; next sequenced work is PR 6 (terminology guard), Phase 3, or the deferred streaming/dead-code follow-ups noted under PR #537 below
+> **Created:** 14 August 2026 · **Owner:** Brian (Khian) · **Status:** ✅ PR #435 done, ✅ PR #500 done, ✅ PR #523 (Phase 2) done and deployed, ✅ PR #537 (latency + logging + formatting follow-up) done and deployed, ✅ PR #578 (PR 6 — terminology guard + citation-quote verification) done and deployed, ✅ PR #580 (Phase 3 — Gaps tab, Promote-to-KB, per-clause telemetry) done and deployed, ✅ PR #583 (Phase 4 — eval harness) done and applied to production; next sequenced work is #9's trial usage cap (PR 4), the deferred streaming/dead-code follow-ups noted under PR #537 below, or running the eval script for a first baseline reading
+>
+> **Eleventh revision, 21 Aug 2026.** ✅ **PR #583** (`feat: ComplyBot Phase 4 — eval harness
+> for retrieval accuracy`) merged to `main` (merge commit `f5074157d`). **Phase 4 (§4, → PR 8)
+> is now marked ✅ DONE.** Built in `rto-compass-hub-C` (worktree C).
+>
+> Adds `ai_eval_questions` — one row per tagged question (`question`,
+> `expected_instrument_id`, `expected_clause_number`, `source`, `source_response_log_id`,
+> `is_active`), RLS matched to the sibling `ai_eval_query_sets` table
+> (`sec.is_super_admin()`). Deliberately not built on `ai_eval_query_sets` itself — that
+> table's nested `queries[]`/`expected_results[]` shape, matching on `standard_reference` +
+> fuzzy `expected_answer_contains` text, predates the current agentic tool-retrieval
+> architecture and has no single checkable clause number per question.
+>
+> Seeded with 48 tagged questions: 4 pulled verbatim from real `complybot_response_logs`
+> rows with a clean single-clause citation, 44 hand-authored against the live 54-row
+> `legislation_knowledge_base` (25 Outcome Standards, 18 Compliance Requirements, 11
+> Credential Policy rows) to give breadth the real log data doesn't have volume for yet.
+> Mining the logs for automatic ground truth didn't work cleanly — of 72 Compliance-mode
+> rows, only 16 had an extractable single clause citation, and most of the 72 predate the
+> `retrieval_strategy` column entirely, so hand-authoring carried most of the set.
+>
+> Also adds `scripts/complybot-eval-retrieval.ts` — runs every active question against the
+> deployed `ai-router`, checks its returned `citations` array against the tagged expected
+> clause (reusing `ai-router`'s own citation format rather than reimplementing its
+> extraction regex, so the two can't silently drift apart), and reports two numbers:
+> **selection accuracy** (expected clause present anywhere in the citations — the headline
+> metric this phase exists to produce) and **precise selection** (expected clause was the
+> *only* citation). The second number exists because `extractCitationsFromText` matches
+> every KB clause the model's answer happens to mention — without it, a chattier prompt
+> that cites more clauses per answer would look like an accuracy improvement it isn't.
+>
+> One round of `/fresh-eyes` adversarial review ran before merge and found 6 confirmed
+> bugs, all fixed and re-verified: (1) the seed migration's 4 real-log-linked rows used
+> bare literal UUIDs as FK values, which fails branch-DB validation entirely (a branch DB
+> has no production log rows, and a single missing FK parent aborts the whole 48-row
+> insert) — now existence-checked subqueries that degrade to `NULL`; (2) the new RLS
+> policy's `CREATE POLICY` wasn't idempotent — now guarded with `DROP POLICY IF EXISTS`;
+> (3) the script counted API/rate-limit/HTTP failures as retrieval misses — now a separate
+> `errors` bucket excluded from the accuracy denominator; (4) the script never confirmed
+> the JWT's tenant membership matched the tenant it asked about, so a mismatch would
+> silently measure the legacy ILIKE path while reporting it as the new one — now cross-
+> checked by reading `retrieval_strategy` back off the response-log row `ai-router` itself
+> just wrote; (5) `task_type: 'compliance_answer'` alone doesn't force Compliance mode
+> (the router can still reclassify to Help mode, which always returns zero citations) —
+> now sends `mode` explicitly and flags any reroute as an error, not a miss; (6) the
+> citation-match itself was precision-blind — added the "precise selection" metric above.
+> Also retagged three seed questions whose wording was ambiguous between two valid
+> clauses (one on validation frequency, one on trainer credentials, one on marketing) so
+> each unambiguously points at its intended clause.
+>
+> **Post-merge, applied to production and verified** (not just merged): both migrations
+> run via the interim `execute_sql` procedure (`supabase db push` remains unusable — see
+> `supabase/migrations/CLAUDE.md`), confirmed live — 48/48 rows, all 4 response-log FKs
+> resolved to real rows (not silently NULLed), RLS enabled — and the ledger reconciled via
+> `supabase migration repair --status applied` for both versions, confirmed matching by
+> `version` + `name`.
+>
+> **Still pending:** running `scripts/complybot-eval-retrieval.ts` for the first real
+> baseline accuracy reading needs a logged-in user's access token for the Vivacity Testing
+> Tenant — not yet obtained. No edge function changed in this PR, so nothing new is live in
+> `ai-router` itself; this phase only added the measurement tool.
+>
+> **Tenth revision, 21 Aug 2026.** ✅ **PR #580** (`feat: ComplyBot Phase 3 — Gaps tab,
+> Promote-to-KB, per-clause telemetry`) merged to `main` (merge commit `612139d4d`) and
+> confirmed deployed to production on Vercel (`dpl_DJXBmB43SKuGXbfxHvoFyaiPwiTQ`, READY).
+> **Phase 3 (§4, → PR 7) is now marked ✅ DONE.** No migration, no edge function — every
+> column used (`kb_miss`, `routed_mode`, `rating`, `response_log_id`, `ai_response`,
+> `clause_number`/`clause_title`/`instrument_id`) already existed, so there were no
+> post-merge database or deploy steps.
+>
+> Built in `rto-compass-hub-C` (worktree C): a new "Gaps" tab on the ComplyBot Training
+> page groups `kb_miss` and thumbs-down questions by normalised exact-match text (no fuzzy
+> matching, per the standing "avoid a whole tuning problem" principle), with a
+> "Promote to KB" action that reuses the existing `LegislationKBSheet` clause editor,
+> pre-filled with the gap question. A second table gives per-clause telemetry — how often
+> each clause is actually cited in a compliance answer (mirroring `ai-router`'s own
+> word-bounded `"Clause N"` citation regex, not a fresh reimplementation) and what share of
+> those citations were rated thumbs-down, so an authoring problem (cited often, rated
+> badly) is visible separately from a coverage gap (never retrieved at all).
+>
+> One round of adversarial fresh-eyes review ran before merge and found four confirmed
+> bugs in the first draft, all fixed and re-verified: (1) a double-count where a single
+> incident that was both a `kb_miss` and a thumbs-down was tallied as two separate
+> problems, now deduped by `response_log_id`; (2) a `.in()` call listing up to 500 UUIDs
+> in the request URL, which works today at current volume but would silently start
+> failing once compliance-mode traffic grew — now chunked at 100 IDs per request; (3) the
+> per-clause telemetry table swallowing its own error state and rendering a false-negative
+> "no citations recorded" on failure instead of an error — now surfaces the failure
+> explicitly; (4) an error message telling the operator to "check the browser console"
+> when nothing was ever logged there — now backed by a real `logger.error` call. Also
+> fixed from the "worth a second look" list: a missing sort tiebreak that made the "Last
+> Seen" column read as out of order, and the Promote-to-KB action not invalidating the
+> Gaps/telemetry queries, which made a successful save look like a no-op. Left
+> deliberately unfixed and documented in-code: citation matching is keyed on
+> `clause_number` alone (not `instrument_id`), correct only while clause numbers stay
+> unique across instruments — true for all 54 live rows today, and this is the same
+> limitation the upstream `ai-router` citation matching already has, not something this
+> branch introduced.
+>
+> **Still pending:** manual QA in the Vivacity Testing Tenant — click through the Gaps tab
+> against real `kb_miss`/thumbs-down data and confirm the Promote-to-KB round-trip actually
+> lands a usable clause. Not yet performed as of this revision. Worktree C is released
+> (unclaimed) back to `main` per the teardown procedure. Next step per §4A: **Phase 4**
+> (eval harness — the only phase left un-started) or **#9**'s trial usage cap (PR 4), per
+> Brian's choice.
 >
 > **Major revision 14 Aug 2026 (same day).** After (a) measuring the KB's actual token
 > footprint and (b) reading Vivacity's already-shipped `ask-viv-assistant` RAG in
@@ -124,6 +229,57 @@
 > replaced) — left in place deliberately per minimum-scope, flagged as a small future
 > cleanup PR. Live re-verification of the citation fix and formatting against real chat
 > traffic in the Vivacity Testing Tenant is still pending as a follow-up manual QA step.
+>
+> **Eighth revision, 21 Aug 2026.** Manual QA spot-check of PR #537's citation-fix and
+> formatting-fix against real Vivacity Testing Tenant traffic — **passed, both fixes
+> confirmed live-verified.** Two questions were run through Compliance mode as tenant admin
+> and cross-checked against `complybot_response_logs`:
+> - "What are the requirements for trainer and assessor credentials?" — correctly cited
+>   Clause 1A/1B/1C/1D/1E/2A of the Credential Policy plus Standard 3.2, matching the real
+>   KB rows. `retrieval_strategy = single_call_v1`, `kb_miss = false`.
+> - "Does OS-2025 cover compliance with laws?" — deliberately baited the exact false-citation
+>   failure mode found during #537's review (a bare-substring match on "20" inside "2025").
+>   Correctly identified that Clause 20 belongs to CR-2025, not OS-2025 — the word-bounded
+>   "Clause N" fix held. `retrieval_strategy = single_call_v1`, `kb_miss = false`.
+>
+> Both responses were confirmed as flowing prose with no Markdown headers, bullet lists, or
+> tables — contrasted directly against an older pre-#537 logged row for the same tenant
+> (`retrieval_strategy = tool_use_v1`) which still shows `##` headers and `>` blockquotes,
+> confirming the formatting fix is specific to the new code path. `user_prompt` also
+> confirmed to log only the latest question, not concatenated history. **The "live
+> re-verification... pending" line above is now satisfied for these two cases**; broader
+> QA across more question types remains optional but is no longer a blocker. Next step:
+> PR 6 (terminology/banned-term guard + citation-quote verification).
+>
+> **Ninth revision, 21 Aug 2026.** ✅ **PR #578** (`feat: ComplyBot terminology guard +
+> citation-quote verification`) merged to `main` (merge commit `287ff1a2b`) and deployed to
+> production automatically — confirmed live (`ai-router` edge function status `ACTIVE`,
+> redeployed 39 seconds after the merge commit). **PR 6 (§6A items 5+6) is now marked ✅
+> DONE.** Two new modules ship in `supabase/functions/ai-router/`: `terminologyFilter.ts`
+> (word-boundary-matched "board"/"directors" → "governing persons" guard, retry-then-
+> substitute per the locked failure handling, with an allowlist path for a legitimate
+> verbatim regulator quote) plus `terminologyRetry.ts` (the one-retry Anthropic call), and
+> `citationVerifier.ts` (strips any quoted legislative text that doesn't match the retrieved
+> clause's `legal_text`, and enforces the 30-word verbatim-quote cap). Both guards sit between
+> the existing Markdown-stripping step and the `complybot_response_logs` write, per the locked
+> pipeline order. 21 new test cases added across the two new `_test.ts` files, explicitly
+> covering the dashboard/onboarding false-positive traps and the allowlist path.
+>
+> A migration (`20260821090000_add_complybot_terminology_citation_telemetry.sql`) added two
+> `jsonb` columns to `complybot_response_logs` — `terminology_substitutions` and
+> `stripped_citation_quotes` — for Phase 3 tuning-signal telemetry. Applied to production via
+> the standing interim procedure (`execute_sql`, not `apply_migration`) and confirmed live;
+> the ledger was reconciled via `supabase migration repair --status applied 20260821090000`
+> and confirmed present in `list_migrations` under the exact version/name. ci-gate ran clean
+> before push (lint, type-check, migration/security guards); `deno test` could not be run
+> locally in this environment (Deno unavailable) — CI's real run on the merge commit is the
+> verification of record for the 21 new tests.
+>
+> **Still pending:** manual QA of both guards against real Vivacity Testing Tenant traffic
+> (ask a question likely to trigger "board"/"directors" language; ask a question with a long
+> or fabricated quote) — not yet performed as of this revision. Next step per §4A: Phase 3
+> (Gaps tab, Promote-to-KB, per-clause telemetry) is now the only phase left un-started, or
+> #9's trial usage cap (PR 4) if Brian wants to run that in the other worktree instead.
 >
 > Single source of truth for rebuilding ComplyBot's retrieval so it is genuinely
 > grounded in the curated knowledge base, and for turning
@@ -467,7 +623,7 @@ is close to free after the first call.
 **No longer in this phase:** `rpc_search_legislation_kb`, the blended score, the relevance
 floor, the clause-number regex, and the OpenAI embedding call — all superseded by §3.
 
-### Phase 3 — Make the Training page actually train (→ PR 7)
+### Phase 3 — Make the Training page actually train (→ PR 7) ✅ DONE (PR #580, merged 21 Aug 2026)
 **Frontend plus one small function. Useless before Phase 2 — `kb_miss` would flag on
 virtually every question today.**
 
@@ -494,10 +650,13 @@ virtually every question today.**
   question that retrieves nothing is a coverage problem. The Gaps tab should distinguish
   these two, because they go to different people.
 
-### Phase 4 — Prove it works, then tune (→ PR 8)
-- Populate `ai_eval_query_sets` (2 rows today) with ~30-50 real questions drawn from the
-  301 response logs, each tagged with the clause that *should* be retrieved.
-- A script that runs the set and reports retrieval accuracy. Run before and after each
+### Phase 4 — Prove it works, then tune (→ PR 8) — ✅ DONE, PR #583 merged 21 Aug 2026
+- ✅ **DONE, PR #583.** A new `ai_eval_questions` table (not `ai_eval_query_sets` — see the
+  eleventh revision note above for why), seeded with 48 tagged questions (4 drawn from real
+  response logs, 44 hand-authored for breadth) via `scripts/complybot-eval-retrieval.ts`.
+  Applied to production and verified. **Still pending:** the first actual baseline run —
+  needs a real user JWT for the Vivacity Testing Tenant, not yet obtained.
+- ✅ **DONE, PR #583.** A script that runs the set and reports retrieval accuracy. Run before and after each
   change — without it, tuning is guesswork.
 - **Revised 14 Aug 2026 — what Phase 4 now measures and tunes.** There are no blend weights
   and no floor to tune. The levers are instead:
@@ -519,10 +678,15 @@ PR #435 completed the first early item. ✅ **PR #500 (merged 19 Aug 2026) compl
 applied to production and ledger-repaired. Order 2 / PR 2 (#11) remains **on hold** per Brian's
 19 Aug 2026 call. ✅ **PR #523 (merged 19 Aug 2026) completed Order 4 / PR 5** (Phase 2's main
 `ai-router` rewrite) — deployed to production, shipped dark behind the `complybot_tool_retrieval`
-feature flag, enabled only for the Vivacity Testing Tenant for live testing. The next AI should
-continue at **Order 5** (Phase 3, then Phase 4), or PR 6 (terminology/banned-term guard +
-citation-quote verification), unless Brian chooses to run #9's cap work (PR 4) in the other
-worktree first or in parallel.
+feature flag, enabled only for the Vivacity Testing Tenant for live testing. ✅ **PR #578
+(merged 21 Aug 2026) completed PR 6** (terminology/banned-term guard + citation-quote
+verification). ✅ **PR #580 (merged 21 Aug 2026) completed Order 5 / PR 7** (Phase 3 — Gaps
+tab, Promote-to-KB, per-clause telemetry) — deployed to production, no migration or edge
+function involved. ✅ **PR #583 (merged 21 Aug 2026) completed Order 6 / PR 8** (Phase 4 —
+eval harness: `ai_eval_questions` table + 48 seeded questions + scoring script), migration
+applied to production and ledger-repaired. **Phase 4 is now the last phase to have shipped.**
+The next AI should continue with **Phase 4**'s still-pending baseline run (needs a real
+Vivacity Testing Tenant JWT), or pick up **#9's trial usage cap (PR 4)**, per Brian's choice.
 
 | Order | Work | Why it goes first | DB job? |
 |---|---|---|---|
@@ -530,7 +694,8 @@ worktree first or in parallel.
 | 2 | **ON HOLD 19 Aug 2026 — Route-permission / sidebar fix** (#11) | Re-verified 19 Aug 2026: original description was partly stale — see #11's correction block. Real live bug is missing `/auditor/*` routes for Regulatory Officer, not a guard-blocking issue. Brian's call: not being actioned right now. Still a prerequisite for #10 if #10 is ever picked up | No (→ PR 2, on hold) |
 | 3 | ✅ **Phase 0** (items 1 and 2 only) — **done, PR #500 merged 19 Aug 2026** | Independently valuable, no dependencies, ships honest failure behaviour immediately | No (→ PR 3) |
 | 4 | ✅ **Phase 2 — DONE, PR #523 merged 19 Aug 2026** | The main rewrite | No (→ PR 5, complete) |
-| 5 | **Phase 3, then Phase 4** | Phase 3 needs Phase 2 live; Phase 4 needs something to measure | Phase 3 only (→ PR 7, then PR 8) |
+| 5 | ✅ **Phase 3 — DONE, PR #580 merged 21 Aug 2026.** | Phase 3 needed Phase 2 live; Phase 4 needs something to measure | No (→ PR 7, complete) |
+| 6 | ✅ **Phase 4 — DONE, PR #583 merged 21 Aug 2026.** Eval harness — baseline run still pending | Needed Phase 3's telemetry surface as a reference point for what "measure it" means | No (→ PR 8, complete) |
 
 Runs in parallel, independent of the above: **#6's cleanup PR** (dead tables, orphaned
 frontend, dead layouts/sidebars, `complybot-learning-logger`) (→ PR 9) and **#10's navigation
@@ -550,9 +715,9 @@ purely a delivery-sequencing layer on top of them. Every phase and every numbere
 | **3** | ✅ Phase 0 items 1+2 — `ai-router` honest fallback + `kb_miss`/`retrieval_strategy` column — **done, PR #500 merged 19 Aug 2026, migration applied to prod + ledger repaired** | Small — 1 migration + `ai-router` edit | none functionally, sequenced after PR 2 per §4 unless Brian chooses to run this DB slot earlier | No — small DB job |
 | **4** | #9 trial usage cap — settings rows + composite index + `ai-router` quota check + UI banner/block | Medium — 1 migration + `ai-router` + widget UI | Angela's cap number (locked: 20/16) | Yes — designed to run in the other worktree in parallel with PR 5 |
 | **5** | ✅ **DONE, PR #523 merged 19 Aug 2026.** Phase 2 core rewrite — directory generation, `lookup_clauses`/article tools, tool loop, module extraction, plus the safety-critical §6A items that can't ship without it (feature-flag kill switch, iteration cap, tool-errors-as-results, prompt caching) | Large — the main rewrite | PR 3 (fallback behaviour it builds on) | Complete |
-| **6** | Terminology/banned-term guard + citation-quote verification (§6A items 5+6) | Medium — separable, own test file | PR 5 (operates on its output) | Could ship right after PR 5, or fold in if small enough once scoped |
-| **7** | Phase 3 — Gaps tab, Promote-to-KB, per-clause telemetry | Medium — frontend + small function | PR 5 live | No |
-| **8** | Phase 4 — eval harness + tagged question set | Small — script + data | PR 7 (or at least PR 5) live | No |
+| **6** | ✅ **DONE, PR #578 merged 21 Aug 2026.** Terminology/banned-term guard + citation-quote verification (§6A items 5+6) | Medium — separable, own test file | PR 5 (operates on its output) | Complete |
+| **7** | ✅ **DONE, PR #580 merged 21 Aug 2026.** Phase 3 — Gaps tab, Promote-to-KB, per-clause telemetry | Medium — frontend + small function | PR 5 live | Complete |
+| **8** | ✅ **DONE, PR #583 merged 21 Aug 2026.** Phase 4 — eval harness + tagged question set | Small — script + data | PR 7 (or at least PR 5) live | Complete |
 | **9** | #6+#8 cleanup — dead tables, orphaned frontend/layouts/sidebars, `complybot-learning-logger` | Medium — pure removal | none functionally | Yes — can run anytime in parallel |
 
 **Parallel lanes across the two worktrees:** PR 4 and PR 9 have no dependency on PR 5 and can run
