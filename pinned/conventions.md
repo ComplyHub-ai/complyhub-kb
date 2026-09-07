@@ -45,26 +45,26 @@ When adding a new private bucket, default to this pattern from the start. See `p
 3. Supabase detects the new migration file and automatically creates a branch DB, runs all migrations against it
 4. Confirm branch DB shows no `MIGRATIONS_FAILED` before doing any QA
 5. QA is done against the branch DB (not production)
-6. Merge the PR to `main` — this lands the `.sql` file in the repo only; it does NOT touch the production DB
-7. Manually apply the migration to production via MCP `apply_migration` immediately after merge — never defer
-8. Verify the DB object changed in production
+6. Merge the PR to `main` — the `Apply Supabase Migrations` GitHub Actions workflow applies the migration to production automatically within minutes (fixed 4 Sep 2026, hardened 7 Sep 2026 — see below). No manual step needed.
+7. **Never** use MCP `apply_migration` for this — it does not respect the migration file's version and creates a git/production ledger mismatch. A manual apply also just races the automated workflow.
+8. Verify the DB object changed in production (the workflow's log confirms the apply, but re-checking the live object is still good practice)
 
 **Non-migration branch flow:** no branch DB is created — QA runs against production DB, no manual apply step needed after merge.
 
 **Key rules:**
-- Merging to `main` never auto-applies migrations to production — always a separate manual step
+- Merging to `main` auto-applies migrations to production via the `Apply Supabase Migrations` GitHub Actions workflow — no manual step
 - Never do production QA for migration branches — always use the branch DB
-- Apply to production immediately after merge — never leave it pending
+- Never hand-apply a migration after merge (races the automated workflow); if the workflow fails, fix the underlying cause and re-run it rather than applying by hand
 
-### Migration discipline — preventing drift (effective 26 June 2026)
+### Migration discipline — preventing drift (effective 26 June 2026; apply step automated 4 Sep 2026)
 
-The repo and the production database are independent. Merging to `main` only updates files — it never touches the database. Applying to production is always a separate manual step.
+The repo and the production database are independent. Merging to `main` only updates files. Applying to production used to require a separate manual step; as of 4 Sep 2026 it's automatic (see below).
 
 **The only safe flow:**
 1. Write the `.sql` file on a branch
 2. Push → branch DB confirms green (no `MIGRATIONS_FAILED`)
 3. Merge PR to `main`
-4. **Apply to production immediately** via MCP `apply_migration` — never defer
+4. Production apply happens automatically via the `Apply Supabase Migrations` GitHub Actions workflow within minutes — do NOT use MCP `apply_migration` to do this manually, it does not respect the file's version and creates a ledger mismatch
 5. Verify the DB object changed in production
 
 **If anyone applies directly to production:** write a reconciliation migration capturing the exact change. Merge it before any new branch work touches that schema area. This is what happened with Angela's 26 June fixes — failure to do this caused branch DB failures across the whole PR.
@@ -75,9 +75,11 @@ Do **not** timestamp the file with the date you're doing the reconciliation and 
 
 **Branch DB + seed.sql:** Branch DBs run: baseline → migrations → `seed.sql`. The `seed.sql` is live and configured in `config.toml` under `[db.seed]`. It uses hardcoded tenant UUIDs so QA accounts exist on every branch DB. If a migration adds a column that `seed.sql` references and the baseline doesn't have it, the seed step fails. Always check `seed.sql` when adding columns to seeded tables.
 
-### Schema drift — Lovable legacy (context as of 25 June 2026)
+### Schema drift — Lovable legacy — ✅ RECONCILED 4 Sep 2026
 
-Before June 2026, Lovable applied database changes directly to the production DB without creating migration files. This left 3,608 migration version records in production with no corresponding `.sql` files in the repo. Branch DBs hit `MIGRATIONS_FAILED` because they start fresh and can't find those versions. Lovable is no longer in use — all migrations now go through files + branch DB testing.
+Before June 2026, Lovable applied database changes directly to the production DB without creating migration files. This left thousands of migration version records in production (measured at 3,608 in June, ~4,600 by end of August as more accumulated) with no corresponding `.sql` files in the repo. Branch DBs hit `MIGRATIONS_FAILED` because they start fresh and can't find those versions. Lovable is no longer in use — all migrations now go through files + branch DB testing.
+
+**Resolved 4 Sep 2026.** The ledger was reconciled to exactly match the repo's files, then ~1,050 superseded migration files were squashed into a fresh 20-slice baseline dump (`supabase/migrations/2026090403…_baseline_01.sql` through `..._baseline_20.sql`). `supabase db push` now reports the remote database up to date, and the automated apply workflow has passed on every merge since (confirmed 8+ consecutive successes, 6–7 Sep 2026). Full history: `migration-drift-remediation.md` (workspace root).
 
 **Known drift fixed:** Migration `20260624000100_gap_fill_tenants_schema_drift.sql` adds 10 columns to `public.tenants` that were applied directly to production via Lovable and were missing from the baseline: `cricos_provider_code`, `lms_name`, `llnd_provider`, `llnd_assessment_instrument`, `english_evidence_policy` (jsonb), `acsf_defaults` (jsonb), `delivery_sites` (jsonb), `funding_streams` (text[]), `trainer_pd_review_cadence`, `parent_consultant_org_id` (uuid).
 
@@ -122,7 +124,9 @@ Caught by `ci-gate`'s pre-push gate (formerly named `cichecker`), but only after
 and pushed once. Doing the git-log check while *authoring* the file, not just before pushing, avoids the
 wasted round trip.
 
-### Migration idempotency — every CREATE must be safe to run twice (effective 16 Jul 2026)
+### Migration idempotency — every CREATE must be safe to run twice (effective 16 Jul 2026; CI-enforced 7 Sep 2026)
+
+**Now a blocking CI check, not just a convention.** `ci.yml`'s `migration-guards` job flags any new migration with a bare `CREATE TABLE`/`CREATE INDEX`/`CREATE UNIQUE INDEX` (no `IF NOT EXISTS`), a `CREATE POLICY` with no matching `DROP POLICY IF EXISTS`, or a `CREATE TYPE` with no `pg_type` existence guard. This landed alongside making the production apply workflow's migrate-and-stamp step atomic (PR 5) — since apply is now fully automatic on merge, a non-idempotent file that fails partway can no longer be safely hand-retried the way it used to be.
 
 Before finishing any migration file that does `DROP X IF EXISTS <name>` then `CREATE X <name>`, check that the name being dropped and the name being created are the SAME name — not "drop the old live name, create a differently-named new thing." If they differ, a second run of the same file (or any other file creating that same new name) hits a collision and the whole migration chain halts.
 
