@@ -67,9 +67,10 @@ The repo and the production database are independent. Merging to `main` only upd
 > No dashboard SQL Editor against production, no MCP/AI-tool schema changes against production, no
 > `apply_migration` for anything that already exists as a file.
 
-Angela and RJ retain direct production access — this is enforced by detection (the drift-check CI job
-today; an auto-reconciliation bot is planned but not yet built — see `migration-drift-remediation.md`
-§5 PR 7), not by revoking permissions. See `migration-drift-remediation.md` §4.3 for the full reasoning.
+Angela and RJ retain direct production access — this is enforced by detection (the drift-check CI job),
+not by revoking permissions. An auto-reconciliation bot was proposed to strengthen this further but was
+discarded 7 Sep 2026 (Brian) — not being built. Full reasoning and the whole squash/hardening project:
+`complyhub-kb/audit/2026-09-07_migration-drift-remediation.md`.
 
 **The only safe flow:**
 1. Write the `.sql` file on a branch
@@ -90,7 +91,7 @@ Do **not** timestamp the file with the date you're doing the reconciliation and 
 
 Before June 2026, Lovable applied database changes directly to the production DB without creating migration files. This left thousands of migration version records in production (measured at 3,608 in June, ~4,600 by end of August as more accumulated) with no corresponding `.sql` files in the repo. Branch DBs hit `MIGRATIONS_FAILED` because they start fresh and can't find those versions. Lovable is no longer in use — all migrations now go through files + branch DB testing.
 
-**Resolved 4 Sep 2026.** The ledger was reconciled to exactly match the repo's files, then ~1,050 superseded migration files were squashed into a fresh 20-slice baseline dump (`supabase/migrations/2026090403…_baseline_01.sql` through `..._baseline_20.sql`). `supabase db push` now reports the remote database up to date, and the automated apply workflow has passed on every merge since (confirmed 8+ consecutive successes, 6–7 Sep 2026). Full history: `migration-drift-remediation.md` (workspace root).
+**Resolved 4 Sep 2026.** The ledger was reconciled to exactly match the repo's files, then ~1,050 superseded migration files were squashed into a fresh 20-slice baseline dump (`supabase/migrations/2026090403…_baseline_01.sql` through `..._baseline_20.sql`). `supabase db push` now reports the remote database up to date, and the automated apply workflow has passed on every merge since (confirmed 8+ consecutive successes, 6–7 Sep 2026). Full history: `complyhub-kb/audit/2026-09-07_migration-drift-remediation.md`.
 
 **Known drift fixed:** Migration `20260624000100_gap_fill_tenants_schema_drift.sql` adds 10 columns to `public.tenants` that were applied directly to production via Lovable and were missing from the baseline: `cricos_provider_code`, `lms_name`, `llnd_provider`, `llnd_assessment_instrument`, `english_evidence_policy` (jsonb), `acsf_defaults` (jsonb), `delivery_sites` (jsonb), `funding_streams` (text[]), `trainer_pd_review_cadence`, `parent_consultant_org_id` (uuid).
 
