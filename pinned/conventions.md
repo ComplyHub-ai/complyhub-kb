@@ -1,4 +1,4 @@
-> **Last updated:** 5 May 2026 · **Reconsider by:** 5 Nov 2026 · **Confidence:** medium — RLS and Edge function sections added from production incident; other sections still scaffold.
+> **Last updated:** 7 Sep 2026 · **Reconsider by:** 7 Mar 2027 · **Confidence:** medium — RLS and Edge function sections added from production incident; other sections still scaffold.
 
 # System Design — Conventions & Patterns
 
@@ -60,6 +60,17 @@ When adding a new private bucket, default to this pattern from the start. See `p
 
 The repo and the production database are independent. Merging to `main` only updates files. Applying to production used to require a separate manual step; as of 4 Sep 2026 it's automatic (see below).
 
+**The canonical rule (locked 28 Aug 2026, workspace `CLAUDE.md`):**
+
+> A migration may only be deployed to production once its `.sql` file is merged into `main`.
+> Write the file on a branch → open a PR → let the branch-DB check pass → merge → then it deploys.
+> No dashboard SQL Editor against production, no MCP/AI-tool schema changes against production, no
+> `apply_migration` for anything that already exists as a file.
+
+Angela and RJ retain direct production access — this is enforced by detection (the drift-check CI job
+today; an auto-reconciliation bot is planned but not yet built — see `migration-drift-remediation.md`
+§5 PR 7), not by revoking permissions. See `migration-drift-remediation.md` §4.3 for the full reasoning.
+
 **The only safe flow:**
 1. Write the `.sql` file on a branch
 2. Push → branch DB confirms green (no `MIGRATIONS_FAILED`)
@@ -93,7 +104,7 @@ When a DB change is needed and the situation supports it, prefer editing the bas
 
 **Create a new migration file when:** the object already exists in production (baseline won't re-run against production, so an `ALTER TABLE` still needs manual apply); the change modifies an existing baseline object; the baseline doesn't contain a `CREATE TABLE` for the affected table (Lovable-era drift); risk of conflict with another migration in the chain is high.
 
-**Key caveat:** editing the baseline only covers branch DBs. Production always requires a separate manual `apply_migration` step after the PR merges — never assume baseline changes flow through to production automatically.
+**Key caveat, corrected 7 Sep 2026:** this note used to say production requires a separate manual `apply_migration` step after merge — that is now wrong and must not be followed. As of 4 Sep 2026 (hardened 7 Sep 2026, PR 5) the `Apply Supabase Migrations` GitHub Actions workflow applies any pending migration automatically within minutes of merging to `main`, atomically with the ledger stamp. **Never use MCP `apply_migration` for a file that already exists in `supabase/migrations/`** — it does not respect the filename's version and creates a git/production ledger mismatch; it's fine only for one-off exploratory SQL with no corresponding file. Full detail: `supabase/migrations/CLAUDE.md` § "✅ Migration apply — fully automated".
 
 **Watch for redundancies:** before adding anything to the baseline, check whether an existing migration file already handles it.
 
@@ -105,10 +116,20 @@ merged after it was generated won't be reflected there. Copying a function/view 
 baseline and issuing `CREATE OR REPLACE` silently reverts every change made to that object since —
 there's no error at write time or at apply time, because it's valid SQL that just does the wrong thing.
 
-**Before writing any `CREATE OR REPLACE FUNCTION`/`VIEW` migration:**
+**Before writing any `CREATE OR REPLACE FUNCTION`/`VIEW` migration, use a content search, not a
+filename search (corrected 7 Sep 2026):**
 ```bash
-git log --oneline -- 'supabase/migrations/*<object_name>*'
+git log --oneline -S "<object_name>" -- supabase/migrations/*.sql
 ```
+**Do not use `git log -- 'supabase/migrations/*<object_name>*'` (filename-pattern search) for this
+check — it misses batch migrations.** Many migrations are named after the ticket/incident, not the
+function(s) they touch (e.g. `fix_critical_suggestion_qi_rpcs.sql` touches five differently-named
+functions) — a filename search on any of those five functions returns nothing even though that file
+is the true most recent version. `-S "<string>"` searches the actual diff content of every commit and
+finds it regardless of filename. Confirmed 30 Jul 2026 (PR #329): a filename search for
+`mark_suggestion_viewed` returned no hits, silently reverting a fix already shipped in
+`20260624180000_fix_critical_suggestion_qi_rpcs.sql`.
+
 If any hits exist, read the **most recent** one and base the new migration's body on that file's
 current definition — never on the baseline directly.
 
