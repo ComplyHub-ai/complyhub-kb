@@ -104,8 +104,8 @@ At the start of any session with active branch work (`fix/*`/`feat/*` exists loc
 
 **`npm run type-check` is vacuous — do not trust a clean result from it.** `rto-compass-hub`'s root `tsconfig.json` is solution-style (`files: []` with project references), so plain `tsc --noEmit` silently checks zero files. The correct check (`npx tsc --build tsconfig.app.json --noEmit`) is a full whole-codebase compile with the same hang risk as `npm run build` — **never run it speculatively.** For a normal-sized change: rely on `npm run lint` + manual review of the diff's type surface, and let Vercel's build be the real gate. Full incident detail: `complyhub-kb/pinned/conventions.md`.
 
-### Applying migrations to production — `supabase db push` only, never `apply_migration`
-`apply_migration` does not respect a migration file's `YYYYMMDDHHmmss` filename version — it records under a freshly generated version instead, creating a git/production ledger mismatch. **Never use `apply_migration` to deploy anything that already exists as a file in `supabase/migrations/`.** It's fine only for one-off exploratory SQL with no corresponding file. Full detail + the current interim procedure (production ledger drift means `supabase db push` itself is temporarily unusable): `supabase/migrations/CLAUDE.md` and `complyhub-kb/reference/diagnosis-discipline.md`.
+### Applying migrations to production — automatic on merge, never `apply_migration`
+Production apply is automatic: the `Apply Supabase Migrations` GitHub Actions workflow applies any pending migration within minutes of merging to `main` (ledger reconciliation + baseline squash fixed the ~2,000-version drift that broke this 4 Sep 2026; PR 5, 7 Sep 2026, made the apply+ledger-stamp atomic). `supabase db push` also works again from a terminal if a manual/emergency apply is ever needed. **Never use `apply_migration` to deploy anything that already exists as a file in `supabase/migrations/`** — it does not respect the filename's version, and creates a git/production ledger mismatch. It's fine only for one-off exploratory SQL with no corresponding file. Full detail: `supabase/migrations/CLAUDE.md` and `complyhub-kb/reference/diagnosis-discipline.md`.
 
 ### Verify `main` is clean before AND after any dry-run merge / Reviewer dispatch
 Before dispatching Reviewer's mechanical pass (or running a "check conflicts" dry-run merge manually), confirm `git status` is clean first — check independently again after, don't trust the dispatch's own self-report. If `main` (or any branch) shows unexpected changes, treat it like a branch-verification failure: stop, report to Brian, resolve before anything else. Incident detail: `.cursor/orchestrate/roles.md` § "Known incident".
@@ -132,8 +132,6 @@ Never rely on memory, prior session context, or past observations as ground trut
 - Confirm with Brian before acting on anything touching `main`, CI config, `config.toml`, or `supabase/migrations/`.
 - Do not create new guardrail files inside `rto-compass-hub/` without Brian explicitly asking.
 - Never commit or push to `main` in `rto-compass-hub/`.
-- When Brian asks "what should I do next", check `rto-compass-hub/TODO.md` and `rto-compass-hub/.lovable/plan.md` first.
-- Present options, don't hand off. Architectural judgement calls go to Brian, not Carl/RJ/Dave — Brian works across all roles.
 - Always give UI-based navigation instructions (click path, not raw URLs) — reference `complyhub-kb/reference/ui-navigation.md`.
 
 ---
@@ -179,14 +177,6 @@ One flow: **FRAME → RECON → PLAN → MAKE → CHECK → SHIP.** One ledger: 
 | **Reviewer** | Adversarial fresh-eyes review (incl. live read-only DB) + mechanical gauntlet (type-check/lint/dry-run-merge/banned-patterns) + final SHIP/NEEDS-WORK verdict | Never |
 
 **Who fixes bugs — always Fixer, i.e. Claude Code itself.** Scout and Reviewer only ever report. If a task seems to need a fourth role, that's a sign the current Scout or Reviewer pass needs to cover more ground in one dispatch.
-
-**No AskUserQuestion popups for routine flow.** State the call in prose and proceed; Brian redirects if wrong. Commit/push hard gates above still absolute.
-
-**Two engines, one switch** — both read-only, never given edit access:
-- **Claude mode** (default) — Scout/Reviewer run as genuine Claude Code Agent tool subagents.
-- **Cursor CLI mode** — token-budget handoff for when Brian is close to running out of tokens; dispatched via `.cursor/orchestrate/dispatch.sh`. Switchable mid-conversation just by Brian saying so.
-
-Exact commands, prompt templates, models: `.cursor/orchestrate/roles.md` — read before the first dispatch of a session. Background: `complyhub-kb/reference/ai-model-routing.md`.
 
 ### ⛔ Mandatory Scope Line — every Scout/Reviewer dispatch
 
@@ -276,6 +266,7 @@ Full detail: `complyhub-kb/reference/worktree-workflow.md`.
 | on demand | `complyhub-kb/reference/ai-model-routing.md` | Orchestrator role matrix + cursor-agent shell-out background |
 | on demand | `.cursor/orchestrate/roles.md` | Read before first Scout/Reviewer dispatch each session — exact commands, prompt templates, model choices, gotchas |
 | on demand | `complyhub-kb/reference/worktree-workflow.md` | Parallel worktree workflow |
+| on demand | `complyhub-kb/reference/playwright-qa-conventions.md` | Playwright E2E patterns (authenticated vs public-route checks), env-var gotchas, Supabase Branch DB status |
 | on demand | `complyhub-kb/reference/supabase-mcp.md` | Supabase MCP usage rules |
 | on demand | `complyhub-kb/reference/vercel-mcp.md` | Vercel MCP usage rules |
 | on demand | `complyhub-kb/reference/diagnosis-discipline.md` | Bug-tracing discipline, incident lessons |

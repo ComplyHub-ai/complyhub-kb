@@ -1,0 +1,5252 @@
+[
+  {
+    "version": "00000000000000",
+    "name": "baseline",
+    "has_statements": true
+  },
+  {
+    "version": "20260525052116",
+    "name": "619d2a32-62be-4466-a969-ecb2f8121b38",
+    "has_statements": true
+  },
+  {
+    "version": "20260525060856",
+    "name": "10754392-648a-409b-ae26-1f315600da31",
+    "has_statements": true
+  },
+  {
+    "version": "20260526014001",
+    "name": "861af9ca-f2f1-4765-92d9-0472ec1acec2",
+    "has_statements": true
+  },
+  {
+    "version": "20260526021551",
+    "name": "9f4311ae-d39d-42ca-892b-7307fe287513",
+    "has_statements": true
+  },
+  {
+    "version": "20260526024840",
+    "name": "22b7b119-bb3e-4c67-9b28-558de3c54fc3",
+    "has_statements": true
+  },
+  {
+    "version": "20260526074731",
+    "name": "f1305159-6055-4c17-8142-a04a990e32df",
+    "has_statements": true
+  },
+  {
+    "version": "20260527011639",
+    "name": "9407ad69-0c44-4f44-ae0e-755bb232087a",
+    "has_statements": true
+  },
+  {
+    "version": "20260527030703",
+    "name": "e04b2625-cd2d-4dc0-b13a-ac5ca548f912",
+    "has_statements": true
+  },
+  {
+    "version": "20260527045835",
+    "name": "a8bbae13-bc1f-42c6-996b-f625bb62973f",
+    "has_statements": true
+  },
+  {
+    "version": "20260527073803",
+    "name": "e8f47775-ef1b-4702-945b-d4f936461a4d",
+    "has_statements": true
+  },
+  {
+    "version": "20260527080426",
+    "name": "6a1b90a6-f058-432a-a074-ab69a4415981",
+    "has_statements": true
+  },
+  {
+    "version": "20260527092004",
+    "name": "ce34792a-fd94-45c5-93b7-f6e5bd64b6a9",
+    "has_statements": true
+  },
+  {
+    "version": "20260527231541",
+    "name": "50b3d7dc-13e4-4b66-9c7c-a83d8799259b",
+    "has_statements": true
+  },
+  {
+    "version": "20260528015847",
+    "name": "7897ebe0-c4b1-4f59-a777-a2a24d3e2683",
+    "has_statements": true
+  },
+  {
+    "version": "20260528041245",
+    "name": "35e32e64-cd81-4736-8f0e-c6940097e688",
+    "has_statements": true
+  },
+  {
+    "version": "20260528063853",
+    "name": "eb0c2fd3-bcb5-45fc-b92d-6616b5e172e9",
+    "has_statements": true
+  },
+  {
+    "version": "20260609084513",
+    "name": "7b83dad3-952c-4467-9187-538b93b35a4d",
+    "has_statements": true
+  },
+  {
+    "version": "20260609111500",
+    "name": "fix_consultant_sa_rpc_gate",
+    "has_statements": true
+  },
+  {
+    "version": "20260610061821",
+    "name": "7226e959-f3af-4ed6-9dd4-8a09c8ceccbf",
+    "has_statements": true
+  },
+  {
+    "version": "20260610113000",
+    "name": "fix_consultation_and_pd_delete_integrity",
+    "has_statements": true
+  },
+  {
+    "version": "20260611100401",
+    "name": "create_tas_assessment_mapping",
+    "has_statements": true
+  },
+  {
+    "version": "20260611120000",
+    "name": "create_sso_reports_register",
+    "has_statements": false
+  },
+  {
+    "version": "20260613052845",
+    "name": "409fdb09-3d08-43bc-b80b-c6eb1ab5746b",
+    "has_statements": true
+  },
+  {
+    "version": "20260613064044",
+    "name": "9e4d3c34-94e1-4738-828c-0d64da144f92",
+    "has_statements": true
+  },
+  {
+    "version": "20260613070940",
+    "name": "037f375c-9abe-4e2d-8749-b7b658abd951",
+    "has_statements": true
+  },
+  {
+    "version": "20260614210903",
+    "name": "345cc653-db6e-4eb3-8fe8-68c2bf7300ef",
+    "has_statements": true
+  },
+  {
+    "version": "20260614230313",
+    "name": "181a0fb3-4eba-499d-b923-f17d5c3c4eb3",
+    "has_statements": true
+  },
+  {
+    "version": "20260616024757",
+    "name": "a3399d51-b586-44d9-b741-be3da64b3488",
+    "has_statements": true
+  },
+  {
+    "version": "20260616054439",
+    "name": "1b96b0ae-8d42-4033-a511-bba4c7af67df",
+    "has_statements": true
+  },
+  {
+    "version": "20260616062418",
+    "name": "22e8f6b4-415f-4fa1-a5c6-3f2192887d68",
+    "has_statements": true
+  },
+  {
+    "version": "20260616064246",
+    "name": "a6e93fda-2644-46fa-a3db-c68148fe6763",
+    "has_statements": true
+  },
+  {
+    "version": "20260616065358",
+    "name": "f8a5f240-f509-4ff0-9c57-d28b0e82a8f9",
+    "has_statements": true
+  },
+  {
+    "version": "20260616070809",
+    "name": "9465890c-d247-45c9-bab4-f33b2b8dee7b",
+    "has_statements": true
+  },
+  {
+    "version": "20260616071916",
+    "name": "4f4f613b-d240-4524-ae48-35389830cc4a",
+    "has_statements": true
+  },
+  {
+    "version": "20260616072103",
+    "name": "7cdc05a8-6700-4b1e-bd80-b4c29378c8a1",
+    "has_statements": true
+  },
+  {
+    "version": "20260616081504",
+    "name": "1880b837-c625-4135-9e68-28ea068ec9fa",
+    "has_statements": true
+  },
+  {
+    "version": "20260616110000",
+    "name": "fix_portfolio_request_membership",
+    "has_statements": false
+  },
+  {
+    "version": "20260616113000",
+    "name": "fix_user_security_summary_tenant_scope",
+    "has_statements": false
+  },
+  {
+    "version": "20260617055610",
+    "name": "5f96574b-c45f-4fb9-a3b2-40a2de938068",
+    "has_statements": true
+  },
+  {
+    "version": "20260617062838",
+    "name": "2b16dc48-f797-4c0a-a1a6-7ef4f4a0e0d9",
+    "has_statements": true
+  },
+  {
+    "version": "20260617070729",
+    "name": "a5a11c27-af3a-4f30-bfa6-8d638f696747",
+    "has_statements": true
+  },
+  {
+    "version": "20260617071240",
+    "name": "9eb80d10-cf2e-4030-848a-4a895eee1172",
+    "has_statements": true
+  },
+  {
+    "version": "20260617071549",
+    "name": "d93a7ce8-8d48-4134-9470-a1553a172c12",
+    "has_statements": true
+  },
+  {
+    "version": "20260617072040",
+    "name": "655151fd-9215-449a-9a7d-50d14e0b9392",
+    "has_statements": true
+  },
+  {
+    "version": "20260617223949",
+    "name": "create_qi_annual_register_table",
+    "has_statements": true
+  },
+  {
+    "version": "20260618000050",
+    "name": "add_custom_id_trigger_to_qi_register",
+    "has_statements": false
+  },
+  {
+    "version": "20260618000100",
+    "name": "add_archive_columns_to_trainer_industry_currency",
+    "has_statements": false
+  },
+  {
+    "version": "20260618000200",
+    "name": "extend_archive_whitelist_to_trainer_industry_currency",
+    "has_statements": false
+  },
+  {
+    "version": "20260618000300",
+    "name": "add_survey_link_and_custom_id_trigger_to_qi_register",
+    "has_statements": false
+  },
+  {
+    "version": "20260618000400",
+    "name": "create_trigger_qi_register_autolog_from_session",
+    "has_statements": false
+  },
+  {
+    "version": "20260618000500",
+    "name": "backfill_qi_register_from_existing_qi_surveys",
+    "has_statements": false
+  },
+  {
+    "version": "20260618000600",
+    "name": "tas_consultation_links_and_suggest_rpc",
+    "has_statements": false
+  },
+  {
+    "version": "20260618000700",
+    "name": "backfill_tas_consultation_links",
+    "has_statements": false
+  },
+  {
+    "version": "20260618000799",
+    "name": "drop_rpc_tas_list_builds_v3_for_return_type_extend",
+    "has_statements": false
+  },
+  {
+    "version": "20260618000800",
+    "name": "extend_tas_list_v3_consultation_evidence",
+    "has_statements": false
+  },
+  {
+    "version": "20260618000900",
+    "name": "seed_custom_id_sequence_helper",
+    "has_statements": false
+  },
+  {
+    "version": "20260618001000",
+    "name": "seed_custom_id_sequences_run",
+    "has_statements": false
+  },
+  {
+    "version": "20260618021722",
+    "name": "98873ecc-5550-4d6a-a855-09fba84aaed9",
+    "has_statements": true
+  },
+  {
+    "version": "20260618021800",
+    "name": "aot_polymorphism_p2a_engine",
+    "has_statements": false
+  },
+  {
+    "version": "20260618021900",
+    "name": "schedule_email_outbox_worker",
+    "has_statements": false
+  },
+  {
+    "version": "20260618022000",
+    "name": "assessment_tools_naming_and_custom_id_columns",
+    "has_statements": false
+  },
+  {
+    "version": "20260618022100",
+    "name": "assessment_tools_status_constraint_expand",
+    "has_statements": false
+  },
+  {
+    "version": "20260618022200",
+    "name": "assessment_tools_documents_link",
+    "has_statements": false
+  },
+  {
+    "version": "20260618022300",
+    "name": "assessment_tools_validation_propagation",
+    "has_statements": false
+  },
+  {
+    "version": "20260618022350",
+    "name": "backfill_sec_superadmin_tenant_gate",
+    "has_statements": false
+  },
+  {
+    "version": "20260618022400",
+    "name": "assessment_tools_rls_standardise",
+    "has_statements": false
+  },
+  {
+    "version": "20260618022500",
+    "name": "assessment_tools_backfill_custom_id",
+    "has_statements": false
+  },
+  {
+    "version": "20260618022600",
+    "name": "assessment_tools_remap_active_to_published",
+    "has_statements": false
+  },
+  {
+    "version": "20260618022700",
+    "name": "assessment_tools_status_constraint_finalise",
+    "has_statements": false
+  },
+  {
+    "version": "20260618022800",
+    "name": "fix_generate_tenant_custom_id_2arg",
+    "has_statements": false
+  },
+  {
+    "version": "20260618022900",
+    "name": "fix_extract_industry_themes_from_evidence",
+    "has_statements": false
+  },
+  {
+    "version": "20260618023000",
+    "name": "training_products_for_tenant_scope",
+    "has_statements": false
+  },
+  {
+    "version": "20260618025652",
+    "name": "becf20de-3233-433d-971b-1d7b857312fb",
+    "has_statements": true
+  },
+  {
+    "version": "20260618030715",
+    "name": "5c1c1424-bec5-443e-805d-24a70c80178a",
+    "has_statements": true
+  },
+  {
+    "version": "20260618033000",
+    "name": "backfill_qi_survey_questions_and_responses",
+    "has_statements": false
+  },
+  {
+    "version": "20260618033500",
+    "name": "add_unique_qi_survey_questions_type_code",
+    "has_statements": false
+  },
+  {
+    "version": "20260618034005",
+    "name": "423ad643-51fd-422c-9043-7382fee64f55",
+    "has_statements": true
+  },
+  {
+    "version": "20260618054727",
+    "name": "89375505-b6ea-4406-9616-d15cd647d3b6",
+    "has_statements": true
+  },
+  {
+    "version": "20260618061520",
+    "name": "f4a4e0d6-53c8-47eb-8628-9ca831d96a68",
+    "has_statements": true
+  },
+  {
+    "version": "20260618062447",
+    "name": "3474e1d4-0f6c-4f18-a407-3ce03610ef29",
+    "has_statements": true
+  },
+  {
+    "version": "20260618065339",
+    "name": "d6728f1d-7df1-4767-89d6-88e1b0fd0a80",
+    "has_statements": true
+  },
+  {
+    "version": "20260618110500",
+    "name": "fix_qi_ids_rollup_and_invite_role_ceiling",
+    "has_statements": false
+  },
+  {
+    "version": "20260619050843",
+    "name": "add_asqa_report_columns_to_qi_annual_register",
+    "has_statements": true
+  },
+  {
+    "version": "20260620110100",
+    "name": "fix_qi_rpc_super_admin_bypass",
+    "has_statements": false
+  },
+  {
+    "version": "20260621110100",
+    "name": "fix_qi_public_survey_integrity",
+    "has_statements": false
+  },
+  {
+    "version": "20260621232252",
+    "name": "a8fc3053-99aa-49e4-b944-d644f71095eb",
+    "has_statements": true
+  },
+  {
+    "version": "20260622000000",
+    "name": "fix_cron_outbox_worker_remove_hardcoded_schedule",
+    "has_statements": false
+  },
+  {
+    "version": "20260622231029",
+    "name": "create_sso_report_reminders_table",
+    "has_statements": true
+  },
+  {
+    "version": "20260622235226",
+    "name": "recreate_governance_clause_tables",
+    "has_statements": true
+  },
+  {
+    "version": "20260623000001",
+    "name": "fix_rpc_tas_create_draft_unit_scope_item_upsert",
+    "has_statements": false
+  },
+  {
+    "version": "20260623000250",
+    "name": "2782a2dd-a6b9-4c19-9418-83aaf8106c0d",
+    "has_statements": true
+  },
+  {
+    "version": "20260623000836",
+    "name": "8f98bf1c-6fb9-4d1d-9d27-6d6e3ffd86ee",
+    "has_statements": true
+  },
+  {
+    "version": "20260623001143",
+    "name": "7aa609e5-77f5-478c-a617-27ab1d9ad387",
+    "has_statements": true
+  },
+  {
+    "version": "20260623003958",
+    "name": "e405c70b-96d6-4008-ac2a-33da846498db",
+    "has_statements": true
+  },
+  {
+    "version": "20260623004634",
+    "name": "12734271-4d65-4191-9d0f-f19490dc0c0f",
+    "has_statements": true
+  },
+  {
+    "version": "20260623075940",
+    "name": "suggestion_intake_trigger",
+    "has_statements": false
+  },
+  {
+    "version": "20260623084301",
+    "name": "3bea0e11-8a29-474d-8f0e-f9fd7b075d57",
+    "has_statements": true
+  },
+  {
+    "version": "20260623093000",
+    "name": "fix_get_suggestion_comments_table",
+    "has_statements": false
+  },
+  {
+    "version": "20260624000100",
+    "name": "gap_fill_tenants_schema_drift",
+    "has_statements": false
+  },
+  {
+    "version": "20260624011731",
+    "name": "aaa40794-e5c5-4870-8957-6da54d7e8160",
+    "has_statements": true
+  },
+  {
+    "version": "20260624052220",
+    "name": "industry_consultation_decisions_phase3",
+    "has_statements": true
+  },
+  {
+    "version": "20260624075954",
+    "name": "dedup_training_products_and_fix_junction_refs",
+    "has_statements": true
+  },
+  {
+    "version": "20260624101230",
+    "name": "get_my_suggestion_detail_structured_fields",
+    "has_statements": false
+  },
+  {
+    "version": "20260624101231",
+    "name": "expose_platform_schema_to_postgrest",
+    "has_statements": false
+  },
+  {
+    "version": "20260624120000",
+    "name": "update_public_suggestion_status_rpc",
+    "has_statements": false
+  },
+  {
+    "version": "20260624150000",
+    "name": "unify_chat_and_status",
+    "has_statements": false
+  },
+  {
+    "version": "20260624160000",
+    "name": "fix_support_chat_marks_unread",
+    "has_statements": false
+  },
+  {
+    "version": "20260624170000",
+    "name": "fix_add_suggestion_comment_role_and_transition",
+    "has_statements": false
+  },
+  {
+    "version": "20260624171000",
+    "name": "fix_update_suggestion_status_unread",
+    "has_statements": false
+  },
+  {
+    "version": "20260624180000",
+    "name": "fix_critical_suggestion_qi_rpcs",
+    "has_statements": false
+  },
+  {
+    "version": "20260625000100",
+    "name": "consultant_affiliates_table",
+    "has_statements": false
+  },
+  {
+    "version": "20260625000200",
+    "name": "affiliate_ref_codes_table",
+    "has_statements": false
+  },
+  {
+    "version": "20260625000300",
+    "name": "qi_survey_links_table",
+    "has_statements": false
+  },
+  {
+    "version": "20260625000400",
+    "name": "consultant_rpcs",
+    "has_statements": false
+  },
+  {
+    "version": "20260625002556",
+    "name": "5562ffad-5abe-450e-a172-c4eddbee59bd",
+    "has_statements": true
+  },
+  {
+    "version": "20260625004101",
+    "name": "09f3dc4e-2d3a-490f-8ce7-20d012d30467",
+    "has_statements": true
+  },
+  {
+    "version": "20260625004358",
+    "name": "6ea0781e-35a1-4875-87f7-6511cfd30f95",
+    "has_statements": true
+  },
+  {
+    "version": "20260625034447",
+    "name": "1b038aa7-834b-441f-8540-ac483cbd2cba",
+    "has_statements": true
+  },
+  {
+    "version": "20260625235900",
+    "name": "fix_trainer_report_role_gates_and_security",
+    "has_statements": false
+  },
+  {
+    "version": "20260625235950",
+    "name": "add_manager_select_policy_trainer_monthly_reports",
+    "has_statements": false
+  },
+  {
+    "version": "20260626000001",
+    "name": "backfill_trainer_monthly_reports_trainer_id",
+    "has_statements": false
+  },
+  {
+    "version": "20260626000002",
+    "name": "fix_cron_trainer_report_prompts_table",
+    "has_statements": false
+  },
+  {
+    "version": "20260626000003",
+    "name": "fix_generate_governance_auto_suggestions_column_refs",
+    "has_statements": false
+  },
+  {
+    "version": "20260626000004",
+    "name": "fix_backfill_trainer_monthly_reports_duplicate",
+    "has_statements": false
+  },
+  {
+    "version": "20260626010000",
+    "name": "add_trainer_report_period_columns",
+    "has_statements": false
+  },
+  {
+    "version": "20260628000001",
+    "name": "gap_fill_ic_survey_responses",
+    "has_statements": false
+  },
+  {
+    "version": "20260629000100",
+    "name": "fix_rls_auth_uid_select_wrapper",
+    "has_statements": false
+  },
+  {
+    "version": "20260629000200",
+    "name": "fix_qi_survey_links_anon_expires_at",
+    "has_statements": false
+  },
+  {
+    "version": "20260629035404",
+    "name": "extend_rpc_sa_dashboard_health_with_tas_and_governance_metrics",
+    "has_statements": true
+  },
+  {
+    "version": "20260629113624",
+    "name": "fix_ic_survey_authenticated_insert",
+    "has_statements": false
+  },
+  {
+    "version": "20260629200000",
+    "name": "delivery_hours_numeric",
+    "has_statements": false
+  },
+  {
+    "version": "20260630075042",
+    "name": "sa_update_tenant_json_updates",
+    "has_statements": true
+  },
+  {
+    "version": "20260630100000",
+    "name": "fix_sa_update_tenant",
+    "has_statements": false
+  },
+  {
+    "version": "20260630141317",
+    "name": "fix_pdr_trigger_custom_id_race",
+    "has_statements": false
+  },
+  {
+    "version": "20260701000001",
+    "name": "fix_mcn_admin_submission_permission",
+    "has_statements": false
+  },
+  {
+    "version": "20260701000002",
+    "name": "fix_consultant_parity_deadlock",
+    "has_statements": false
+  },
+  {
+    "version": "20260702021758",
+    "name": "gap_fill_seat_limit_role_exemptions",
+    "has_statements": true
+  },
+  {
+    "version": "20260702025048",
+    "name": "gap_fill_gen_random_bytes_qualification",
+    "has_statements": true
+  },
+  {
+    "version": "20260702031010",
+    "name": "gap_fill_qi_response_columns_and_rpcs",
+    "has_statements": true
+  },
+  {
+    "version": "20260702031615",
+    "name": "gap_fill_qi_responses_status_check_expand",
+    "has_statements": true
+  },
+  {
+    "version": "20260702031846",
+    "name": "gap_fill_qi_survey_outbox_status_queued",
+    "has_statements": true
+  },
+  {
+    "version": "20260702032411",
+    "name": "gap_fill_drop_smoke_log",
+    "has_statements": true
+  },
+  {
+    "version": "20260702113000",
+    "name": "fix_outbox_and_consultant_trial_invites",
+    "has_statements": false
+  },
+  {
+    "version": "20260703022530",
+    "name": "tas_standalone_unit_qualification_context_and_lpp_softening",
+    "has_statements": true
+  },
+  {
+    "version": "20260703073434",
+    "name": "clear_stale_packaging_rules_tas_builder_cea84fa3",
+    "has_statements": true
+  },
+  {
+    "version": "20260703093000",
+    "name": "assessment_tools_governing_person_write",
+    "has_statements": false
+  },
+  {
+    "version": "20260703094500",
+    "name": "tas_list_builds_include_product_type",
+    "has_statements": false
+  },
+  {
+    "version": "20260703111500",
+    "name": "fix_assessment_validation_schedule_propagation",
+    "has_statements": true
+  },
+  {
+    "version": "20260704110500",
+    "name": "scope_evidence_hash_to_trainer",
+    "has_statements": true
+  },
+  {
+    "version": "20260706090000",
+    "name": "fix_qualification_context_unit_aqf_level",
+    "has_statements": false
+  },
+  {
+    "version": "20260706110000",
+    "name": "fix_learner_profile_pack_aqf_blocker",
+    "has_statements": false
+  },
+  {
+    "version": "20260706214824",
+    "name": "carve_out_skillset_from_build_readiness_aqf_vol",
+    "has_statements": false
+  },
+  {
+    "version": "20260706220632",
+    "name": "carve_out_skillset_from_build_readiness_market_needs",
+    "has_statements": false
+  },
+  {
+    "version": "20260707014837",
+    "name": "patch_aot_prerequisites_skillset_ncver_coverage",
+    "has_statements": false
+  },
+  {
+    "version": "20260707015731",
+    "name": "fix_aot_engine_insert_column_names",
+    "has_statements": false
+  },
+  {
+    "version": "20260707140000",
+    "name": "fix_pdr_register_end_date_type",
+    "has_statements": false
+  },
+  {
+    "version": "20260707150000",
+    "name": "fix_in_house_skillset_scope_link",
+    "has_statements": false
+  },
+  {
+    "version": "20260708060302",
+    "name": "a5c98459-dc80-408f-8d33-2c878ed31b4d",
+    "has_statements": true
+  },
+  {
+    "version": "20260708071124",
+    "name": "b6ae202c-ecd1-4b0a-a59f-ce6de34c707e",
+    "has_statements": true
+  },
+  {
+    "version": "20260708072729",
+    "name": "88d7975b-4bda-4b4e-b1eb-cccbf6df3e8d",
+    "has_statements": true
+  },
+  {
+    "version": "20260708090000",
+    "name": "reconcile_and_fix_materialise_onboarding_credentials",
+    "has_statements": false
+  },
+  {
+    "version": "20260708100000",
+    "name": "backfill_tenant_scope_orphans",
+    "has_statements": false
+  },
+  {
+    "version": "20260708110000",
+    "name": "fix_sync_trainer_to_all_engines_broken_tas_ref",
+    "has_statements": false
+  },
+  {
+    "version": "20260708120000",
+    "name": "fix_in_house_skillset_scope_collision",
+    "has_statements": false
+  },
+  {
+    "version": "20260708130000",
+    "name": "add_auto_mark_trainer_reports_reviewed_idempotent",
+    "has_statements": false
+  },
+  {
+    "version": "20260708135000",
+    "name": "gap_fill_consultant_commission_ledger",
+    "has_statements": false
+  },
+  {
+    "version": "20260708140000",
+    "name": "gap_fill_affiliate_context_rpcs",
+    "has_statements": false
+  },
+  {
+    "version": "20260708142000",
+    "name": "gap_fill_complybot_conversations",
+    "has_statements": false
+  },
+  {
+    "version": "20260708150000",
+    "name": "add_suggestion_intake_log",
+    "has_statements": true
+  },
+  {
+    "version": "20260708160000",
+    "name": "grant_service_role_platform_schema",
+    "has_statements": false
+  },
+  {
+    "version": "20260708170000",
+    "name": "fix_complybot_and_onboarding_security",
+    "has_statements": false
+  },
+  {
+    "version": "20260709000000",
+    "name": "gap_fill_lovable_direct_prod_migrations_july",
+    "has_statements": false
+  },
+  {
+    "version": "20260709015853",
+    "name": "92eb8800-493a-4074-8622-38aa36356474",
+    "has_statements": true
+  },
+  {
+    "version": "20260709021945",
+    "name": "seed_release_note_parents_before_items",
+    "has_statements": false
+  },
+  {
+    "version": "20260709025118",
+    "name": "7c942a9d-a2ab-426c-882a-c38de390b328",
+    "has_statements": true
+  },
+  {
+    "version": "20260709031138",
+    "name": "199724c1-023d-4bd1-a8b4-3e27c68c0888",
+    "has_statements": true
+  },
+  {
+    "version": "20260709032943",
+    "name": "2fa8d929-338e-4582-905e-279b01f0bf2d",
+    "has_statements": true
+  },
+  {
+    "version": "20260709033935",
+    "name": "70550ecd-24c7-43c3-9439-d270aaf8bef1",
+    "has_statements": true
+  },
+  {
+    "version": "20260709040000",
+    "name": "gap_fill_risk_register_governance_link_type",
+    "has_statements": false
+  },
+  {
+    "version": "20260709041000",
+    "name": "harden_governance_meeting_undo_start_tenant_check",
+    "has_statements": false
+  },
+  {
+    "version": "20260709041815",
+    "name": "a6f9cc5f-df8a-4f22-b734-7600920c8ad8",
+    "has_statements": true
+  },
+  {
+    "version": "20260709042000",
+    "name": "fix_governance_meeting_end_started_at_gap",
+    "has_statements": false
+  },
+  {
+    "version": "20260709051741",
+    "name": "add_completed_at_to_consultation_plans",
+    "has_statements": true
+  },
+  {
+    "version": "20260709075000",
+    "name": "revoke_anon_execute_payment_and_custom_id_rpcs",
+    "has_statements": false
+  },
+  {
+    "version": "20260709075100",
+    "name": "revoke_public_execute_payment_and_custom_id_rpcs",
+    "has_statements": false
+  },
+  {
+    "version": "20260709075200",
+    "name": "pin_search_path_update_updated_at_column",
+    "has_statements": false
+  },
+  {
+    "version": "20260709075300",
+    "name": "fix_billing_gate_always_true_qi_sso_trainer",
+    "has_statements": false
+  },
+  {
+    "version": "20260709075400",
+    "name": "enable_rls_tas_regulatory_overlay_registry",
+    "has_statements": false
+  },
+  {
+    "version": "20260709075500",
+    "name": "seed_custom_id_sequences_all_registers",
+    "has_statements": false
+  },
+  {
+    "version": "20260709075600",
+    "name": "set_security_invoker_on_leaky_views",
+    "has_statements": false
+  },
+  {
+    "version": "20260709075700",
+    "name": "revoke_public_anon_execute_internal_and_deprecated_fns",
+    "has_statements": false
+  },
+  {
+    "version": "20260709084428",
+    "name": "release_notes_may_june_july_summary_md_first_attempt",
+    "has_statements": true
+  },
+  {
+    "version": "20260709085335",
+    "name": "release_notes_may_june_july_structured_items",
+    "has_statements": true
+  },
+  {
+    "version": "20260709095300",
+    "name": "create_qi_asqa_narrative",
+    "has_statements": false
+  },
+  {
+    "version": "20260709111000",
+    "name": "harden_recent_critical_security_regressions",
+    "has_statements": false
+  },
+  {
+    "version": "20260709170000",
+    "name": "revoke_anon_set_smart_custom_id",
+    "has_statements": false
+  },
+  {
+    "version": "20260709170100",
+    "name": "seed_custom_id_sequences_all_registers",
+    "has_statements": false
+  },
+  {
+    "version": "20260709231800",
+    "name": "help_centre_standard8_to_quality_area4",
+    "has_statements": true
+  },
+  {
+    "version": "20260710075046",
+    "name": "create_sso_monthly_reports_table",
+    "has_statements": true
+  },
+  {
+    "version": "20260710120000",
+    "name": "fix_sales_leads_summary_count_drift",
+    "has_statements": false
+  },
+  {
+    "version": "20260710130000",
+    "name": "sync_billing_subscriptions_on_trial_extend",
+    "has_statements": false
+  },
+  {
+    "version": "20260710140000",
+    "name": "revoke_anon_security_definer_batch_phase3",
+    "has_statements": false
+  },
+  {
+    "version": "20260710144238",
+    "name": "trainer_student_support_rls",
+    "has_statements": true
+  },
+  {
+    "version": "20260710150000",
+    "name": "retire_email_domain_rules_dead_table",
+    "has_statements": false
+  },
+  {
+    "version": "20260710160000",
+    "name": "fix_find_tenant_by_email_domain_dead_ref",
+    "has_statements": false
+  },
+  {
+    "version": "20260710161000",
+    "name": "restore_tenant_filter_system_health_orphans",
+    "has_statements": false
+  },
+  {
+    "version": "20260710170000",
+    "name": "fix_invite_rpc_and_trial_extend_state",
+    "has_statements": false
+  },
+  {
+    "version": "20260711035550",
+    "name": "drop_q1_tas_dependent_views_before_rename",
+    "has_statements": false
+  },
+  {
+    "version": "20260711035600",
+    "name": "rename_q1_tas_builder_training_product_columns",
+    "has_statements": false
+  },
+  {
+    "version": "20260711035700",
+    "name": "rename_q1_tas_builder_qual_code_check_constraint",
+    "has_statements": false
+  },
+  {
+    "version": "20260711110300",
+    "name": "harden_sso_monthly_report_submission",
+    "has_statements": false
+  },
+  {
+    "version": "20260712011734",
+    "name": "batch01_fix_gate_leak_and_restrict_trainer_credentials",
+    "has_statements": true
+  },
+  {
+    "version": "20260712012414",
+    "name": "batch02_restrict_select_sso_billing_and_token_tables",
+    "has_statements": true
+  },
+  {
+    "version": "20260712012856",
+    "name": "batch02b_fix_survey_tokens_anon_read_leak",
+    "has_statements": true
+  },
+  {
+    "version": "20260712013713",
+    "name": "batch03_restrict_select_remaining_registers",
+    "has_statements": true
+  },
+  {
+    "version": "20260712014730",
+    "name": "h1a_revoke_anon_execute_trigger_fn",
+    "has_statements": true
+  },
+  {
+    "version": "20260712014811",
+    "name": "h1b_revoke_anon_execute_rescue_demo_signup",
+    "has_statements": true
+  },
+  {
+    "version": "20260712022827",
+    "name": "m1a_unique_tenant_custom_id_backstops",
+    "has_statements": true
+  },
+  {
+    "version": "20260712025240",
+    "name": "c4a_repoint_validation_views_off_deprecated_q1_tas",
+    "has_statements": true
+  },
+  {
+    "version": "20260712025842",
+    "name": "c4b_disable_drop_deprecated_tables_harness",
+    "has_statements": true
+  },
+  {
+    "version": "20260712031504",
+    "name": "batch04a_restrict_select_sensitive_role_filtered_tables",
+    "has_statements": true
+  },
+  {
+    "version": "20260712031632",
+    "name": "batch04b_restrict_select_trainer_and_student_sensitive",
+    "has_statements": true
+  },
+  {
+    "version": "20260712121455",
+    "name": "tenant_addresses_tga_dedupe_index_v1",
+    "has_statements": true
+  },
+  {
+    "version": "20260712123359",
+    "name": "drop_tenant_addresses_tga_dedupe_index_v1",
+    "has_statements": true
+  },
+  {
+    "version": "20260712124721",
+    "name": "tenant_addresses_source_tracking_and_dedupe_v2",
+    "has_statements": true
+  },
+  {
+    "version": "20260712231935",
+    "name": "get_my_affiliate_context_v2",
+    "has_statements": true
+  },
+  {
+    "version": "20260713024137",
+    "name": "add_help_centre_content_category",
+    "has_statements": true
+  },
+  {
+    "version": "20260713111000",
+    "name": "harden_sensitive_write_policies",
+    "has_statements": true
+  },
+  {
+    "version": "20260713120000",
+    "name": "set_security_invoker_on_validation_dashboard_views",
+    "has_statements": false
+  },
+  {
+    "version": "20260714040602",
+    "name": "fix_email_outbox_processing_status",
+    "has_statements": true
+  },
+  {
+    "version": "20260714040613",
+    "name": "add_notify_meeting_scheduled",
+    "has_statements": true
+  },
+  {
+    "version": "20260714040632",
+    "name": "add_trainer_report_email_reminders",
+    "has_statements": true
+  },
+  {
+    "version": "20260714040704",
+    "name": "fix_governance_meeting_time_persistence",
+    "has_statements": true
+  },
+  {
+    "version": "20260714040717",
+    "name": "fix_notify_meeting_scheduled_action_urls",
+    "has_statements": true
+  },
+  {
+    "version": "20260714040742",
+    "name": "fix_notify_and_reminder_bugbot_findings",
+    "has_statements": true
+  },
+  {
+    "version": "20260714040749",
+    "name": "add_email_outbox_claimed_at",
+    "has_statements": true
+  },
+  {
+    "version": "20260714055236",
+    "name": "gap_fill_sso_monthly_reports_and_tas_assessment_mapping_schema_drift",
+    "has_statements": true
+  },
+  {
+    "version": "20260714055240",
+    "name": "fix_billing_gate_sso_reports_and_tas_mapping",
+    "has_statements": false
+  },
+  {
+    "version": "20260714055245",
+    "name": "fix_billing_gate_sso_reports_with_check",
+    "has_statements": false
+  },
+  {
+    "version": "20260714055255",
+    "name": "fix_gov_update_meeting_time_role_check",
+    "has_statements": true
+  },
+  {
+    "version": "20260714063038",
+    "name": "20260714190000_fix_trainer_report_reminders_role_check",
+    "has_statements": true
+  },
+  {
+    "version": "20260714071505",
+    "name": "20260714200000_add_claim_email_outbox_batch_rpc",
+    "has_statements": true
+  },
+  {
+    "version": "20260715000100",
+    "name": "repoint_ic_decisions_theme_fk",
+    "has_statements": false
+  },
+  {
+    "version": "20260715000200",
+    "name": "rpc_create_ci_item_from_consultation_decision",
+    "has_statements": false
+  },
+  {
+    "version": "20260715000300",
+    "name": "add_completed_at_to_consultation_sessions",
+    "has_statements": false
+  },
+  {
+    "version": "20260715014530",
+    "name": "add_switch_to_consultant_home",
+    "has_statements": false
+  },
+  {
+    "version": "20260715015941",
+    "name": "qi_survey_results_and_response_rows_rpcs",
+    "has_statements": true
+  },
+  {
+    "version": "20260715025200",
+    "name": "align_sso_report_submitted_status",
+    "has_statements": false
+  },
+  {
+    "version": "20260715030000",
+    "name": "align_sso_status_with_submit_blocks",
+    "has_statements": false
+  },
+  {
+    "version": "20260715031000",
+    "name": "align_sso_status_month_before_meeting",
+    "has_statements": false
+  },
+  {
+    "version": "20260715032000",
+    "name": "get_sso_report_status_accept_period",
+    "has_statements": false
+  },
+  {
+    "version": "20260715090000",
+    "name": "fix_admin_extend_trial_trial_end_date",
+    "has_statements": false
+  },
+  {
+    "version": "20260715115000",
+    "name": "create_tas_units_compat_view_for_pending_chain",
+    "has_statements": false
+  },
+  {
+    "version": "20260715120000",
+    "name": "fix_functions_referencing_renamed_q1_tas_builder_columns",
+    "has_statements": false
+  },
+  {
+    "version": "20260715130000",
+    "name": "fix_q1_tas_view_columns_grants_and_dependents",
+    "has_statements": false
+  },
+  {
+    "version": "20260715140000",
+    "name": "fix_functions_referencing_q1_tas_view_dropped_alias",
+    "has_statements": false
+  },
+  {
+    "version": "20260715150000",
+    "name": "admin_extend_trial_reject_non_trial_subscribers",
+    "has_statements": false
+  },
+  {
+    "version": "20260715160000",
+    "name": "fix_remaining_q1_tas_view_missed_callers",
+    "has_statements": false
+  },
+  {
+    "version": "20260715170000",
+    "name": "restore_restrictive_billing_gate_sso_tas",
+    "has_statements": false
+  },
+  {
+    "version": "20260716004150",
+    "name": "fix_enforce_lockout_respect_active_subscription_and_add_unlock_sweeper",
+    "has_statements": true
+  },
+  {
+    "version": "20260716004202",
+    "name": "schedule_unlock_paid_tenants_sweeper",
+    "has_statements": true
+  },
+  {
+    "version": "20260716072500",
+    "name": "qi_asqa_narrative_admin_write_policies",
+    "has_statements": false
+  },
+  {
+    "version": "20260716083926",
+    "name": "fix_rpc_build_delivery_pack_tas_units_fallback",
+    "has_statements": true
+  },
+  {
+    "version": "20260716090000",
+    "name": "restore_rpc_tas_create_draft_explicit_unit_scope_upsert",
+    "has_statements": true
+  },
+  {
+    "version": "20260716093021",
+    "name": "drop_q1_tas_dependent_views_before_rename",
+    "has_statements": true
+  },
+  {
+    "version": "20260716093041",
+    "name": "rename_q1_tas_builder_training_product_columns",
+    "has_statements": true
+  },
+  {
+    "version": "20260716093049",
+    "name": "rename_q1_tas_builder_qual_code_check_constraint",
+    "has_statements": true
+  },
+  {
+    "version": "20260716093123",
+    "name": "create_tas_units_compat_view_for_pending_chain",
+    "has_statements": true
+  },
+  {
+    "version": "20260716093912",
+    "name": "fix_functions_referencing_renamed_q1_tas_builder_columns",
+    "has_statements": true
+  },
+  {
+    "version": "20260716094320",
+    "name": "fix_functions_referencing_renamed_q1_tas_builder_columns",
+    "has_statements": true
+  },
+  {
+    "version": "20260716094506",
+    "name": "fix_functions_referencing_renamed_q1_tas_builder_columns",
+    "has_statements": true
+  },
+  {
+    "version": "20260716103000",
+    "name": "widen_gov_meeting_items_insert_delete",
+    "has_statements": false
+  },
+  {
+    "version": "20260716103100",
+    "name": "ci_register_assessor_pd_dedupe_index",
+    "has_statements": false
+  },
+  {
+    "version": "20260716103150",
+    "name": "seed_release_notes_may_jun_jul_2026_rows",
+    "has_statements": false
+  },
+  {
+    "version": "20260716103200",
+    "name": "release_notes_content_replacement",
+    "has_statements": false
+  },
+  {
+    "version": "20260716103300",
+    "name": "release_notes_markdown_summary_formatting",
+    "has_statements": false
+  },
+  {
+    "version": "20260716103400",
+    "name": "fix_help_centre_governance_standard_wording",
+    "has_statements": false
+  },
+  {
+    "version": "20260716103500",
+    "name": "tenant_addresses_tga_sync_columns_and_dedupe",
+    "has_statements": false
+  },
+  {
+    "version": "20260716110000",
+    "name": "survey_results_and_response_rows_rpcs",
+    "has_statements": false
+  },
+  {
+    "version": "20260716111500",
+    "name": "sa_extend_trial_v2",
+    "has_statements": false
+  },
+  {
+    "version": "20260716112016",
+    "name": "fix_q1_tas_webhook_trigger_product_code",
+    "has_statements": false
+  },
+  {
+    "version": "20260716144818",
+    "name": "restore_rpc_calculate_aot_engine_full_breakdown",
+    "has_statements": true
+  },
+  {
+    "version": "20260716160000",
+    "name": "sa_extend_trial_v2_reject_paid_subscribers",
+    "has_statements": false
+  },
+  {
+    "version": "20260716170000",
+    "name": "fix_rpc_build_delivery_pack_tas_units_fallback",
+    "has_statements": true
+  },
+  {
+    "version": "20260716173000",
+    "name": "get_sso_report_status_two_arg_sso_monthly_reports",
+    "has_statements": true
+  },
+  {
+    "version": "20260716180000",
+    "name": "qi_asqa_narrative_restrict_write_policies_actual_names",
+    "has_statements": true
+  },
+  {
+    "version": "20260716180100",
+    "name": "generate_governance_auto_suggestions_add_consultant_assistant",
+    "has_statements": true
+  },
+  {
+    "version": "20260716181500",
+    "name": "qi_asqa_narrative_write_policies_idempotent",
+    "has_statements": true
+  },
+  {
+    "version": "20260716191000",
+    "name": "enforce_q1_tas_builder_canonical_product_columns",
+    "has_statements": false
+  },
+  {
+    "version": "20260716200000",
+    "name": "fix_q1_tas_view_qual_code_joins",
+    "has_statements": false
+  },
+  {
+    "version": "20260716200100",
+    "name": "reconcile_q1_tas_rename_chain_schema_migrations",
+    "has_statements": false
+  },
+  {
+    "version": "20260716210000",
+    "name": "fix_q1_tas_builder_trigger_qual_code",
+    "has_statements": false
+  },
+  {
+    "version": "20260716220000",
+    "name": "fix_billing_gate_diamond_and_active_workspace",
+    "has_statements": false
+  },
+  {
+    "version": "20260716225256",
+    "name": "reconcile_drop_compat_view_tracking_row_insert",
+    "has_statements": true
+  },
+  {
+    "version": "20260716230000",
+    "name": "fix_tenant_access_state_false_positive_locks",
+    "has_statements": false
+  },
+  {
+    "version": "20260716230750",
+    "name": "grace_exemption_is_tenant_write_locked",
+    "has_statements": true
+  },
+  {
+    "version": "20260716231500",
+    "name": "fix_rpc_get_phase_gate_state_qual_code",
+    "has_statements": false
+  },
+  {
+    "version": "20260716232000",
+    "name": "fix_backfill_tas_display_codes_qual_code",
+    "has_statements": false
+  },
+  {
+    "version": "20260716232100",
+    "name": "fix_rpc_build_unit_intelligence_context_qual_code",
+    "has_statements": false
+  },
+  {
+    "version": "20260716232101",
+    "name": "fix_rpc_calculate_tas_confidence_scores_qual_code",
+    "has_statements": false
+  },
+  {
+    "version": "20260716232200",
+    "name": "fix_rpc_debug_tas_state_qual_code",
+    "has_statements": false
+  },
+  {
+    "version": "20260716232300",
+    "name": "fix_rpc_fetch_labour_market_snapshot_3arg_qual_code",
+    "has_statements": false
+  },
+  {
+    "version": "20260716232301",
+    "name": "fix_rpc_fetch_labour_market_snapshot_4arg_qual_code",
+    "has_statements": false
+  },
+  {
+    "version": "20260716232400",
+    "name": "fix_rpc_generate_market_alignment_pack_qual_code",
+    "has_statements": false
+  },
+  {
+    "version": "20260716232500",
+    "name": "fix_rpc_get_tas_build_state_qual_code",
+    "has_statements": false
+  },
+  {
+    "version": "20260716232600",
+    "name": "fix_rpc_get_tas_section_statuses_qual_code",
+    "has_statements": false
+  },
+  {
+    "version": "20260716232700",
+    "name": "fix_rpc_get_tenant_tas_portfolio_qual_code",
+    "has_statements": false
+  },
+  {
+    "version": "20260716232800",
+    "name": "fix_rpc_get_units_step_state_qual_code",
+    "has_statements": false
+  },
+  {
+    "version": "20260716232900",
+    "name": "fix_rpc_init_industry_consultation_session_qual_code",
+    "has_statements": false
+  },
+  {
+    "version": "20260716233000",
+    "name": "fix_rpc_resolve_occupation_for_qualification_qual_code",
+    "has_statements": false
+  },
+  {
+    "version": "20260716233100",
+    "name": "fix_rpc_run_auditor_simulation_qual_code",
+    "has_statements": false
+  },
+  {
+    "version": "20260716233200",
+    "name": "fix_rpc_run_tas_consistency_scan_qual_code",
+    "has_statements": false
+  },
+  {
+    "version": "20260716233300",
+    "name": "fix_rpc_search_reusable_evidence_qual_code",
+    "has_statements": false
+  },
+  {
+    "version": "20260716233400",
+    "name": "fix_rpc_tas_diagnostic_qual_code",
+    "has_statements": false
+  },
+  {
+    "version": "20260716233450",
+    "name": "gap_fill_compat_view_tas_market_analysis",
+    "has_statements": false
+  },
+  {
+    "version": "20260716233500",
+    "name": "fix_rpc_tas_integrity_dashboard_qual_code",
+    "has_statements": false
+  },
+  {
+    "version": "20260716233600",
+    "name": "fix_rpc_tas_list_with_readiness_qual_code",
+    "has_statements": false
+  },
+  {
+    "version": "20260716233700",
+    "name": "fix_rpc_tas_publish_final_qual_code",
+    "has_statements": false
+  },
+  {
+    "version": "20260716233800",
+    "name": "fix_rpc_validate_unit_intelligence_qual_code",
+    "has_statements": false
+  },
+  {
+    "version": "20260716233900",
+    "name": "fix_rpc_validate_unit_packaging_qual_code",
+    "has_statements": false
+  },
+  {
+    "version": "20260716234000",
+    "name": "fix_trg_sync_icr_to_evidence_confidence_qual_code",
+    "has_statements": false
+  },
+  {
+    "version": "20260716234100",
+    "name": "fix_generate_approval_pack_qual_code",
+    "has_statements": false
+  },
+  {
+    "version": "20260716235000",
+    "name": "fix_sa_ops_tas_health_qual_code",
+    "has_statements": false
+  },
+  {
+    "version": "20260716235100",
+    "name": "fix_tp_scan_tas_integrity_qual_code",
+    "has_statements": false
+  },
+  {
+    "version": "20260716235200",
+    "name": "fix_rpc_tas_integrity_dashboard_deprecated_market_table",
+    "has_statements": false
+  },
+  {
+    "version": "20260716235300",
+    "name": "fix_gov_minutes_select_governance_add_consultant",
+    "has_statements": false
+  },
+  {
+    "version": "20260716235400",
+    "name": "drop_compat_view_tas_market_analysis",
+    "has_statements": true
+  },
+  {
+    "version": "20260716235500",
+    "name": "fix_remaining_qual_code_rpcs_client_facing",
+    "has_statements": false
+  },
+  {
+    "version": "20260716235600",
+    "name": "fix_rpc_sa_tas_health_qual_code_and_auth_guard",
+    "has_statements": false
+  },
+  {
+    "version": "20260716235700",
+    "name": "fix_tas_builder_widened_qual_code_rename_gaps",
+    "has_statements": false
+  },
+  {
+    "version": "20260716235800",
+    "name": "fix_tas_builder_widened_qual_code_rename_gaps_closing_sweep",
+    "has_statements": false
+  },
+  {
+    "version": "20260716235900",
+    "name": "fix_tas_builder_tenant_auth_gate_audit",
+    "has_statements": false
+  },
+  {
+    "version": "20260717001000",
+    "name": "fix_tas_builder_trainer_matrix_licensing_drift",
+    "has_statements": false
+  },
+  {
+    "version": "20260717010000",
+    "name": "fix_aot_engine_skillset_unit_response_parity",
+    "has_statements": true
+  },
+  {
+    "version": "20260717010500",
+    "name": "fix_rpc_get_latest_tas_compile_column_names",
+    "has_statements": true
+  },
+  {
+    "version": "20260717023232",
+    "name": "delivery_readiness_validation_not_blocking",
+    "has_statements": true
+  },
+  {
+    "version": "20260717024703",
+    "name": "fix_tenant_is_write_locked_duplicate_function",
+    "has_statements": true
+  },
+  {
+    "version": "20260717031526",
+    "name": "fix_aot_determination_delivery_modes_cast",
+    "has_statements": true
+  },
+  {
+    "version": "20260717041048",
+    "name": "demo_tenant_identity_shield",
+    "has_statements": true
+  },
+  {
+    "version": "20260717061109",
+    "name": "add_resources_ready_to_tas_build_state",
+    "has_statements": true
+  },
+  {
+    "version": "20260717063102",
+    "name": "q1_tas_builder_qual_code_title_compat_columns",
+    "has_statements": true
+  },
+  {
+    "version": "20260717063255",
+    "name": "q1_tas_builder_drop_not_null_training_product_fields",
+    "has_statements": true
+  },
+  {
+    "version": "20260717120000",
+    "name": "market_phase_optional_in_build_readiness",
+    "has_statements": true
+  },
+  {
+    "version": "20260717130000",
+    "name": "evidence_integrity_market_checks_optional",
+    "has_statements": false
+  },
+  {
+    "version": "20260717140000",
+    "name": "fix_rpc_validate_learner_aot_consistency_json_paths",
+    "has_statements": true
+  },
+  {
+    "version": "20260718073958",
+    "name": "revoke_anon_on_validation_dashboard_views",
+    "has_statements": true
+  },
+  {
+    "version": "20260719111026",
+    "name": "prerequisite_harden_aot_engine_tenant_authorization",
+    "has_statements": false
+  },
+  {
+    "version": "20260719111027",
+    "name": "harden_aot_engine_tenant_authorization",
+    "has_statements": false
+  },
+  {
+    "version": "20260720092355",
+    "name": "fix_aot_engine_authorization_patch_crlf",
+    "has_statements": true
+  },
+  {
+    "version": "20260720120000",
+    "name": "fix_get_survey_results_text_samples_plain_strings",
+    "has_statements": true
+  },
+  {
+    "version": "20260721025955",
+    "name": "fix_tas_create_draft_variation_and_active_check",
+    "has_statements": true
+  },
+  {
+    "version": "20260721130000",
+    "name": "add_trainer_report_exemptions",
+    "has_statements": true
+  },
+  {
+    "version": "20260722060000",
+    "name": "sa_extend_trial_v2_restore_billing_guards",
+    "has_statements": true
+  },
+  {
+    "version": "20260722060100",
+    "name": "revoke_anon_execute_governance_functions",
+    "has_statements": true
+  },
+  {
+    "version": "20260722103245",
+    "name": "suggest_consultations_for_tas_unit_tier",
+    "has_statements": false
+  },
+  {
+    "version": "20260722110641",
+    "name": "harden_user_management_rpcs",
+    "has_statements": true
+  },
+  {
+    "version": "20260722120318",
+    "name": "aot_engine_skillset_percentage_split_and_unit_allocations",
+    "has_statements": false
+  },
+  {
+    "version": "20260722130000",
+    "name": "fix_calculate_governance_readiness_return_shape",
+    "has_statements": true
+  },
+  {
+    "version": "20260722135734",
+    "name": "widen_user_management_rpcs_to_consultant",
+    "has_statements": true
+  },
+  {
+    "version": "20260722140000",
+    "name": "fix_aot_skillset_fallback_dilution_and_total",
+    "has_statements": true
+  },
+  {
+    "version": "20260722150000",
+    "name": "finalize_user_management_rpc_authorization",
+    "has_statements": true
+  },
+  {
+    "version": "20260723031037",
+    "name": "repair_meeting_duplicate_functions",
+    "has_statements": true
+  },
+  {
+    "version": "20260723111654",
+    "name": "restrict_user_management_rbac_to_administrator",
+    "has_statements": true
+  },
+  {
+    "version": "20260723143058",
+    "name": "fix_tas_build_state_jsonb_arg_limit",
+    "has_statements": true
+  },
+  {
+    "version": "20260723150408",
+    "name": "fix_aot_determination_skillset_aqf_exemption",
+    "has_statements": true
+  },
+  {
+    "version": "20260723233725",
+    "name": "restrict_select_current_tenant_registers",
+    "has_statements": true
+  },
+  {
+    "version": "20260724023000",
+    "name": "retire_trainer_report_day_before_lock_trigger",
+    "has_statements": true
+  },
+  {
+    "version": "20260724132456",
+    "name": "fix_submit_trainer_monthly_report_active_tenant",
+    "has_statements": true
+  },
+  {
+    "version": "20260724150001",
+    "name": "reject_reviewed_approved_trainer_report_resubmit",
+    "has_statements": true
+  },
+  {
+    "version": "20260726110616",
+    "name": "fix_trainer_report_meeting_rpc_tenant_scope",
+    "has_statements": true
+  },
+  {
+    "version": "20260726235325",
+    "name": "fix_aot_readiness_skillset_rationale_exemption",
+    "has_statements": true
+  },
+  {
+    "version": "20260726235326",
+    "name": "add_rpc_get_aot_determination",
+    "has_statements": true
+  },
+  {
+    "version": "20260727025244",
+    "name": "harden_rto_settings_onboarding_trainer_credential_rpcs",
+    "has_statements": true
+  },
+  {
+    "version": "20260727025253",
+    "name": "restrict_all_current_tenant_doc_review_actions",
+    "has_statements": true
+  },
+  {
+    "version": "20260727060151",
+    "name": "recreate_auto_create_governance_entry_rpc",
+    "has_statements": true
+  },
+  {
+    "version": "20260728083000",
+    "name": "widen_gov_register_id_and_extend_auto_create_governance_entry",
+    "has_statements": true
+  },
+  {
+    "version": "20260728094000",
+    "name": "fix_auto_create_governance_entry_overload_and_idempotency",
+    "has_statements": true
+  },
+  {
+    "version": "20260728111348",
+    "name": "fix_auto_create_governance_entry_uuid_and_calendar_sync",
+    "has_statements": true
+  },
+  {
+    "version": "20260729003727",
+    "name": "tas_progress_updated_at_from_all_sections",
+    "has_statements": true
+  },
+  {
+    "version": "20260729003820",
+    "name": "tas_build_state_log_silent_catches",
+    "has_statements": true
+  },
+  {
+    "version": "20260729040703",
+    "name": "harden_rpc_update_document_register_fields",
+    "has_statements": true
+  },
+  {
+    "version": "20260729060039",
+    "name": "fix_document_rpc_grace_tenant_write_block",
+    "has_statements": true
+  },
+  {
+    "version": "20260730003711",
+    "name": "fix_suggestion_rpc_not_found_and_ownership_gaps",
+    "has_statements": true
+  },
+  {
+    "version": "20260730235749",
+    "name": "fix_trainer_report_display_id_race_condition",
+    "has_statements": false
+  },
+  {
+    "version": "20260731004833",
+    "name": "harden_risk_register_and_link_ci",
+    "has_statements": true
+  },
+  {
+    "version": "20260731013559",
+    "name": "drop_dead_storage_policies_on_empty_buckets",
+    "has_statements": true
+  },
+  {
+    "version": "20260731013622",
+    "name": "drop_deprecated_empty_document_tables",
+    "has_statements": true
+  },
+  {
+    "version": "20260731021216",
+    "name": "add_trainer_report_submit_notifications",
+    "has_statements": false
+  },
+  {
+    "version": "20260731022408",
+    "name": "add_restrictive_write_role_gate_risk_register",
+    "has_statements": true
+  },
+  {
+    "version": "20260731022516",
+    "name": "create_set_risk_governance_attention_rpc",
+    "has_statements": true
+  },
+  {
+    "version": "20260731024542",
+    "name": "add_trainer_report_submit_notify_trigger",
+    "has_statements": false
+  },
+  {
+    "version": "20260731043600",
+    "name": "create_governance_packs_storage_bucket",
+    "has_statements": true
+  },
+  {
+    "version": "20260731044216",
+    "name": "seed_demo_industry_consultation_decisions_v3",
+    "has_statements": true
+  },
+  {
+    "version": "20260731051812",
+    "name": "restrictive_select_stage1_student_pii",
+    "has_statements": true
+  },
+  {
+    "version": "20260731052208",
+    "name": "restrictive_select_stage2_consultation_tables",
+    "has_statements": true
+  },
+  {
+    "version": "20260731052944",
+    "name": "fix_qi_responses_survey_slug_unique_constraint",
+    "has_statements": true
+  },
+  {
+    "version": "20260731053011",
+    "name": "seed_demo_qi_annual_register_and_survey_data_v4",
+    "has_statements": true
+  },
+  {
+    "version": "20260731053654",
+    "name": "add_tp_trainers_industry_currency_gap_flagged",
+    "has_statements": true
+  },
+  {
+    "version": "20260731055146",
+    "name": "fix_av_events_tas_id_nullable_and_extend_insert_policy",
+    "has_statements": true
+  },
+  {
+    "version": "20260731055210",
+    "name": "seed_demo_assessment_validation_tas_links",
+    "has_statements": true
+  },
+  {
+    "version": "20260731063233",
+    "name": "fix_create_tenant_only_tenant_type_and_lifecycle",
+    "has_statements": true
+  },
+  {
+    "version": "20260731092158",
+    "name": "assessment_tools_delete_allow_consultant",
+    "has_statements": true
+  },
+  {
+    "version": "20260731100000",
+    "name": "harden_trainer_report_submit_notify_trigger",
+    "has_statements": true
+  },
+  {
+    "version": "20260731131340",
+    "name": "gap_fill_q1_tas_builder_consultation_columns",
+    "has_statements": true
+  },
+  {
+    "version": "20260731133705",
+    "name": "fix_restrictive_select_profiles_tenant_scope",
+    "has_statements": true
+  },
+  {
+    "version": "20260731141000",
+    "name": "fix_restrictive_select_workspace_isolation",
+    "has_statements": true
+  },
+  {
+    "version": "20260731221500",
+    "name": "tighten_governance_packs_storage_rls",
+    "has_statements": true
+  },
+  {
+    "version": "20260731223400",
+    "name": "governance_packs_storage_use_has_tenant_role",
+    "has_statements": true
+  },
+  {
+    "version": "20260731224500",
+    "name": "governance_packs_storage_operational_write_roles",
+    "has_statements": true
+  },
+  {
+    "version": "20260731225000",
+    "name": "governance_packs_table_rls_operational_write",
+    "has_statements": true
+  },
+  {
+    "version": "20260801112000",
+    "name": "fix_trainer_report_notify_rpcs_admin_strict",
+    "has_statements": true
+  },
+  {
+    "version": "20260802112000",
+    "name": "fix_risk_register_write_role_strict",
+    "has_statements": true
+  },
+  {
+    "version": "20260803010000",
+    "name": "fix_check_tas_approved_allow_null_tas_id",
+    "has_statements": true
+  },
+  {
+    "version": "20260803051810",
+    "name": "create_tenant_documents_bucket",
+    "has_statements": true
+  },
+  {
+    "version": "20260803051900",
+    "name": "tenant_documents_rls_policies",
+    "has_statements": true
+  },
+  {
+    "version": "20260803051902",
+    "name": "add_documents_register_storage_bucket_column",
+    "has_statements": true
+  },
+  {
+    "version": "20260803051904",
+    "name": "backfill_documents_register_storage_bucket",
+    "has_statements": true
+  },
+  {
+    "version": "20260803065714",
+    "name": "flip_documents_register_storage_bucket_to_tenant_documents",
+    "has_statements": true
+  },
+  {
+    "version": "20260803105045",
+    "name": "fix_qi_survey_question_key_mismatch",
+    "has_statements": false
+  },
+  {
+    "version": "20260803120000",
+    "name": "decommission_dead_storage_buckets",
+    "has_statements": true
+  },
+  {
+    "version": "20260803130000",
+    "name": "strip_dead_evidence_attachments_policy_branch",
+    "has_statements": true
+  },
+  {
+    "version": "20260804010000",
+    "name": "fix_document_notifications_rls",
+    "has_statements": true
+  },
+  {
+    "version": "20260804015820",
+    "name": "backfill_document_type_canonical_values",
+    "has_statements": true
+  },
+  {
+    "version": "20260804015845",
+    "name": "add_document_type_check_constraint",
+    "has_statements": true
+  },
+  {
+    "version": "20260804015908",
+    "name": "add_linked_register_type_check_constraint",
+    "has_statements": true
+  },
+  {
+    "version": "20260804015934",
+    "name": "add_documents_register_fks_to_feature_tables",
+    "has_statements": true
+  },
+  {
+    "version": "20260804020000",
+    "name": "gap_fill_gov_register_linked_document_id",
+    "has_statements": true
+  },
+  {
+    "version": "20260804022908",
+    "name": "widen_documents_register_insert_to_consultants",
+    "has_statements": true
+  },
+  {
+    "version": "20260804044222",
+    "name": "add_tenant_documents_permissive_role_grants",
+    "has_statements": true
+  },
+  {
+    "version": "20260804072745",
+    "name": "widen_tenant_documents_trainers_path_role_grant",
+    "has_statements": true
+  },
+  {
+    "version": "20260804120000",
+    "name": "fix_tasks_insert_tenant_context_gate",
+    "has_statements": true
+  },
+  {
+    "version": "20260804130000",
+    "name": "gov_register_linked_document_id_on_delete_set_null",
+    "has_statements": true
+  },
+  {
+    "version": "20260804140000",
+    "name": "widen_set_document_version_roles",
+    "has_statements": true
+  },
+  {
+    "version": "20260805002043",
+    "name": "fix_effective_role_null_active_tenant",
+    "has_statements": true
+  },
+  {
+    "version": "20260805005208",
+    "name": "set_evidence_documents_default_bucket",
+    "has_statements": true
+  },
+  {
+    "version": "20260805005209",
+    "name": "backfill_evidence_documents_storage_bucket",
+    "has_statements": true
+  },
+  {
+    "version": "20260805005211",
+    "name": "fix_resolve_evidence_url_hardcoded_bucket",
+    "has_statements": true
+  },
+  {
+    "version": "20260805005538",
+    "name": "fix_evidence_document_link_trigger_missing_record_types",
+    "has_statements": true
+  },
+  {
+    "version": "20260805023000",
+    "name": "widen_submit_sso_monthly_report_role_gate",
+    "has_statements": false
+  },
+  {
+    "version": "20260805025520",
+    "name": "add_qi_evidence_path_role_grant",
+    "has_statements": true
+  },
+  {
+    "version": "20260805032852",
+    "name": "help_centre_accordion_and_video_library_ddl",
+    "has_statements": true
+  },
+  {
+    "version": "20260805032945",
+    "name": "help_centre_seed_categories_and_sessions_dml",
+    "has_statements": true
+  },
+  {
+    "version": "20260805033011",
+    "name": "help_centre_training_library_bucket",
+    "has_statements": true
+  },
+  {
+    "version": "20260805040029",
+    "name": "add_tas_attachments_path_role_grant",
+    "has_statements": true
+  },
+  {
+    "version": "20260805041625",
+    "name": "add_complybot_path_role_grant",
+    "has_statements": true
+  },
+  {
+    "version": "20260805042444",
+    "name": "fix_audit_reports_cross_tenant_leak",
+    "has_statements": true
+  },
+  {
+    "version": "20260805043110",
+    "name": "add_restrictive_billing_gate_to_survey_and_tas_units_tables",
+    "has_statements": true
+  },
+  {
+    "version": "20260805044744",
+    "name": "add_restrictive_billing_gate_batch_a",
+    "has_statements": true
+  },
+  {
+    "version": "20260805044754",
+    "name": "add_restrictive_billing_gate_batch_b",
+    "has_statements": true
+  },
+  {
+    "version": "20260805044806",
+    "name": "add_restrictive_billing_gate_batch_c",
+    "has_statements": true
+  },
+  {
+    "version": "20260805051443",
+    "name": "add_rpl_path_role_grant",
+    "has_statements": true
+  },
+  {
+    "version": "20260805051918",
+    "name": "add_pli_evidence_path_role_grant",
+    "has_statements": true
+  },
+  {
+    "version": "20260805052522",
+    "name": "repoint_rpc_request_export_file_bucket",
+    "has_statements": true
+  },
+  {
+    "version": "20260805054021",
+    "name": "add_fpp_path_role_grant",
+    "has_statements": true
+  },
+  {
+    "version": "20260805054939",
+    "name": "add_meetings_path_role_grant",
+    "has_statements": true
+  },
+  {
+    "version": "20260805055605",
+    "name": "add_register_evidence_path_role_grant",
+    "has_statements": true
+  },
+  {
+    "version": "20260805060601",
+    "name": "add_validation_reports_path_role_grant",
+    "has_statements": true
+  },
+  {
+    "version": "20260805061000",
+    "name": "widen_sso_monthly_reports_access_for_governing_person",
+    "has_statements": false
+  },
+  {
+    "version": "20260805061530",
+    "name": "fix_suggestion_attachments_cross_user_leak",
+    "has_statements": true
+  },
+  {
+    "version": "20260805071000",
+    "name": "add_suggestions_path_role_grant",
+    "has_statements": true
+  },
+  {
+    "version": "20260805071100",
+    "name": "backfill_suggestions_attachment_paths",
+    "has_statements": true
+  },
+  {
+    "version": "20260805072000",
+    "name": "add_tas_imports_path_role_grant",
+    "has_statements": true
+  },
+  {
+    "version": "20260805072100",
+    "name": "backfill_tas_import_documents_paths",
+    "has_statements": true
+  },
+  {
+    "version": "20260805081048",
+    "name": "qi_phase0_drop_survey_links_wrong_fk",
+    "has_statements": true
+  },
+  {
+    "version": "20260805081059",
+    "name": "qi_phase0_remap_register_ids",
+    "has_statements": true
+  },
+  {
+    "version": "20260805081119",
+    "name": "qi_phase0_add_register_fks_and_deprecate",
+    "has_statements": true
+  },
+  {
+    "version": "20260805081414",
+    "name": "qi_phase1_campaign_tables_ddl",
+    "has_statements": true
+  },
+  {
+    "version": "20260805081452",
+    "name": "qi_phase1_campaign_tables_rls",
+    "has_statements": true
+  },
+  {
+    "version": "20260805081827",
+    "name": "qi_phase2_ensure_register_for_year_fn",
+    "has_statements": true
+  },
+  {
+    "version": "20260805081854",
+    "name": "qi_phase2_schedule_annual_register_sweeper",
+    "has_statements": true
+  },
+  {
+    "version": "20260805081936",
+    "name": "qi_phase2_bulk_send_campaign_rpc",
+    "has_statements": true
+  },
+  {
+    "version": "20260805083410",
+    "name": "qi_phase2_bulk_send_add_rto_name_payload",
+    "has_statements": true
+  },
+  {
+    "version": "20260805110700",
+    "name": "sso_monthly_reports_access_select_only",
+    "has_statements": true
+  },
+  {
+    "version": "20260805110710",
+    "name": "fix_cpr_restrictive_billing_gate",
+    "has_statements": true
+  },
+  {
+    "version": "20260806010000",
+    "name": "archive_test_document_template",
+    "has_statements": true
+  },
+  {
+    "version": "20260806031500",
+    "name": "add_role_and_write_lock_guards_to_branding_rpc",
+    "has_statements": true
+  },
+  {
+    "version": "20260806120000",
+    "name": "create_tenant_branding_bucket",
+    "has_statements": true
+  },
+  {
+    "version": "20260806120100",
+    "name": "tenant_branding_rls_policies",
+    "has_statements": true
+  },
+  {
+    "version": "20260806120200",
+    "name": "backfill_tenant_branding_metadata_urls",
+    "has_statements": true
+  },
+  {
+    "version": "20260806120250",
+    "name": "create_user_avatars_bucket",
+    "has_statements": true
+  },
+  {
+    "version": "20260806120300",
+    "name": "user_avatars_rls_policies",
+    "has_statements": true
+  },
+  {
+    "version": "20260806120400",
+    "name": "backfill_profiles_avatar_urls",
+    "has_statements": true
+  },
+  {
+    "version": "20260806120500",
+    "name": "copy_dap_industry_orphan_paths",
+    "has_statements": true
+  },
+  {
+    "version": "20260806120600",
+    "name": "add_is_tenant_write_locked_check_rpc",
+    "has_statements": true
+  },
+  {
+    "version": "20260806120700",
+    "name": "decommission_organization_logos_bucket",
+    "has_statements": true
+  },
+  {
+    "version": "20260806120800",
+    "name": "storage_soak_monitor_tables_and_rpc",
+    "has_statements": true
+  },
+  {
+    "version": "20260806120900",
+    "name": "storage_soak_monitor_seed_buckets",
+    "has_statements": true
+  },
+  {
+    "version": "20260806121000",
+    "name": "storage_soak_monitor_schedule_cron",
+    "has_statements": true
+  },
+  {
+    "version": "20260806121100",
+    "name": "reactivate_compliance_clauses_os_cr_cp_2025",
+    "has_statements": true
+  },
+  {
+    "version": "20260806121200",
+    "name": "seed_documents_dd_document_type",
+    "has_statements": true
+  },
+  {
+    "version": "20260807013343",
+    "name": "fix_tmr_display_id_generator_format_mismatch",
+    "has_statements": false
+  },
+  {
+    "version": "20260807121130",
+    "name": "guard_rpc_bulk_upsert_trainer_units_against_unrelated_units",
+    "has_statements": true
+  },
+  {
+    "version": "20260807124853",
+    "name": "fix_rpc_bulk_upsert_trainer_units_missing_reference_data",
+    "has_statements": true
+  },
+  {
+    "version": "20260807133201",
+    "name": "add_skipped_duplicate_evidence_disposition",
+    "has_statements": true
+  },
+  {
+    "version": "20260810012915",
+    "name": "fix_consultant_trial_invite_link_route",
+    "has_statements": true
+  },
+  {
+    "version": "20260810015315",
+    "name": "add_public_track_referral_click_rpc",
+    "has_statements": true
+  },
+  {
+    "version": "20260810024119",
+    "name": "add_ref_code_to_no_rto_trial",
+    "has_statements": true
+  },
+  {
+    "version": "20260810024133",
+    "name": "add_referral_attribution_to_trial_tenant_creation",
+    "has_statements": true
+  },
+  {
+    "version": "20260810024546",
+    "name": "drop_unused_notes_tenant_id_column",
+    "has_statements": true
+  },
+  {
+    "version": "20260810031239",
+    "name": "add_record_referral_commission_for_invoice_rpc",
+    "has_statements": true
+  },
+  {
+    "version": "20260810120000",
+    "name": "require_verified_not_pending_for_trainer_classification",
+    "has_statements": true
+  },
+  {
+    "version": "20260810135717",
+    "name": "fix_trainer_owner_only_restrictive_billing_gate",
+    "has_statements": true
+  },
+  {
+    "version": "20260810140500",
+    "name": "lock_down_record_referral_commission_rpc",
+    "has_statements": true
+  },
+  {
+    "version": "20260811025625",
+    "name": "add_governance_meeting_analysis_gate",
+    "has_statements": true
+  },
+  {
+    "version": "20260811150000",
+    "name": "fix_qi_campaign_billing_gate_restrictive",
+    "has_statements": true
+  },
+  {
+    "version": "20260811160000",
+    "name": "fix_ofi_register_missing_created_by_column",
+    "has_statements": true
+  },
+  {
+    "version": "20260811163000",
+    "name": "fix_submit_trainer_monthly_report_insert_gaps",
+    "has_statements": true
+  },
+  {
+    "version": "20260811180000",
+    "name": "convert_ofi_register_id_to_uuid",
+    "has_statements": true
+  },
+  {
+    "version": "20260811181000",
+    "name": "fix_ofi_id_dependent_functions",
+    "has_statements": true
+  },
+  {
+    "version": "20260811190000",
+    "name": "fix_remaining_ofi_id_integer_casts",
+    "has_statements": true
+  },
+  {
+    "version": "20260811200000",
+    "name": "part3_ci_priority_casing_and_convert_ofis",
+    "has_statements": true
+  },
+  {
+    "version": "20260811200100",
+    "name": "part3_drop_caa_complaint_id_sync_trigger",
+    "has_statements": true
+  },
+  {
+    "version": "20260811200200",
+    "name": "part3_add_in_progress_dd_status",
+    "has_statements": true
+  },
+  {
+    "version": "20260811200300",
+    "name": "part3_ofi_register_missing_columns",
+    "has_statements": true
+  },
+  {
+    "version": "20260811201000",
+    "name": "fix_submit_sso_monthly_report_ofi_uuid",
+    "has_statements": true
+  },
+  {
+    "version": "20260812001640",
+    "name": "complyhub_intelligence_foundation",
+    "has_statements": true
+  },
+  {
+    "version": "20260812011150",
+    "name": "intelligence_gov_overdue_action_v1",
+    "has_statements": true
+  },
+  {
+    "version": "20260812012831",
+    "name": "fix_gov_overdue_dismissed_recreate",
+    "has_statements": true
+  },
+  {
+    "version": "20260812013640",
+    "name": "intelligence_ass_validation_overdue_v1",
+    "has_statements": true
+  },
+  {
+    "version": "20260812015112",
+    "name": "fix_ass_validation_overdue_dismissed_and_errors",
+    "has_statements": true
+  },
+  {
+    "version": "20260812020000",
+    "name": "intelligence_viewer_superadmin_rpcs",
+    "has_statements": true
+  },
+  {
+    "version": "20260812022300",
+    "name": "risk_avr_str_dedicated_status_tables",
+    "has_statements": true
+  },
+  {
+    "version": "20260812030143",
+    "name": "help_centre_content_allow_download_type",
+    "has_statements": true
+  },
+  {
+    "version": "20260812040858",
+    "name": "help_centre_video_library_tidy_and_session3_recording",
+    "has_statements": true
+  },
+  {
+    "version": "20260812041031",
+    "name": "help_centre_content_add_thumbnail_url_ddl",
+    "has_statements": true
+  },
+  {
+    "version": "20260812041042",
+    "name": "help_centre_session3_video_description_dml",
+    "has_statements": true
+  },
+  {
+    "version": "20260812042054",
+    "name": "help_centre_align_session_1_to_3_titles_dml",
+    "has_statements": true
+  },
+  {
+    "version": "20260812042350",
+    "name": "help_centre_categories_add_summary_ddl",
+    "has_statements": true
+  },
+  {
+    "version": "20260812042410",
+    "name": "help_centre_write_session_summaries_dml",
+    "has_statements": true
+  },
+  {
+    "version": "20260812043538",
+    "name": "help_centre_categories_summary_gap_fill",
+    "has_statements": true
+  },
+  {
+    "version": "20260812060000",
+    "name": "gap_fill_help_centre_session3_workbook_content",
+    "has_statements": true
+  },
+  {
+    "version": "20260812111211",
+    "name": "fix_intelligence_delete_role_strict",
+    "has_statements": true
+  },
+  {
+    "version": "20260813024800",
+    "name": "sso_monthly_pack_periodic_sections",
+    "has_statements": true
+  },
+  {
+    "version": "20260813025709",
+    "name": "help_centre_session7_placeholder_wording_dml",
+    "has_statements": true
+  },
+  {
+    "version": "20260813032331",
+    "name": "help_centre_media_bucket_and_default_thumbnail",
+    "has_statements": true
+  },
+  {
+    "version": "20260813100602",
+    "name": "restore_meeting_duplicate_candidates_table",
+    "has_statements": true
+  },
+  {
+    "version": "20260813100640",
+    "name": "fix_gov_build_meeting_pack_broken_refs_and_role_gate",
+    "has_statements": true
+  },
+  {
+    "version": "20260813100718",
+    "name": "expand_role_gates_governing_person_and_sso_parity",
+    "has_statements": true
+  },
+  {
+    "version": "20260813100749",
+    "name": "revoke_anon_governance_sso_rpcs_aug_2026",
+    "has_statements": true
+  },
+  {
+    "version": "20260813100854",
+    "name": "add_governing_person_to_duplicate_rpc_gates",
+    "has_statements": true
+  },
+  {
+    "version": "20260813101544",
+    "name": "sso_monthly_reports_add_created_by_and_status_values",
+    "has_statements": true
+  },
+  {
+    "version": "20260813101607",
+    "name": "fix_create_sso_reports_for_meeting_live_schema",
+    "has_statements": true
+  },
+  {
+    "version": "20260813101724",
+    "name": "seed_demo_trainer_and_sso_accounts",
+    "has_statements": true
+  },
+  {
+    "version": "20260813101858",
+    "name": "demo_tenant_training_meeting_and_sso_report_seed",
+    "has_statements": true
+  },
+  {
+    "version": "20260813102157",
+    "name": "fix_get_sso_dashboard_readiness_snapshot_table",
+    "has_statements": true
+  },
+  {
+    "version": "20260813102341",
+    "name": "repoint_duplicate_rpcs_to_canonical_table",
+    "has_statements": true
+  },
+  {
+    "version": "20260813102430",
+    "name": "fix_gov_get_meeting_settings_invalid_aggregate_order_by",
+    "has_statements": true
+  },
+  {
+    "version": "20260813102513",
+    "name": "fix_gov_get_meeting_settings_recent_meetings_block",
+    "has_statements": true
+  },
+  {
+    "version": "20260813102731",
+    "name": "fix_tenant_resolution_active_tenant_id_governance_sso_rpcs",
+    "has_statements": true
+  },
+  {
+    "version": "20260813102836",
+    "name": "fix_clause_score_sso_report_source_table",
+    "has_statements": true
+  },
+  {
+    "version": "20260813104831",
+    "name": "register_custom_id_trigger_sweep",
+    "has_statements": true
+  },
+  {
+    "version": "20260813105057",
+    "name": "create_register_cascade_links",
+    "has_statements": true
+  },
+  {
+    "version": "20260813105144",
+    "name": "rpc_dispatch_register_item_and_training_product_options",
+    "has_statements": true
+  },
+  {
+    "version": "20260813105344",
+    "name": "fix_register_custom_id_generators_collision_safety",
+    "has_statements": true
+  },
+  {
+    "version": "20260813113831",
+    "name": "tp_tables_custom_id_sequential_generation",
+    "has_statements": true
+  },
+  {
+    "version": "20260813114012",
+    "name": "tenant_resolution_sweep_active_tenant_id_batch_2",
+    "has_statements": true
+  },
+  {
+    "version": "20260813114048",
+    "name": "drop_dead_pack_overload_and_revoke_anon_internal_rpcs",
+    "has_statements": true
+  },
+  {
+    "version": "20260813114735",
+    "name": "drop_duplicate_register_indexes",
+    "has_statements": true
+  },
+  {
+    "version": "20260813120000",
+    "name": "harden_sso_and_trainer_rpc_authorization",
+    "has_statements": true
+  },
+  {
+    "version": "20260813150000",
+    "name": "widen_sso_quick_log_rls",
+    "has_statements": true
+  },
+  {
+    "version": "20260813160000",
+    "name": "fix_trainer_report_meeting_summary_required_role",
+    "has_statements": true
+  },
+  {
+    "version": "20260813180000",
+    "name": "harden_sso_pack_seed_and_report_commentary",
+    "has_statements": true
+  },
+  {
+    "version": "20260814012709",
+    "name": "fix_bootstrap_demo_account_self_check",
+    "has_statements": true
+  },
+  {
+    "version": "20260814012729",
+    "name": "revoke_anon_exec_bootstrap_demo_account",
+    "has_statements": true
+  },
+  {
+    "version": "20260814012802",
+    "name": "revoke_public_exec_bootstrap_demo_account",
+    "has_statements": true
+  },
+  {
+    "version": "20260814015533",
+    "name": "rls_initplan_sweep_batch_1",
+    "has_statements": true
+  },
+  {
+    "version": "20260814015600",
+    "name": "rls_initplan_sweep_batch_2",
+    "has_statements": true
+  },
+  {
+    "version": "20260814015618",
+    "name": "rls_initplan_sweep_batch_3",
+    "has_statements": true
+  },
+  {
+    "version": "20260814015635",
+    "name": "rls_initplan_sweep_batch_4_final",
+    "has_statements": true
+  },
+  {
+    "version": "20260814020103",
+    "name": "fix_complybot_feedback_rls",
+    "has_statements": true
+  },
+  {
+    "version": "20260814041438",
+    "name": "trainer_report_gating_advisory_and_roster_alignment",
+    "has_statements": true
+  },
+  {
+    "version": "20260814041453",
+    "name": "archive_orphan_tp_trainers_australian_college",
+    "has_statements": true
+  },
+  {
+    "version": "20260814043000",
+    "name": "revoke_anon_switch_to_consultant_home",
+    "has_statements": true
+  },
+  {
+    "version": "20260814050000",
+    "name": "register_custom_id_cleanup",
+    "has_statements": true
+  },
+  {
+    "version": "20260814055947",
+    "name": "tar_register_trainer_self_service",
+    "has_statements": true
+  },
+  {
+    "version": "20260814061438",
+    "name": "fix_governance_meetings_meeting_date_autofill",
+    "has_statements": true
+  },
+  {
+    "version": "20260814061454",
+    "name": "register_custom_id_triggers_wave2_gov_thp_avr_icr",
+    "has_statements": true
+  },
+  {
+    "version": "20260814061511",
+    "name": "backfill_missing_custom_ids_gov_thp",
+    "has_statements": true
+  },
+  {
+    "version": "20260814061547",
+    "name": "fix_bulk_recompute_service_role_gate",
+    "has_statements": true
+  },
+  {
+    "version": "20260814061700",
+    "name": "disable_annual_deprecated_table_cleanup_cron",
+    "has_statements": true
+  },
+  {
+    "version": "20260814061750",
+    "name": "reschedule_fixed_tga_ingest_crons_avoid_race",
+    "has_statements": true
+  },
+  {
+    "version": "20260814063022",
+    "name": "rls_initplan_sweep_new_schemas_batch_5",
+    "has_statements": true
+  },
+  {
+    "version": "20260814063115",
+    "name": "drop_live_duplicate_indexes_documents_surveys",
+    "has_statements": true
+  },
+  {
+    "version": "20260814063131",
+    "name": "revoke_anon_internal_tas_rpcs_and_soak_policy",
+    "has_statements": true
+  },
+  {
+    "version": "20260814063203",
+    "name": "revoke_public_internal_tas_rpcs_grant_authenticated",
+    "has_statements": true
+  },
+  {
+    "version": "20260814063417",
+    "name": "allow_risk_register_cascade_source",
+    "has_statements": true
+  },
+  {
+    "version": "20260814063744",
+    "name": "restrictive_select_closure_trainers_matrix_batch_1",
+    "has_statements": true
+  },
+  {
+    "version": "20260814072717",
+    "name": "storage_policies_ofi_and_generic_evidence_buckets",
+    "has_statements": true
+  },
+  {
+    "version": "20260814073211",
+    "name": "harden_register_cascade_dispatch",
+    "has_statements": true
+  },
+  {
+    "version": "20260814073222",
+    "name": "fix_compute_all_student_risk_scores_role_gate",
+    "has_statements": true
+  },
+  {
+    "version": "20260814073339",
+    "name": "fix_compute_student_risk_score_dead_thresholds_table",
+    "has_statements": true
+  },
+  {
+    "version": "20260814073449",
+    "name": "legacy_point_risk_events_in_student_risk_score",
+    "has_statements": true
+  },
+  {
+    "version": "20260814075036",
+    "name": "restore_lkl_audit_status_and_merge_plans_tables",
+    "has_statements": true
+  },
+  {
+    "version": "20260814080359",
+    "name": "phase1_fix_danger_cluster_delete_functions",
+    "has_statements": true
+  },
+  {
+    "version": "20260814080514",
+    "name": "phase2_fix_silent_degrader_functions",
+    "has_statements": true
+  },
+  {
+    "version": "20260814080606",
+    "name": "restore_trainer_compliance_register_subsystem",
+    "has_statements": true
+  },
+  {
+    "version": "20260814080641",
+    "name": "fix_recompute_trainer_status_service_gate",
+    "has_statements": true
+  },
+  {
+    "version": "20260814080711",
+    "name": "fix_upsert_trainer_register_row_service_gate",
+    "has_statements": true
+  },
+  {
+    "version": "20260814080806",
+    "name": "fix_bulk_recompute_swapped_args",
+    "has_statements": true
+  },
+  {
+    "version": "20260814080839",
+    "name": "trainer_compliance_register_nullable_created_by",
+    "has_statements": true
+  },
+  {
+    "version": "20260814080901",
+    "name": "trainer_compliance_register_nullable_updated_by",
+    "has_statements": true
+  },
+  {
+    "version": "20260814080926",
+    "name": "fix_upsert_register_row_audit_target",
+    "has_statements": true
+  },
+  {
+    "version": "20260814081219",
+    "name": "align_recompute_audit_inserts_to_legacy_schema",
+    "has_statements": true
+  },
+  {
+    "version": "20260814081244",
+    "name": "legacy_audit_log_nullable_user_id",
+    "has_statements": true
+  },
+  {
+    "version": "20260814081447",
+    "name": "access_gate_distinct_no_tenant_context_reason",
+    "has_statements": true
+  },
+  {
+    "version": "20260814083633",
+    "name": "schedule_tp_transition_engine_nightly_cron",
+    "has_statements": true
+  },
+  {
+    "version": "20260814083650",
+    "name": "seed_demo_tenant_superseded_scope_hlt57415",
+    "has_statements": true
+  },
+  {
+    "version": "20260814085422",
+    "name": "attach_remaining_register_custom_id_triggers",
+    "has_statements": true
+  },
+  {
+    "version": "20260814090000",
+    "name": "allow_trainers_to_raise_ssr_requests",
+    "has_statements": true
+  },
+  {
+    "version": "20260814090536",
+    "name": "restore_tga_resolution_queue_and_supersession_alerts",
+    "has_statements": true
+  },
+  {
+    "version": "20260814091013",
+    "name": "fix_tga_nightly_sync_cron_auth_and_cadence",
+    "has_statements": true
+  },
+  {
+    "version": "20260814100000",
+    "name": "add_trainer_monthly_report_attachments",
+    "has_statements": true
+  },
+  {
+    "version": "20260814110000",
+    "name": "fix_accept_governance_suggestion_risk_title",
+    "has_statements": true
+  },
+  {
+    "version": "20260814120000",
+    "name": "allow_trainer_monthly_report_storage",
+    "has_statements": true
+  },
+  {
+    "version": "20260815060438",
+    "name": "consolidate_persist_tga_scope_items_overloads",
+    "has_statements": true
+  },
+  {
+    "version": "20260815060611",
+    "name": "fix_persist_tga_scope_items_admin_audit_actor_type",
+    "has_statements": true
+  },
+  {
+    "version": "20260815061927",
+    "name": "restrictive_select_closure_batch_2_trainer_and_transition",
+    "has_statements": true
+  },
+  {
+    "version": "20260815062801",
+    "name": "rebuild_compute_student_risk_score_calibrated",
+    "has_statements": true
+  },
+  {
+    "version": "20260815062917",
+    "name": "risk_scorer_breadth_modifier",
+    "has_statements": true
+  },
+  {
+    "version": "20260815065509",
+    "name": "fix_invite_cleanup_cron_auth_and_recreate_ncver_ingest",
+    "has_statements": true
+  },
+  {
+    "version": "20260815073230",
+    "name": "restrictive_select_closure_batch_3_student_pii",
+    "has_statements": true
+  },
+  {
+    "version": "20260815075911",
+    "name": "purge_consultant_assistant_from_policies",
+    "has_statements": true
+  },
+  {
+    "version": "20260815075949",
+    "name": "purge_consultant_assistant_rbac_rows_and_profiles",
+    "has_statements": true
+  },
+  {
+    "version": "20260815120000",
+    "name": "fix_sso_suggestion_accept_and_decision_clobber",
+    "has_statements": true
+  },
+  {
+    "version": "20260815230246",
+    "name": "add_governance_meetings_tenant_fk_for_postgrest_embeds",
+    "has_statements": true
+  },
+  {
+    "version": "20260816040208",
+    "name": "fix_enforce_lockout_enum_text_casts",
+    "has_statements": true
+  },
+  {
+    "version": "20260816040425",
+    "name": "fix_ops_diagnostics_service_context_gates_and_enum_literals",
+    "has_statements": true
+  },
+  {
+    "version": "20260816040519",
+    "name": "fix_compliance_scorer_service_context_and_snapshot_guard",
+    "has_statements": true
+  },
+  {
+    "version": "20260816040541",
+    "name": "recreate_reserved_owner_crons_wave2",
+    "has_statements": true
+  },
+  {
+    "version": "20260816041205",
+    "name": "confidence_score_phase1_extend_snapshots",
+    "has_statements": true
+  },
+  {
+    "version": "20260816041216",
+    "name": "confidence_score_nightly_repoint_job29",
+    "has_statements": true
+  },
+  {
+    "version": "20260816041707",
+    "name": "enforce_lockout_respect_cancelled_suspended_on_unlock",
+    "has_statements": true
+  },
+  {
+    "version": "20260816042007",
+    "name": "repair_get_trainer_reports_for_meeting_columns",
+    "has_statements": true
+  },
+  {
+    "version": "20260816044217",
+    "name": "no_rto_trial_add_triage_fields",
+    "has_statements": true
+  },
+  {
+    "version": "20260816044238",
+    "name": "no_rto_trial_risk_and_notify_trigger",
+    "has_statements": true
+  },
+  {
+    "version": "20260816044252",
+    "name": "trial_tenant_notify_trigger",
+    "has_statements": true
+  },
+  {
+    "version": "20260816044523",
+    "name": "no_rto_trial_notify_revoke_anon_authenticated",
+    "has_statements": true
+  },
+  {
+    "version": "20260816050308",
+    "name": "revoke_authenticated_unguarded_privileged_rpcs_batch1",
+    "has_statements": true
+  },
+  {
+    "version": "20260816050404",
+    "name": "revoke_authenticated_password_mutation_rpcs_batch2",
+    "has_statements": true
+  },
+  {
+    "version": "20260816051001",
+    "name": "revoke_authenticated_self_certifying_trial_rpcs_batch3",
+    "has_statements": true
+  },
+  {
+    "version": "20260816060707",
+    "name": "restrictive_closure_batch2a_admin_cm_writes",
+    "has_statements": true
+  },
+  {
+    "version": "20260816060754",
+    "name": "restrictive_closure_batch2b_bespoke_tables",
+    "has_statements": true
+  },
+  {
+    "version": "20260816073804",
+    "name": "close_trainer_credentials_anon_access",
+    "has_statements": true
+  },
+  {
+    "version": "20260816074129",
+    "name": "add_driver_tagging_layer",
+    "has_statements": true
+  },
+  {
+    "version": "20260816074137",
+    "name": "seed_driver_register_map",
+    "has_statements": true
+  },
+  {
+    "version": "20260816074214",
+    "name": "fix_trainer_credentials_closure_definer_lookup",
+    "has_statements": true
+  },
+  {
+    "version": "20260816074734",
+    "name": "drop_domain_based_super_admin_auto_grant",
+    "has_statements": true
+  },
+  {
+    "version": "20260816075652",
+    "name": "close_subscribers_public_read",
+    "has_statements": true
+  },
+  {
+    "version": "20260816080308",
+    "name": "billing_lockout_respect_invoice_payments_and_audit",
+    "has_statements": true
+  },
+  {
+    "version": "20260816080406",
+    "name": "veto_write_lock_for_paid_invoice_tenants",
+    "has_statements": true
+  },
+  {
+    "version": "20260816080610",
+    "name": "repoint_governance_health_dashboard_to_live_register",
+    "has_statements": true
+  },
+  {
+    "version": "20260816080649",
+    "name": "intelligence_insights_aggregate_dedupe_key",
+    "has_statements": true
+  },
+  {
+    "version": "20260816081212",
+    "name": "fill_governance_meeting_created_by_under_service_context",
+    "has_statements": true
+  },
+  {
+    "version": "20260816081345",
+    "name": "fix_tenant_addresses_on_conflict_arbiter",
+    "has_statements": true
+  },
+  {
+    "version": "20260816081353",
+    "name": "revoke_authenticated_from_platform_wide_ops_rpcs",
+    "has_statements": true
+  },
+  {
+    "version": "20260816083644",
+    "name": "add_schedule_row_delivery_confirmation",
+    "has_statements": true
+  },
+  {
+    "version": "20260816083650",
+    "name": "preserve_schedule_row_delivery_on_upsert",
+    "has_statements": true
+  },
+  {
+    "version": "20260816083651",
+    "name": "repoint_cb_route_stats_and_deprecate_unused_complybot_tables",
+    "has_statements": true
+  },
+  {
+    "version": "20260816100000",
+    "name": "revoke_public_anon_trial_tenant_rpcs",
+    "has_statements": true
+  },
+  {
+    "version": "20260816100001",
+    "name": "drop_stale_organisation_id_invitation_rpcs",
+    "has_statements": true
+  },
+  {
+    "version": "20260816100002",
+    "name": "revoke_public_anon_post_session_accept_rpcs",
+    "has_statements": true
+  },
+  {
+    "version": "20260816120000",
+    "name": "fix_sso_submit_snapshot_live_tables",
+    "has_statements": false
+  },
+  {
+    "version": "20260817031039",
+    "name": "revoke_anon_write_grants_on_storage_objects",
+    "has_statements": true
+  },
+  {
+    "version": "20260817031140",
+    "name": "deny_anon_storage_writes_via_restrictive_policy",
+    "has_statements": true
+  },
+  {
+    "version": "20260817032314",
+    "name": "get_effective_role_verify_impersonation_server_side",
+    "has_statements": true
+  },
+  {
+    "version": "20260817034346",
+    "name": "revoke_anon_grants_on_driver_register_map",
+    "has_statements": true
+  },
+  {
+    "version": "20260817034410",
+    "name": "restrict_driver_register_map_to_read_only",
+    "has_statements": true
+  },
+  {
+    "version": "20260817034817",
+    "name": "correct_driver_6_register_mapping",
+    "has_statements": true
+  },
+  {
+    "version": "20260817034820",
+    "name": "drop_tenant_grain_driver_code_from_clause_map",
+    "has_statements": true
+  },
+  {
+    "version": "20260817043644",
+    "name": "fix_sso_monthly_report_rls_and_submitted_status",
+    "has_statements": true
+  },
+  {
+    "version": "20260817045749",
+    "name": "rename_deprecated_complybot_and_dap_sessions",
+    "has_statements": true
+  },
+  {
+    "version": "20260817050444",
+    "name": "sso_monthly_report_wizard_backfill",
+    "has_statements": true
+  },
+  {
+    "version": "20260817074050",
+    "name": "revoke_public_execute_billing_enforce_lockout",
+    "has_statements": true
+  },
+  {
+    "version": "20260817090000",
+    "name": "close_trainer_monthly_report_attachments_select",
+    "has_statements": true
+  },
+  {
+    "version": "20260817091500",
+    "name": "fix_sso_report_reminders_billing_gate_scope",
+    "has_statements": true
+  },
+  {
+    "version": "20260817092615",
+    "name": "revoke_public_anon_callable_definer_rpcs_20260817",
+    "has_statements": true
+  },
+  {
+    "version": "20260817092654",
+    "name": "revoke_public_anon_trigger_functions_20260817",
+    "has_statements": true
+  },
+  {
+    "version": "20260817092800",
+    "name": "drop_broken_invitation_rpcs_20260817",
+    "has_statements": true
+  },
+  {
+    "version": "20260817093034",
+    "name": "add_driver_scorecard_function",
+    "has_statements": true
+  },
+  {
+    "version": "20260817100000",
+    "name": "reconcile_sso_submit_live_tables_and_status",
+    "has_statements": true
+  },
+  {
+    "version": "20260817111411",
+    "name": "exclude_internal_demo_tenants_from_trial_views",
+    "has_statements": true
+  },
+  {
+    "version": "20260817111433",
+    "name": "correct_stale_trial_expiry_dates",
+    "has_statements": true
+  },
+  {
+    "version": "20260817111741",
+    "name": "create_trial_intent_survey_responses",
+    "has_statements": true
+  },
+  {
+    "version": "20260817112613",
+    "name": "create_trial_intent_survey_admin_views",
+    "has_statements": true
+  },
+  {
+    "version": "20260817112758",
+    "name": "fix_invite_functions_duplicate_key_upsert",
+    "has_statements": true
+  },
+  {
+    "version": "20260817140000",
+    "name": "revoke_public_check_email_rate_limit",
+    "has_statements": true
+  },
+  {
+    "version": "20260817150000",
+    "name": "revoke_anon_signup_oracle_rpcs",
+    "has_statements": true
+  },
+  {
+    "version": "20260817160000",
+    "name": "harden_signup_oracle_rpcs_authenticated_callers",
+    "has_statements": true
+  },
+  {
+    "version": "20260817170000",
+    "name": "match_schedule_row_delivery_by_content_not_position",
+    "has_statements": true
+  },
+  {
+    "version": "20260817180000",
+    "name": "fix_cb_route_stats_tenant_leak_and_delivered_by_spoof",
+    "has_statements": true
+  },
+  {
+    "version": "20260817190000",
+    "name": "fix_schedule_row_delivered_by_reattribution",
+    "has_statements": true
+  },
+  {
+    "version": "20260817191000",
+    "name": "fix_trainer_attachment_billing_gate_restrictive",
+    "has_statements": true
+  },
+  {
+    "version": "20260817232220",
+    "name": "fix_sso_monthly_report_missing_columns",
+    "has_statements": true
+  },
+  {
+    "version": "20260817232512",
+    "name": "fix_accept_sso_suggestion_risk_register",
+    "has_statements": true
+  },
+  {
+    "version": "20260818000000",
+    "name": "fix_trial_expiry_scanner_cron_auth",
+    "has_statements": true
+  },
+  {
+    "version": "20260818011822",
+    "name": "fix_trainer_attachment_billing_gate_syntax",
+    "has_statements": true
+  },
+  {
+    "version": "20260818020000",
+    "name": "restore_security_invoker_superadmin_views",
+    "has_statements": true
+  },
+  {
+    "version": "20260818083433",
+    "name": "seed_demo_qi_survey_link_acer_learner_2026",
+    "has_statements": true
+  },
+  {
+    "version": "20260819014110",
+    "name": "add_industry_survey_governance_autolog",
+    "has_statements": true
+  },
+  {
+    "version": "20260819015430",
+    "name": "widen_trainer_report_submitted_count_statuses",
+    "has_statements": true
+  },
+  {
+    "version": "20260819040123",
+    "name": "extend_standalone_forms_phase1",
+    "has_statements": true
+  },
+  {
+    "version": "20260819040550",
+    "name": "harden_standalone_forms_public_rpcs",
+    "has_statements": true
+  },
+  {
+    "version": "20260819040956",
+    "name": "prefix_standalone_form_tokens",
+    "has_statements": true
+  },
+  {
+    "version": "20260819041204",
+    "name": "fix_standalone_form_token_generation",
+    "has_statements": true
+  },
+  {
+    "version": "20260819042557",
+    "name": "fix_industry_consultation_survey_field_mapping",
+    "has_statements": true
+  },
+  {
+    "version": "20260819050000",
+    "name": "add_complybot_response_logs_retrieval_strategy",
+    "has_statements": true
+  },
+  {
+    "version": "20260819052115",
+    "name": "create_standalone_forms_upload_storage",
+    "has_statements": true
+  },
+  {
+    "version": "20260819052530",
+    "name": "harden_standalone_forms_upload_authorization",
+    "has_statements": true
+  },
+  {
+    "version": "20260819060000",
+    "name": "fix_consultation_register_tas_build_requirement",
+    "has_statements": true
+  },
+  {
+    "version": "20260819060500",
+    "name": "backfill_consultation_register_from_survey_responses",
+    "has_statements": true
+  },
+  {
+    "version": "20260819070000",
+    "name": "add_tenant_api_keys",
+    "has_statements": true
+  },
+  {
+    "version": "20260819073724",
+    "name": "create_standalone_form_campaign_foundation",
+    "has_statements": true
+  },
+  {
+    "version": "20260819075723",
+    "name": "add_standalone_form_campaign_response_and_send_rpcs",
+    "has_statements": true
+  },
+  {
+    "version": "20260819081038",
+    "name": "harden_standalone_form_campaign_permissions",
+    "has_statements": true
+  },
+  {
+    "version": "20260819081317",
+    "name": "revoke_anon_standalone_form_campaign_internal_rpcs",
+    "has_statements": true
+  },
+  {
+    "version": "20260819082103",
+    "name": "route_campaign_tokens_through_public_form_rpcs",
+    "has_statements": true
+  },
+  {
+    "version": "20260819082445",
+    "name": "finalize_standalone_form_campaign_close_and_identity",
+    "has_statements": true
+  },
+  {
+    "version": "20260819082559",
+    "name": "enforce_standalone_form_campaign_close_transition",
+    "has_statements": true
+  },
+  {
+    "version": "20260819082909",
+    "name": "harden_standalone_form_campaign_billing_and_event_index",
+    "has_statements": true
+  },
+  {
+    "version": "20260819120000",
+    "name": "fail_closed_suggestion_accept_membership",
+    "has_statements": true
+  },
+  {
+    "version": "20260819120100",
+    "name": "fix_icr_survey_dedup_plan_id",
+    "has_statements": false
+  },
+  {
+    "version": "20260820010150",
+    "name": "harden_standalone_form_campaign_billing_and_multirole_gate",
+    "has_statements": true
+  },
+  {
+    "version": "20260820021203",
+    "name": "enforce_form_campaign_reminder_two_sequence",
+    "has_statements": true
+  },
+  {
+    "version": "20260820025640",
+    "name": "add_standalone_form_campaign_analysis_and_governance_review",
+    "has_statements": true
+  },
+  {
+    "version": "20260820025800",
+    "name": "fix_standalone_form_campaign_analysis_choice_counts",
+    "has_statements": true
+  },
+  {
+    "version": "20260820030025",
+    "name": "repair_governance_event_custom_id_generation",
+    "has_statements": true
+  },
+  {
+    "version": "20260820030121",
+    "name": "fix_standalone_forms_permission_role_aggregation",
+    "has_statements": true
+  },
+  {
+    "version": "20260820030652",
+    "name": "harden_form_campaign_finding_review_transitions",
+    "has_statements": true
+  },
+  {
+    "version": "20260820080447",
+    "name": "add_form_campaign_lifecycle_closure",
+    "has_statements": true
+  },
+  {
+    "version": "20260820081122",
+    "name": "fix_tas_create_revision_invalid_status_literals",
+    "has_statements": true
+  },
+  {
+    "version": "20260820082034",
+    "name": "fix_tas_create_revision_updated_by",
+    "has_statements": true
+  },
+  {
+    "version": "20260820085033",
+    "name": "add_form_campaign_scheduling_resend_and_due_worker",
+    "has_statements": true
+  },
+  {
+    "version": "20260820090000",
+    "name": "fix_tenant_api_key_rpc_membership_check",
+    "has_statements": true
+  },
+  {
+    "version": "20260820100000",
+    "name": "widen_tenant_api_key_beta_to_all_tenants",
+    "has_statements": true
+  },
+  {
+    "version": "20260821002701",
+    "name": "add_form_campaign_governance_outcomes",
+    "has_statements": true
+  },
+  {
+    "version": "20260821060334",
+    "name": "add_ai_eval_questions",
+    "has_statements": true
+  },
+  {
+    "version": "20260821060335",
+    "name": "seed_ai_eval_questions",
+    "has_statements": true
+  },
+  {
+    "version": "20260821080924",
+    "name": "fix_av_findings_actions_fk_and_widen_insert_roles",
+    "has_statements": true
+  },
+  {
+    "version": "20260821090000",
+    "name": "add_complybot_terminology_citation_telemetry",
+    "has_statements": true
+  },
+  {
+    "version": "20260821120000",
+    "name": "fail_closed_sso_snapshot_suggestions_membership",
+    "has_statements": true
+  },
+  {
+    "version": "20260822011901",
+    "name": "fix_aot_risk_flag_array_append",
+    "has_statements": true
+  },
+  {
+    "version": "20260822015313",
+    "name": "fix_tas_market_need_consultation_readiness",
+    "has_statements": true
+  },
+  {
+    "version": "20260822022349",
+    "name": "aot_planned_hours_overrides",
+    "has_statements": true
+  },
+  {
+    "version": "20260822023610",
+    "name": "secure_init_tenant_rbac_canonical_roles",
+    "has_statements": true
+  },
+  {
+    "version": "20260822023651",
+    "name": "converge_canonical_tenant_roles",
+    "has_statements": true
+  },
+  {
+    "version": "20260822023843",
+    "name": "harden_rbac_roles_writes",
+    "has_statements": true
+  },
+  {
+    "version": "20260822024615",
+    "name": "converge_administrator_full_capabilities",
+    "has_statements": true
+  },
+  {
+    "version": "20260822024801",
+    "name": "require_consultation_for_all_tas_market_need",
+    "has_statements": true
+  },
+  {
+    "version": "20260822024830",
+    "name": "remove_assessment_validation_from_tas_delivery_assurance",
+    "has_statements": true
+  },
+  {
+    "version": "20260822025100",
+    "name": "scope_tas_trainers_to_deliverable_units",
+    "has_statements": false
+  },
+  {
+    "version": "20260822025429",
+    "name": "canonicalize_tenant_members_role_constraint",
+    "has_statements": true
+  },
+  {
+    "version": "20260822025559",
+    "name": "add_external_portal_entity_linkage",
+    "has_statements": true
+  },
+  {
+    "version": "20260822025907",
+    "name": "validate_canonical_role_mutation_rpcs",
+    "has_statements": true
+  },
+  {
+    "version": "20260822031356",
+    "name": "restore_eleven_role_authorization_contract",
+    "has_statements": true
+  },
+  {
+    "version": "20260822031458",
+    "name": "seed_eleven_role_authorization_data",
+    "has_statements": true
+  },
+  {
+    "version": "20260822032124",
+    "name": "align_cm_rbac_baseline",
+    "has_statements": true
+  },
+  {
+    "version": "20260822032132",
+    "name": "remove_cm_governance_capabilities",
+    "has_statements": true
+  },
+  {
+    "version": "20260822032900",
+    "name": "remove_fixed_market_consultation_quotas",
+    "has_statements": true
+  },
+  {
+    "version": "20260822044500",
+    "name": "align_tas_draft_compile_and_harden_compile_gate",
+    "has_statements": true
+  },
+  {
+    "version": "20260822045800",
+    "name": "align_final_tas_compile_with_approval_readiness",
+    "has_statements": false
+  },
+  {
+    "version": "20260822053115",
+    "name": "remove_cm_admin_capability_drift",
+    "has_statements": true
+  },
+  {
+    "version": "20260822053500",
+    "name": "allow_tas_draft_generation_without_assurance_gates",
+    "has_statements": false
+  },
+  {
+    "version": "20260822055410",
+    "name": "close_core_governance_rls_roles_batch_1",
+    "has_statements": true
+  },
+  {
+    "version": "20260822060000",
+    "name": "reassert_fail_closed_sso_security_sweep",
+    "has_statements": false
+  },
+  {
+    "version": "20260822061500",
+    "name": "align_governance_suggestion_rpcs_wave0_roles",
+    "has_statements": false
+  },
+  {
+    "version": "20260822062357",
+    "name": "close_core_governance_security_definer_rpcs_batch_1",
+    "has_statements": true
+  },
+  {
+    "version": "20260822062831",
+    "name": "close_legacy_governance_rpc_overload_exec",
+    "has_statements": true
+  },
+  {
+    "version": "20260822065343",
+    "name": "close_core_governance_meeting_rpcs_batch_2",
+    "has_statements": true
+  },
+  {
+    "version": "20260822070109",
+    "name": "create_driver_diagnostic_foundation",
+    "has_statements": true
+  },
+  {
+    "version": "20260822070239",
+    "name": "seed_driver_6_diagnostic_dimensions",
+    "has_statements": true
+  },
+  {
+    "version": "20260822070304",
+    "name": "fix_driver_diagnostic_supersede_policy",
+    "has_statements": true
+  },
+  {
+    "version": "20260822074000",
+    "name": "require_writable_support_session_for_governance_writes",
+    "has_statements": false
+  },
+  {
+    "version": "20260822074200",
+    "name": "close_legacy_governance_meeting_rpc_execute",
+    "has_statements": false
+  },
+  {
+    "version": "20260822074500",
+    "name": "close_legacy_governance_rpc_public_grants",
+    "has_statements": true
+  },
+  {
+    "version": "20260822074530",
+    "name": "align_driver_diagnostic_governance_access",
+    "has_statements": true
+  },
+  {
+    "version": "20260822074557",
+    "name": "create_driver_diagnostic_workflow_rpcs",
+    "has_statements": true
+  },
+  {
+    "version": "20260822074656",
+    "name": "harden_wave_0f_legacy_rpc_grants_and_comment",
+    "has_statements": true
+  },
+  {
+    "version": "20260822075500",
+    "name": "forward_fix_aot_planned_hours_contract",
+    "has_statements": false
+  },
+  {
+    "version": "20260822080100",
+    "name": "version_labour_market_cache_provenance",
+    "has_statements": false
+  },
+  {
+    "version": "20260822103643",
+    "name": "close_governance_decision_action_rpcs_wave_0g",
+    "has_statements": true
+  },
+  {
+    "version": "20260822104500",
+    "name": "harden_tas_licensing_scan_jurisdiction",
+    "has_statements": false
+  },
+  {
+    "version": "20260822111500",
+    "name": "fix_governance_wave0g_regeneration_semantics",
+    "has_statements": true
+  },
+  {
+    "version": "20260822120000",
+    "name": "fail_closed_tas_trainer_matrix_membership",
+    "has_statements": false
+  },
+  {
+    "version": "20260822121000",
+    "name": "secure_tenant_wide_trainer_matrix_rpc",
+    "has_statements": false
+  },
+  {
+    "version": "20260823063236",
+    "name": "dap_phase0_lifecycle_consistency",
+    "has_statements": true
+  },
+  {
+    "version": "20260823063258",
+    "name": "dap_phase0_correct_product_type_data",
+    "has_statements": true
+  },
+  {
+    "version": "20260823072533",
+    "name": "close_form_campaign_governance_authority_wave_0h",
+    "has_statements": true
+  },
+  {
+    "version": "20260823074222",
+    "name": "harden_form_campaign_governance_transition_invariants_wave_0h_followup",
+    "has_statements": true
+  },
+  {
+    "version": "20260823074258",
+    "name": "dap_phase0_sync_fields_consistency",
+    "has_statements": true
+  },
+  {
+    "version": "20260823074825",
+    "name": "dap_phase1_readiness_gate",
+    "has_statements": true
+  },
+  {
+    "version": "20260823075444",
+    "name": "dap_trainer_identity_foundation",
+    "has_statements": true
+  },
+  {
+    "version": "20260823075501",
+    "name": "dap_trainer_identity_backfill",
+    "has_statements": true
+  },
+  {
+    "version": "20260823080426",
+    "name": "close_form_campaign_insert_delete_and_completed_bypasses_wave_0h_followup",
+    "has_statements": true
+  },
+  {
+    "version": "20260823080500",
+    "name": "harden_labour_market_cache_evidence_ownership",
+    "has_statements": true
+  },
+  {
+    "version": "20260823080554",
+    "name": "dap_assessment_tool_readiness",
+    "has_statements": true
+  },
+  {
+    "version": "20260823080700",
+    "name": "secure_verified_labour_headlines",
+    "has_statements": true
+  },
+  {
+    "version": "20260823080830",
+    "name": "move_form_campaign_governed_insert_delete_guards_to_rls_wave_0h_followup",
+    "has_statements": true
+  },
+  {
+    "version": "20260823081250",
+    "name": "dap_workforce_readiness_gate",
+    "has_statements": true
+  },
+  {
+    "version": "20260823081423",
+    "name": "harden_form_campaign_finding_governance_handoff_wave_0i",
+    "has_statements": true
+  },
+  {
+    "version": "20260823081445",
+    "name": "fix_form_campaign_finding_policy_tenant_correlation_wave_0i",
+    "has_statements": true
+  },
+  {
+    "version": "20260823081856",
+    "name": "remediate_security_review_findings",
+    "has_statements": true
+  },
+  {
+    "version": "20260823082100",
+    "name": "require_writable_support_mode_for_aot_planned_hours",
+    "has_statements": true
+  },
+  {
+    "version": "20260823083000",
+    "name": "enforce_market_phase_consultation_presence",
+    "has_statements": true
+  },
+  {
+    "version": "20260823083100",
+    "name": "repair_market_phase_completion_without_consultation",
+    "has_statements": true
+  },
+  {
+    "version": "20260823084239",
+    "name": "close_wave_0i_review_findings_followup",
+    "has_statements": true
+  },
+  {
+    "version": "20260823084500",
+    "name": "finalise_aot_planned_hours_authority_and_determination",
+    "has_statements": true
+  },
+  {
+    "version": "20260823084600",
+    "name": "preserve_single_unit_aot_source_evidence",
+    "has_statements": true
+  },
+  {
+    "version": "20260823090127",
+    "name": "deploy_verified_labour_market_pipeline",
+    "has_statements": true
+  },
+  {
+    "version": "20260823091137",
+    "name": "harden_form_campaign_analysis_authorization_wave_0j",
+    "has_statements": true
+  },
+  {
+    "version": "20260823092739",
+    "name": "harden_form_campaign_analysis_authorization_wave_0j",
+    "has_statements": true
+  },
+  {
+    "version": "20260823094500",
+    "name": "harden_driver_diagnostic_audit_and_open_unique",
+    "has_statements": true
+  },
+  {
+    "version": "20260823094600",
+    "name": "lock_driver_diagnostic_confirmed_history",
+    "has_statements": true
+  },
+  {
+    "version": "20260823094700",
+    "name": "harden_driver_diagnostic_workflow_rpcs",
+    "has_statements": true
+  },
+  {
+    "version": "20260823105058",
+    "name": "harden_form_campaign_analysis_authorization_wave_0j",
+    "has_statements": true
+  },
+  {
+    "version": "20260823120000",
+    "name": "harden_tas_licensing_decision_rpc_auth",
+    "has_statements": true
+  },
+  {
+    "version": "20260823213148",
+    "name": "harden_form_campaign_analysis_authorization_wave_0j",
+    "has_statements": true
+  },
+  {
+    "version": "20260823214802",
+    "name": "dap_fre_resource_readiness",
+    "has_statements": true
+  },
+  {
+    "version": "20260823215754",
+    "name": "dap_work_placement_readiness",
+    "has_statements": true
+  },
+  {
+    "version": "20260823220758",
+    "name": "dap_active_plan_versioning_and_lock",
+    "has_statements": true
+  },
+  {
+    "version": "20260823221730",
+    "name": "dap_controlled_revision_rpc",
+    "has_statements": true
+  },
+  {
+    "version": "20260823222153",
+    "name": "dap_assessment_tool_version_freeze",
+    "has_statements": true
+  },
+  {
+    "version": "20260823222231",
+    "name": "dap_assessment_source_scope_and_revision",
+    "has_statements": true
+  },
+  {
+    "version": "20260823222618",
+    "name": "harden_form_campaign_distribution_authorization_wave_0k",
+    "has_statements": true
+  },
+  {
+    "version": "20260823222813",
+    "name": "dap_learner_support_readiness",
+    "has_statements": true
+  },
+  {
+    "version": "20260823223232",
+    "name": "dap_workforce_supervision_arrangement_readiness",
+    "has_statements": true
+  },
+  {
+    "version": "20260823223931",
+    "name": "dap_continuous_improvement_readiness",
+    "has_statements": true
+  },
+  {
+    "version": "20260823231634",
+    "name": "resolve_tenant_scoped_labour_market_anzsco",
+    "has_statements": true
+  },
+  {
+    "version": "20260823231647",
+    "name": "repair_verified_labour_market_anzsco_mappings",
+    "has_statements": true
+  },
+  {
+    "version": "20260824020621",
+    "name": "close_wave_0j_0k_review_findings",
+    "has_statements": true
+  },
+  {
+    "version": "20260824022923",
+    "name": "update_survey_questions_safely",
+    "has_statements": true
+  },
+  {
+    "version": "20260824032957",
+    "name": "fix_stripe_subscription_entitlement_access",
+    "has_statements": true
+  },
+  {
+    "version": "20260824034438",
+    "name": "correct_stripe_entitlement_projection_ordering",
+    "has_statements": true
+  },
+  {
+    "version": "20260824044645",
+    "name": "add_labour_market_resolution_profiles",
+    "has_statements": true
+  },
+  {
+    "version": "20260824044647",
+    "name": "seed_cross_industry_labour_market_profiles",
+    "has_statements": true
+  },
+  {
+    "version": "20260824050722",
+    "name": "correct_trainer_matrix_credential_policy_reporting",
+    "has_statements": true
+  },
+  {
+    "version": "20260824050822",
+    "name": "make_trainer_matrix_readiness_risk_aware",
+    "has_statements": true
+  },
+  {
+    "version": "20260824050935",
+    "name": "revoke_anon_context_after_trainer_matrix_changes",
+    "has_statements": true
+  },
+  {
+    "version": "20260824051049",
+    "name": "flag_trainer_credential_authentication_gaps",
+    "has_statements": true
+  },
+  {
+    "version": "20260824051447",
+    "name": "remove_arbitrary_two_year_industry_currency_gate",
+    "has_statements": true
+  },
+  {
+    "version": "20260824052322",
+    "name": "newcastle_rescue_normalise_trainer_unit_codes",
+    "has_statements": true
+  },
+  {
+    "version": "20260824080700",
+    "name": "fix_security_review_governance_guard_and_context_revokes",
+    "has_statements": true
+  },
+  {
+    "version": "20260824083500",
+    "name": "protect_tas_user_edited_drafts",
+    "has_statements": true
+  },
+  {
+    "version": "20260824084300",
+    "name": "restrict_internal_tenant_rpc_grants",
+    "has_statements": true
+  },
+  {
+    "version": "20260824090000",
+    "name": "reconcile_canonical_billing_schema",
+    "has_statements": true
+  },
+  {
+    "version": "20260824110000",
+    "name": "repair_stale_unit_tas_governance",
+    "has_statements": true
+  },
+  {
+    "version": "20260824133000",
+    "name": "persist_tga_scope_items_replace_snapshot",
+    "has_statements": true
+  },
+  {
+    "version": "20260824141000",
+    "name": "add_labour_market_resolution_profiles",
+    "has_statements": true
+  },
+  {
+    "version": "20260824141010",
+    "name": "seed_cross_industry_labour_market_profiles",
+    "has_statements": true
+  },
+  {
+    "version": "20260824143000",
+    "name": "allow_legacy_trainer_prefix_tenant_documents",
+    "has_statements": true
+  },
+  {
+    "version": "20260824150000",
+    "name": "harden_single_unit_aot_prerequisites_and_pack_shape",
+    "has_statements": true
+  },
+  {
+    "version": "20260824150100",
+    "name": "backfill_single_unit_aot_pack_shape",
+    "has_statements": true
+  },
+  {
+    "version": "20260824161000",
+    "name": "restore_trainer_matrix_tenant_gate",
+    "has_statements": true
+  },
+  {
+    "version": "20260824185000",
+    "name": "enforce_driver_diagnostic_history_delete_immutability",
+    "has_statements": false
+  },
+  {
+    "version": "20260824193000",
+    "name": "close_trainer_evidence_path_ownership",
+    "has_statements": true
+  },
+  {
+    "version": "20260824224858",
+    "name": "reassert_context_rpc_public_anon_revokes",
+    "has_statements": false
+  },
+  {
+    "version": "20260825042000",
+    "name": "route_dap_workforce_readiness_to_internal_matrix",
+    "has_statements": true
+  },
+  {
+    "version": "20260825043500",
+    "name": "align_governance_shared_reads_and_pack_storage",
+    "has_statements": false
+  },
+  {
+    "version": "20260825070000",
+    "name": "add_labour_market_workforce_mapping",
+    "has_statements": false
+  },
+  {
+    "version": "20260825080000",
+    "name": "fix_labour_market_workforce_mapping_gates",
+    "has_statements": false
+  },
+  {
+    "version": "20260825082917",
+    "name": "deactivate_demo_bsb40120_invalid_labour_mapping",
+    "has_statements": true
+  },
+  {
+    "version": "20260825083518",
+    "name": "add_qi_managed_distribution_response_closure",
+    "has_statements": true
+  },
+  {
+    "version": "20260825083833",
+    "name": "fix_qi_public_survey_managed_flag",
+    "has_statements": true
+  },
+  {
+    "version": "20260825083914",
+    "name": "fix_qi_manage_superadmin_support_mode",
+    "has_statements": true
+  },
+  {
+    "version": "20260825084029",
+    "name": "avoid_qi_managed_token_persistence",
+    "has_statements": true
+  },
+  {
+    "version": "20260825112339",
+    "name": "add_qi_phase4_analysis_governance_ci",
+    "has_statements": true
+  },
+  {
+    "version": "20260825112400",
+    "name": "qi_phase4_get_qi_year_analysis_stub",
+    "has_statements": false
+  },
+  {
+    "version": "20260825112407",
+    "name": "lock_down_qi_phase4_rpc_execute",
+    "has_statements": true
+  },
+  {
+    "version": "20260825114353",
+    "name": "add_qi_deterministic_findings",
+    "has_statements": true
+  },
+  {
+    "version": "20260825170000",
+    "name": "validate_workforce_mapping_before_mutate",
+    "has_statements": false
+  },
+  {
+    "version": "20260825181000",
+    "name": "reassert_context_rpc_revokes_after_workforce_mapping",
+    "has_statements": false
+  },
+  {
+    "version": "20260825190000",
+    "name": "harden_labour_market_workforce_mapping_writes",
+    "has_statements": false
+  },
+  {
+    "version": "20260825200000",
+    "name": "restrict_dap_permissive_billing_gate_writes",
+    "has_statements": true
+  },
+  {
+    "version": "20260825201100",
+    "name": "fail_closed_trainer_classification_and_stats",
+    "has_statements": true
+  },
+  {
+    "version": "20260825224300",
+    "name": "enforce_qi_campaign_register_year",
+    "has_statements": false
+  },
+  {
+    "version": "20260826004002",
+    "name": "add_qi_campaign_edit_publish_rpcs",
+    "has_statements": true
+  },
+  {
+    "version": "20260826004811",
+    "name": "fix_qi_year_analysis_register_column",
+    "has_statements": true
+  },
+  {
+    "version": "20260826010642",
+    "name": "enforce_qi_bulk_send_open_status",
+    "has_statements": true
+  },
+  {
+    "version": "20260826020000",
+    "name": "harden_qi_campaign_tenant_context",
+    "has_statements": true
+  },
+  {
+    "version": "20260826021500",
+    "name": "complete_qi_campaign_security_contract",
+    "has_statements": true
+  },
+  {
+    "version": "20260826051035",
+    "name": "harden_qi_campaign_tenant_context_mcp",
+    "has_statements": true
+  },
+  {
+    "version": "20260826051108",
+    "name": "complete_qi_campaign_security_contract_mcp",
+    "has_statements": true
+  },
+  {
+    "version": "20260826051510",
+    "name": "backfill_missing_tenant_rbac_seeding",
+    "has_statements": true
+  },
+  {
+    "version": "20260826051601",
+    "name": "fix_consultant_trainer_document_upload_only",
+    "has_statements": true
+  },
+  {
+    "version": "20260826052954",
+    "name": "fix_tas_evidence_index_consultation_scope_v2",
+    "has_statements": true
+  },
+  {
+    "version": "20260826053051",
+    "name": "cleanup_tas_evidence_index_cross_contamination",
+    "has_statements": true
+  },
+  {
+    "version": "20260826053216",
+    "name": "invalidate_stale_tas_evidence_derivatives",
+    "has_statements": true
+  },
+  {
+    "version": "20260826053244",
+    "name": "remove_unscoped_content_assets_tas_evidence_fallback",
+    "has_statements": true
+  },
+  {
+    "version": "20260826063255",
+    "name": "add_legacy_consultation_scope_to_evidence_index",
+    "has_statements": true
+  },
+  {
+    "version": "20260826065507",
+    "name": "cleanup_tas_evidence_cached_derivatives_followup",
+    "has_statements": true
+  },
+  {
+    "version": "20260826072225",
+    "name": "restore_legacy_consultation_evidence_cache_followup",
+    "has_statements": true
+  },
+  {
+    "version": "20260826073834",
+    "name": "narrow_consultation_score_invalidation_followup",
+    "has_statements": true
+  },
+  {
+    "version": "20260826074942",
+    "name": "cleanup_remaining_invalid_tas_consultation_evidence_v2",
+    "has_statements": true
+  },
+  {
+    "version": "20260826075012",
+    "name": "repair_labour_market_workforce_mapping_prod_drift",
+    "has_statements": true
+  },
+  {
+    "version": "20260826075119",
+    "name": "seed_hltaid011_labour_market_resolution_profile",
+    "has_statements": true
+  },
+  {
+    "version": "20260826075127",
+    "name": "cleanup_orphaned_tas_consultation_evidence",
+    "has_statements": true
+  },
+  {
+    "version": "20260826075536",
+    "name": "cleanup_stale_unbacked_tas_external_market_evidence",
+    "has_statements": true
+  },
+  {
+    "version": "20260826082205",
+    "name": "repair_labour_market_snapshot_cache_jsonb_count_preserve_defaults",
+    "has_statements": true
+  },
+  {
+    "version": "20260826120000",
+    "name": "guard_billing_subscription_sync_event_order",
+    "has_statements": true
+  },
+  {
+    "version": "20260826130000",
+    "name": "restrict_qi_analysis_permissive_billing_gate",
+    "has_statements": true
+  },
+  {
+    "version": "20260827011219",
+    "name": "drop_dead_tenant_access_state",
+    "has_statements": true
+  },
+  {
+    "version": "20260827061500",
+    "name": "assessment_assurance_preuse_foundation",
+    "has_statements": true
+  },
+  {
+    "version": "20260827062000",
+    "name": "assessment_assurance_preuse_approval_guard",
+    "has_statements": true
+  },
+  {
+    "version": "20260827062500",
+    "name": "assessment_assurance_preuse_security_hardening",
+    "has_statements": true
+  },
+  {
+    "version": "20260827063000",
+    "name": "complybot_tool_retrieval_global_default",
+    "has_statements": true
+  },
+  {
+    "version": "20260827073317",
+    "name": "fix_document_revision_history_cross_db_reference",
+    "has_statements": false
+  },
+  {
+    "version": "20260827074900",
+    "name": "harden_document_revision_history_tenant_scope",
+    "has_statements": true
+  },
+  {
+    "version": "20260827090000",
+    "name": "extend_email_status_enum_bounce_events",
+    "has_statements": true
+  },
+  {
+    "version": "20260827090500",
+    "name": "add_qi_campaign_recipient_delivery_status_rpc",
+    "has_statements": true
+  },
+  {
+    "version": "20260827091500",
+    "name": "add_qi_quarterly_campaign_auto_draft",
+    "has_statements": true
+  },
+  {
+    "version": "20260827093000",
+    "name": "add_qi_automated_campaign_reminders",
+    "has_statements": true
+  },
+  {
+    "version": "20260827093500",
+    "name": "fix_aot_planned_hours_effective_allocations",
+    "has_statements": false
+  },
+  {
+    "version": "20260827094000",
+    "name": "grant_aot_planned_hours_rpc_authenticated",
+    "has_statements": false
+  },
+  {
+    "version": "20260827095500",
+    "name": "review_followup_aot_effective_allocations",
+    "has_statements": false
+  },
+  {
+    "version": "20260827095600",
+    "name": "expose_effective_aot_allocations_to_frontend",
+    "has_statements": true
+  },
+  {
+    "version": "20260827095700",
+    "name": "reconcile_aot_rounding_and_nonnegative_cache",
+    "has_statements": true
+  },
+  {
+    "version": "20260827101000",
+    "name": "allow_planned_scope_tas_drafts",
+    "has_statements": true
+  },
+  {
+    "version": "20260827101202",
+    "name": "add_transition_teachout_student_workflow",
+    "has_statements": true
+  },
+  {
+    "version": "20260827101340",
+    "name": "reconcile_transition_deadline_data",
+    "has_statements": true
+  },
+  {
+    "version": "20260827101655",
+    "name": "harden_teachout_resolution_integrity",
+    "has_statements": true
+  },
+  {
+    "version": "20260827102035",
+    "name": "repair_demo_transition_product_tenant_scope",
+    "has_statements": true
+  },
+  {
+    "version": "20260827134952",
+    "name": "fix_qi_public_survey_unassigned_recipient_record",
+    "has_statements": true
+  },
+  {
+    "version": "20260827140400",
+    "name": "harden_transition_active_tenant_auth",
+    "has_statements": true
+  },
+  {
+    "version": "20260827140500",
+    "name": "harden_transition_audit_and_evidence_integrity",
+    "has_statements": true
+  },
+  {
+    "version": "20260827140600",
+    "name": "harden_transition_operational_role_compatibility",
+    "has_statements": true
+  },
+  {
+    "version": "20260827140700",
+    "name": "enforce_transition_lifecycle_serialization",
+    "has_statements": true
+  },
+  {
+    "version": "20260827140800",
+    "name": "add_atomic_transition_case_refresh_rpc",
+    "has_statements": true
+  },
+  {
+    "version": "20260827141000",
+    "name": "align_billing_state_trigger_with_paid_period",
+    "has_statements": true
+  },
+  {
+    "version": "20260827141100",
+    "name": "restore_qi_public_submit_register_rollup",
+    "has_statements": true
+  },
+  {
+    "version": "20260827141200",
+    "name": "restore_qi_public_submit_integrity_guards",
+    "has_statements": true
+  },
+  {
+    "version": "20260827201000",
+    "name": "assessment_assurance_suite_completeness",
+    "has_statements": true
+  },
+  {
+    "version": "20260827202500",
+    "name": "gate_preuse_on_complete_assessment_suite",
+    "has_statements": true
+  },
+  {
+    "version": "20260827203000",
+    "name": "harden_assessment_suite_decisions",
+    "has_statements": true
+  },
+  {
+    "version": "20260827210500",
+    "name": "gate_preuse_review_verification",
+    "has_statements": true
+  },
+  {
+    "version": "20260827211500",
+    "name": "guard_assessment_tool_approval_status",
+    "has_statements": true
+  },
+  {
+    "version": "20260827212000",
+    "name": "materialise_preuse_draft_version",
+    "has_statements": true
+  },
+  {
+    "version": "20260827212500",
+    "name": "recompute_assessment_suite_mapping_status",
+    "has_statements": true
+  },
+  {
+    "version": "20260827231557",
+    "name": "cleanup_orphaned_tas_evidence_derivatives",
+    "has_statements": true
+  },
+  {
+    "version": "20260827235909",
+    "name": "recreate_document_revision_events_table",
+    "has_statements": false
+  },
+  {
+    "version": "20260828000100",
+    "name": "gate_revise_approved_document_super_admin_write",
+    "has_statements": true
+  },
+  {
+    "version": "20260828004444",
+    "name": "harden_tas_security_definer_tenant_guards",
+    "has_statements": true
+  },
+  {
+    "version": "20260828004517",
+    "name": "harden_tas_sql_security_definer_tenant_guards",
+    "has_statements": true
+  },
+  {
+    "version": "20260828004602",
+    "name": "harden_remaining_tenant_security_definer_guards",
+    "has_statements": true
+  },
+  {
+    "version": "20260828020055",
+    "name": "invalidate_suite_confirmation_on_component_changes",
+    "has_statements": true
+  },
+  {
+    "version": "20260828032352",
+    "name": "revoke_public_anon_trigger_functions_20260828",
+    "has_statements": true
+  },
+  {
+    "version": "20260828033000",
+    "name": "fix_standalone_form_public_share_lookup",
+    "has_statements": true
+  },
+  {
+    "version": "20260828033011",
+    "name": "restore_consultant_governance_meeting_parity",
+    "has_statements": true
+  },
+  {
+    "version": "20260828034633",
+    "name": "tas_write_authority_guard",
+    "has_statements": true
+  },
+  {
+    "version": "20260828034852",
+    "name": "tas_create_draft_write_authority_guard",
+    "has_statements": true
+  },
+  {
+    "version": "20260828035056",
+    "name": "tas_publish_final_write_authority_guard",
+    "has_statements": true
+  },
+  {
+    "version": "20260828035324",
+    "name": "tas_create_revision_write_authority_guard",
+    "has_statements": true
+  },
+  {
+    "version": "20260828035808",
+    "name": "tas_calculate_readiness_write_authority_guard",
+    "has_statements": true
+  },
+  {
+    "version": "20260828040054",
+    "name": "tas_create_final_pack_write_authority_guard",
+    "has_statements": true
+  },
+  {
+    "version": "20260828040552",
+    "name": "tas_rerun_phase4_write_authority_guard",
+    "has_statements": true
+  },
+  {
+    "version": "20260828043132",
+    "name": "harden_assessment_assurance_component_and_version_guards",
+    "has_statements": true
+  },
+  {
+    "version": "20260828071558",
+    "name": "tas_calculate_aot_engine_write_authority_guard",
+    "has_statements": true
+  },
+  {
+    "version": "20260828072411",
+    "name": "tas_strategic_fit_save_input_write_authority_guard",
+    "has_statements": true
+  },
+  {
+    "version": "20260828072744",
+    "name": "tas_strategic_fit_confirm_write_authority_guard",
+    "has_statements": true
+  },
+  {
+    "version": "20260828073828",
+    "name": "remove_consultant_assistant_from_role_management",
+    "has_statements": true
+  },
+  {
+    "version": "20260828074321",
+    "name": "remove_consultant_assistant_from_governance_settings_data",
+    "has_statements": true
+  },
+  {
+    "version": "20260828075026",
+    "name": "remove_consultant_assistant_from_workforce_functions_v2",
+    "has_statements": true
+  },
+  {
+    "version": "20260828075609",
+    "name": "remove_consultant_assistant_from_transition_functions_v2",
+    "has_statements": true
+  },
+  {
+    "version": "20260828080100",
+    "name": "remove_consultant_assistant_from_core_governance_assert_functions",
+    "has_statements": true
+  },
+  {
+    "version": "20260828080429",
+    "name": "harden_assessment_assurance_terminal_transitions",
+    "has_statements": true
+  },
+  {
+    "version": "20260828080722",
+    "name": "remove_consultant_assistant_from_governance_direct_role_functions",
+    "has_statements": true
+  },
+  {
+    "version": "20260828081232",
+    "name": "remove_consultant_assistant_from_governance_has_tenant_role_functions",
+    "has_statements": true
+  },
+  {
+    "version": "20260828082128",
+    "name": "remove_consultant_assistant_from_integration_functions",
+    "has_statements": true
+  },
+  {
+    "version": "20260828082738",
+    "name": "remove_consultant_assistant_from_register_document_functions_v2",
+    "has_statements": true
+  },
+  {
+    "version": "20260828083413",
+    "name": "remove_consultant_assistant_from_tas_workforce_residual_functions",
+    "has_statements": true
+  },
+  {
+    "version": "20260828084100",
+    "name": "remove_consultant_assistant_from_public_helper_functions",
+    "has_statements": true
+  },
+  {
+    "version": "20260828085104",
+    "name": "remove_consultant_assistant_from_sec_helper_functions",
+    "has_statements": true
+  },
+  {
+    "version": "20260828085859",
+    "name": "remove_consultant_assistant_from_operational_residual_functions_v2",
+    "has_statements": true
+  },
+  {
+    "version": "20260828090549",
+    "name": "remove_consultant_assistant_from_consultant_role_management_functions",
+    "has_statements": true
+  },
+  {
+    "version": "20260828092744",
+    "name": "tas_planned_scope_catalog_product_unlock",
+    "has_statements": true
+  },
+  {
+    "version": "20260828092854",
+    "name": "tas_planned_scope_catalog_product_unlock",
+    "has_statements": true
+  },
+  {
+    "version": "20260828103500",
+    "name": "log_assessment_preuse_ai_provenance",
+    "has_statements": true
+  },
+  {
+    "version": "20260828110000",
+    "name": "forward_append_only_preuse_finding_history",
+    "has_statements": true
+  },
+  {
+    "version": "20260828111500",
+    "name": "harden_phase1b_trigger_security",
+    "has_statements": true
+  },
+  {
+    "version": "20260828111501",
+    "name": "harden_assessment_assurance_terminal_transitions",
+    "has_statements": true
+  },
+  {
+    "version": "20260828111502",
+    "name": "freeze_terminal_assessment_suite_versions",
+    "has_statements": true
+  },
+  {
+    "version": "20260828121400",
+    "name": "restrict_document_revision_events_billing_gate",
+    "has_statements": true
+  },
+  {
+    "version": "20260829004050",
+    "name": "repair_cross_tenant_training_product_scope_rows",
+    "has_statements": true
+  },
+  {
+    "version": "20260829004115",
+    "name": "guard_training_product_scope_tenant_owner",
+    "has_statements": true
+  },
+  {
+    "version": "20260829011200",
+    "name": "close_assessment_assurance_terminal_review_gaps",
+    "has_statements": true
+  },
+  {
+    "version": "20260829013000",
+    "name": "close_assessment_assurance_terminal_review_gaps_followup",
+    "has_statements": true
+  },
+  {
+    "version": "20260829021723",
+    "name": "ensure_assessment_baselines_for_tool",
+    "has_statements": true
+  },
+  {
+    "version": "20260829105500",
+    "name": "atomic_preuse_rectification_lifecycle",
+    "has_statements": true
+  },
+  {
+    "version": "20260829120000",
+    "name": "atomic_version_reapproval_and_publish_repair",
+    "has_statements": true
+  },
+  {
+    "version": "20260829123000",
+    "name": "serialize_preuse_baseline_association",
+    "has_statements": true
+  },
+  {
+    "version": "20260829124500",
+    "name": "fix_ensure_assessment_baselines_for_tool_contract",
+    "has_statements": true
+  },
+  {
+    "version": "20260830063933",
+    "name": "repair_assessment_baseline_prepare_select_distinct_and_requirement_types",
+    "has_statements": true
+  },
+  {
+    "version": "20260830064000",
+    "name": "restore_assessment_baseline_prepare_hardening",
+    "has_statements": true
+  },
+  {
+    "version": "20260831135305",
+    "name": "tas_authoring_role_contract_rls",
+    "has_statements": true
+  },
+  {
+    "version": "20260831140610",
+    "name": "add_qi_campaign_recipient_import_rpc",
+    "has_statements": true
+  },
+  {
+    "version": "20260831161000",
+    "name": "restore_consultant_tenant_operator_governance_parity",
+    "has_statements": true
+  },
+  {
+    "version": "20260831170000",
+    "name": "risk_intelligence_lookups",
+    "has_statements": true
+  },
+  {
+    "version": "20260831170100",
+    "name": "risk_intelligence_lookups_seed",
+    "has_statements": true
+  },
+  {
+    "version": "20260831170200",
+    "name": "risk_register_inherent_residual",
+    "has_statements": true
+  },
+  {
+    "version": "20260831170300",
+    "name": "risk_intelligence_tables",
+    "has_statements": true
+  },
+  {
+    "version": "20260831170301",
+    "name": "risk_intelligence_functions",
+    "has_statements": true
+  },
+  {
+    "version": "20260831170302",
+    "name": "risk_intelligence_rls",
+    "has_statements": true
+  },
+  {
+    "version": "20260831170303",
+    "name": "risk_appetite_state_enforcement",
+    "has_statements": true
+  },
+  {
+    "version": "20260831170304",
+    "name": "risk_sla_active_uniqueness",
+    "has_statements": true
+  },
+  {
+    "version": "20260831170305",
+    "name": "risk_assessment_history_server_only",
+    "has_statements": true
+  },
+  {
+    "version": "20260831170400",
+    "name": "risk_sla_review_intervals_seed",
+    "has_statements": true
+  },
+  {
+    "version": "20260831170500",
+    "name": "risk_register_phase1_backfill",
+    "has_statements": true
+  },
+  {
+    "version": "20260831170600",
+    "name": "risk_register_write_roles_consultant",
+    "has_statements": true
+  },
+  {
+    "version": "20260831180000",
+    "name": "tighten_billing_gate_annual_invoice",
+    "has_statements": true
+  },
+  {
+    "version": "20260901000111",
+    "name": "add_assessment_evidence_locator_atomic_save_rpc",
+    "has_statements": true
+  },
+  {
+    "version": "20260901000433",
+    "name": "secure_get_access_gate_membership_scope",
+    "has_statements": true
+  },
+  {
+    "version": "20260901003647",
+    "name": "fix_sa_tenant_lifecycle_stats_super_admin_check",
+    "has_statements": true
+  },
+  {
+    "version": "20260901030102",
+    "name": "add_active_or_expiring_soon_lifecycle_filter",
+    "has_statements": true
+  },
+  {
+    "version": "20260901075807",
+    "name": "intelligence_ass_review_queue_v1",
+    "has_statements": true
+  },
+  {
+    "version": "20260901103000",
+    "name": "intelligence_daily_tenant_runner",
+    "has_statements": true
+  },
+  {
+    "version": "20260901110500",
+    "name": "risk_intelligence_phase1_security_hardening",
+    "has_statements": true
+  },
+  {
+    "version": "20260901123000",
+    "name": "risk_drop_legacy_control_test_stamp_trigger",
+    "has_statements": true
+  },
+  {
+    "version": "20260901124500",
+    "name": "risk_intelligence_policy_tightening",
+    "has_statements": true
+  },
+  {
+    "version": "20260901140000",
+    "name": "qi_approved_action_dispatch",
+    "has_statements": true
+  },
+  {
+    "version": "20260901141000",
+    "name": "restore_consultant_governance_meetings_only",
+    "has_statements": true
+  },
+  {
+    "version": "20260901153000",
+    "name": "intelligence_runner_lock_severity_fixes",
+    "has_statements": true
+  },
+  {
+    "version": "20260901154500",
+    "name": "intelligence_ready_for_preuse_verified_gate",
+    "has_statements": true
+  },
+  {
+    "version": "20260901220000",
+    "name": "risk_context_profile_and_suggestions",
+    "has_statements": true
+  },
+  {
+    "version": "20260901220001",
+    "name": "risk_context_trigger_hardening",
+    "has_statements": true
+  },
+  {
+    "version": "20260902024746",
+    "name": "fix_compliance_calendar_owner_role_cast",
+    "has_statements": true
+  },
+  {
+    "version": "20260902024908",
+    "name": "fix_compliance_calendar_audit_columns",
+    "has_statements": true
+  },
+  {
+    "version": "20260902024934",
+    "name": "fix_compliance_calendar_event_task_link",
+    "has_statements": true
+  },
+  {
+    "version": "20260902031500",
+    "name": "intelligence_deterministic_limit_ordering",
+    "has_statements": true
+  },
+  {
+    "version": "20260902051032",
+    "name": "intelligence_ass_review_queue_helper_execute_hardening",
+    "has_statements": true
+  },
+  {
+    "version": "20260902082733",
+    "name": "help_centre_add_session_8_video_dml",
+    "has_statements": true
+  },
+  {
+    "version": "20260902113000",
+    "name": "risk_context_phase2_hardening",
+    "has_statements": true
+  },
+  {
+    "version": "20260902120000",
+    "name": "consultant_meeting_files_and_action_item_read",
+    "has_statements": true
+  },
+  {
+    "version": "20260902215932",
+    "name": "remove_duplicate_generic_qi_templates_dml",
+    "has_statements": true
+  },
+  {
+    "version": "20260902225024",
+    "name": "revoke_public_anon_trigger_functions_20260903",
+    "has_statements": true
+  },
+  {
+    "version": "20260902225039",
+    "name": "revoke_public_anon_tenant_api_key_rpcs_20260903",
+    "has_statements": true
+  },
+  {
+    "version": "20260903002918",
+    "name": "allow_consultant_trainer_matrix_read",
+    "has_statements": true
+  },
+  {
+    "version": "20260903013803",
+    "name": "harden_proposed_scope_creation_normalized_identity",
+    "has_statements": true
+  },
+  {
+    "version": "20260903030126",
+    "name": "allow_consultant_governance_minutes_write",
+    "has_statements": true
+  },
+  {
+    "version": "20260903053435",
+    "name": "close_workforce_mapping_write_bypass",
+    "has_statements": true
+  },
+  {
+    "version": "20260903053436",
+    "name": "fail_closed_sso_accept_start_membership",
+    "has_statements": true
+  },
+  {
+    "version": "20260903073000",
+    "name": "intelligence_risk_control_attention_v1",
+    "has_statements": true
+  },
+  {
+    "version": "20260903081500",
+    "name": "risk_cross_register_suggestions_v1",
+    "has_statements": true
+  },
+  {
+    "version": "20260903083200",
+    "name": "qi_effectiveness_followup_intelligence",
+    "has_statements": true
+  },
+  {
+    "version": "20260903084000",
+    "name": "risk_cross_register_suggestions_hardening",
+    "has_statements": true
+  },
+  {
+    "version": "20260903084500",
+    "name": "risk_event_driven_detection_v1",
+    "has_statements": true
+  },
+  {
+    "version": "20260903085000",
+    "name": "risk_suggestion_decision_router",
+    "has_statements": true
+  },
+  {
+    "version": "20260903120000",
+    "name": "remove_governance_support_mode_write_elevation",
+    "has_statements": true
+  },
+  {
+    "version": "20260903130000",
+    "name": "widen_evidence_audit_log_action_check",
+    "has_statements": true
+  },
+  {
+    "version": "20260903140000",
+    "name": "fix_evidence_document_links_role_check",
+    "has_statements": true
+  },
+  {
+    "version": "20260903150000",
+    "name": "remove_duplicate_pdr_register_dual_write_rows",
+    "has_statements": true
+  },
+  {
+    "version": "20260903150001",
+    "name": "add_delete_evidence_document_rpc",
+    "has_statements": true
+  }
+]

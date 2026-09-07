@@ -1,6 +1,6 @@
 # ComplyBot RAG Improvement — Living Decision Doc
 
-> **Created:** 14 August 2026 · **Owner:** Brian (Khian) · **Status:** ✅ PR #435 done, ✅ PR #500 done, ✅ PR #523 (Phase 2) done and deployed, ✅ PR #537 (latency + logging + formatting follow-up) done and deployed, ✅ PR #578 (PR 6 — terminology guard + citation-quote verification) done and deployed, ✅ PR #580 (Phase 3 — Gaps tab, Promote-to-KB, per-clause telemetry) done and deployed, ✅ PR #583 (Phase 4 — eval harness) done and applied to production; next sequenced work is #9's trial usage cap (PR 4), the deferred streaming/dead-code follow-ups noted under PR #537 below, or running the eval script for a first baseline reading
+> **Created:** 14 August 2026 · **Owner:** Brian (Khian) · **Status:** ✅ PR #435 done, ✅ PR #500 done, ✅ PR #523 (Phase 2) done and deployed, ✅ PR #537 (latency + logging + formatting follow-up) done and deployed, ✅ PR #578 (PR 6 — terminology guard + citation-quote verification) done and deployed, ✅ PR #580 (Phase 3 — Gaps tab, Promote-to-KB, per-clause telemetry) done and deployed, ✅ PR #583 (Phase 4 — eval harness) done and applied to production; next sequenced work is #9's trial usage cap (PR 4), or the deferred streaming/dead-code follow-ups noted under PR #537 below — the Phase 4 eval baseline has now been run (89.6% selection accuracy, see the twelfth revision below)
 >
 > **Eleventh revision, 21 Aug 2026.** ✅ **PR #583** (`feat: ComplyBot Phase 4 — eval harness
 > for retrieval accuracy`) merged to `main` (merge commit `f5074157d`). **Phase 4 (§4, → PR 8)
@@ -62,6 +62,28 @@
 > baseline accuracy reading needs a logged-in user's access token for the Vivacity Testing
 > Tenant — not yet obtained. No edge function changed in this PR, so nothing new is live in
 > `ai-router` itself; this phase only added the measurement tool.
+>
+> **Twelfth revision, 26 Aug 2026.** Ran `scripts/complybot-eval-retrieval.ts` for the first real
+> baseline against production, using a real Vivacity Testing Tenant user JWT. All 48 questions
+> scored (0 excluded/errored). **Result: 89.6% selection accuracy (43/48), 47.9% precise selection
+> (23/48).** This is the first concrete number for Phase 4's headline metric — no baseline existed
+> before this run.
+>
+> **5 misses, all clustering around the same failure mode anticipated in §4** — the model failing
+> to *select* the right clause from the directory, not a retrieval/code defect:
+> - `OS-2025 - 2.8` (student appeals), `OS-2025 - 3.1` (workforce management), `CP-2025 - 2B`
+>   (TAE delivery under direction) — no citations returned at all, suggesting the directory's
+>   clause title for these doesn't surface as an obvious match for how the question is phrased.
+> - `OS-2025 - 3.3` (trainer currency) — model cited the adjacent `OS-2025 - 3.4` instead, a
+>   likely title-overlap confusion between neighbouring clauses.
+> - `OS-2025 - 3.2` — model cited four `CP-2025` clauses instead, the one miss that crossed
+>   instruments rather than picking a neighbour.
+>
+> Per §4's revised Phase 4 framing, the fix for these is very likely **clause title tuning**
+> (Angela's authoring work) rather than an engineering change — no code defect was found in this
+> run. **Next step:** the eval script is now proven and repeatable; the natural follow-up is
+> revisiting the 5 flagged clause titles and re-running to confirm improvement, whenever Angela's
+> time allows. Otherwise the next sequenced engineering work remains #9's trial usage cap (PR 4).
 >
 > **Tenth revision, 21 Aug 2026.** ✅ **PR #580** (`feat: ComplyBot Phase 3 — Gaps tab,
 > Promote-to-KB, per-clause telemetry`) merged to `main` (merge commit `612139d4d`) and
@@ -745,7 +767,7 @@ confirmed-broken.
 | 6 | Retire the four dead ComplyBot tables and orphaned legacy code | **LOCKED** — yes, separate sequenced cleanup PR |
 | 7 | Model tiering for compliance-mode answers | **RE-LOCKED 14 Aug (reversed)** — Sonnet for the agentic tool-use path, per Brian |
 | 8 | Fate of `complybot-learning-logger` | **LOCKED** — retire, bundled into #6's cleanup |
-| 9 | Usage cap for trial tenants on ComplyBot calls — no cap exists today, for anyone | **LOCKED, revised 14 Aug** — Compliance mode only, Help mode unlimited; per-trial (not calendar-month) boundary; **20 questions per 14-day trial, soft warning at 16 (80%)**; ships as its own PR |
+| 9 | Usage cap for trial tenants on ComplyBot calls — no cap exists today, for anyone | **REVERSED, 26 Aug 2026** — Brian decided against implementing a usage cap for trial tenants. No cap will be built. The 20-question/14-day/soft-warning-at-16 spec below is retained for historical record only — do not implement it. |
 | 10 | Navigation index coverage gap (Help mode click-path guidance) | **LOCKED (revised)** — regenerate from 3 live sidebar configs, not `roleNavigation.ts`. **Blocked on #11**; generate in CI, don't copy once |
 | 11 | Possible drift between `roleNavigation.ts` route-permission gating and the actual live sidebar configs | **RESOLVED — 3 confirmed bugs found.** Own small PR, but **no longer parked**: hard prerequisite for #10, sequenced 2nd (§4) |
 | 12 | Cross-cutting engineering requirements (kill switch, iteration cap, tool-error handling, prompt caching, terminology guard) | **LOCKED 14 Aug** — see §6A, lifted from Vivacity's shipped implementation |
@@ -860,6 +882,9 @@ non-engagement or weak in-UI prompting; do not assume the original billing-gate 
 still open without fresh evidence.
 
 ### #9 — Usage cap for trial tenants: per-trial compliance-mode quota, Help mode unlimited (→ PR 4)
+
+**⛔ REVERSED 26 Aug 2026. Do not implement.** Brian decided not to cap trial tenants at all — no usage limit ships. The design below is kept only as a historical record of what was locked before the reversal; do not build any part of it.
+
 **Originally locked 14 Aug 2026 as a monthly quota covering both modes. REVISED and
 RE-LOCKED the same day** after Brian confirmed: (a) cap Compliance mode only, Help mode
 stays unlimited; (b) ships as its own PR, separate from Phase 2, sequenced into the

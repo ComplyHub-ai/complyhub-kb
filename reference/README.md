@@ -12,6 +12,7 @@ Fetched via GitHub MCP on demand. Not pinned — loaded when needed.
 - `key-flows.md` — Key user flows
 - `workflow.md` — Development workflow reference
 - `known-issues.md` — Known issues log
+- `complybot-guide.md` — ComplyBot architecture, feature flag, KB training/Gaps/Promote-to-KB workflow, eval harness usage (`deno test`), and open items — standing reference, updated as ComplyBot changes
 
 ### Not yet created
 - `flow-patterns.md`

@@ -3,7 +3,7 @@
 > Parked findings and follow-ups for a **later session** — not current in-progress work.
 > Promote to a real task only via a new FRAME. See `CLAUDE.md` § "The Loop."
 
-Last updated: 21 August 2026 (claimed Worktree A for Claude Code session)
+Last updated: 3 September 2026 (Worktree C released to standby after #954 merged)
 
 ---
 
@@ -17,9 +17,21 @@ Last updated: 21 August 2026 (claimed Worktree A for Claude Code session)
 
 | Worktree | Path | Branch | Claimed by | Task | Since |
 |---|---|---|---|---|---|
-| A | `rto-compass-hub` | `standby/worktree-A (synced to main @ e7f07acbd)` | Khian (this chat) | Reviewing open PRs #575, #572, #571, #561 — read-only recon, updating pr-review-open-prs.md | 21 Aug 2026 |
-| B | `rto-compass-hub-B` | `standby/worktree-B (synced to main @ 2ab5242ea)` | Khian (this chat) | Bug report — TTS Education (Erolyn Blythe): Trainer Matrix evidence files attached but not recognised/accessible for TAS, so evidence can't be assigned to Units of Competency for Erolyn's and Christine's Trainer Matrices. Same tenant as prior PR #581 QA item above. | 21 Aug 2026 |
-| C | `rto-compass-hub-C` | `main (synced @ f5074157d, includes PR #583)` | Khian (this chat) | PR #583 merged: Phase 4 (`complybot-rag-improvement.md` §4 Phase 4 / PR 8) — `ai_eval_questions` table + 48 seeded questions, applied to production via the interim MCP `execute_sql` procedure and verified (48/48 rows, all 4 response-log FKs resolved, RLS confirmed on). Ledger reconciled — confirmed both `version`+`name` rows in `supabase_migrations.schema_migrations` match the filenames exactly. **Still pending:** run `scripts/complybot-eval-retrieval.ts` against the Vivacity Testing Tenant with a real user JWT for the first baseline accuracy reading | 21 Aug 2026 |
+| A | `rto-compass-hub` | `fix/ic-survey-write-lock-and-backfill` (merged as PR #1011, checkout stale) | unclaimed | — | 7 Sep 2026 |
+| B | `rto-compass-hub-worktree-b` | `main` (`42aa95d11`, PR #1012 merged) | unclaimed | — | 7 Sep 2026 |
+| C | `rto-compass-hub-C` | `standby/worktree-C` (reset to `origin/main` @ `35008bc00`) | unclaimed | — | 7 Sep 2026 |
+
+**Worktree C teardown/reclaim — 7 Sep 2026:** `feat/risk-treatment-suggestions` was confirmed merged into `origin/main` (PR #941/#954 work concluded per the entries below). Since `main` is already checked out in worktree B, worktree C was moved to `standby/worktree-C` (reset to `origin/main`) rather than checking out `main` directly, then `docs/migration-discipline-post-squash` was branched fresh off `origin/main` for PR 6 (`migration-drift-remediation.md` §5). Pre-existing generated `html/` build artifacts were stashed and reapplied onto the new branch rather than discarded.
+
+**Worktree C released — 7 Sep 2026:** PR #1013 (docs, migration discipline post-squash — see PR 6 above) merged (`35008bc00`). `main` was already checked out in worktree B, so worktree C was moved to `standby/worktree-C` and reset to fresh `origin/main` rather than checking out `main` directly; the preserved `html/` artifacts were stashed and reapplied on the standby branch. Row released to unclaimed.
+
+**PR #941 review evidence — 3 Sep 2026:** current detached HEAD is `449a6f569` and `origin/main` is `ebb7a2639`. Exact reconciliation history was found in merged PR #959 for `20260902051032_intelligence_ass_review_queue_helper_execute_hardening` and `20260902215932_remove_duplicate_generic_qi_templates_dml`; PR #945 contains the Help Centre Session 8 DML corresponding to the remaining production-only row. These files are absent from current `origin/main`, so the migration-drift failure is pre-existing and outside #941. Review verdict is **NEEDS-WORK**: #941's new Risk Profile Setup navigation depends on the route/page supplied only by open PR #954, and the event-driven migration omits DELETE triggers for four primary source tables plus `tp_trainers`, leaving stale open suggestions until a later sweep. Direct changed-file ESLint, focused 7-file/43-test rerun, `git diff --check`, and `npm run type-check` completed cleanly. Generated `html/` modifications and untracked `test-results/` were preserved.
+
+**PR #954 review evidence — 3 Sep 2026:** Worktree C is detached at `2bcc73809` from `origin/feat/assessment-review-queue`; current `origin/main` is `ebb7a2639`, and the PR is 301 commits behind with GitHub reporting `CONFLICTING`. Review verdict is **NEEDS-WORK**. Verified blockers are an unresolvable `secureId` import, risk-profile state surviving tenant switches, stale tenant schema field names and fail-open count handling, non-atomic/non-idempotent risk saves, unrelated validation deep-link fallback, and stale assessment-tool detail state across tenant switches. Additional risks are retired tools remaining queue-eligible, required answers not affecting generation, and arbitrary product/FRE query caps. Scoped ESLint passed for 30 changed source files; five focused test files passed 49 tests; `git diff --check`, repository type-check, `.single()` guard, and security guard passed. Supabase Preview is failing. Generated `html/` modifications and untracked `test-results/` remain preserved; no code changes, commit, or push was made.
+
+**PR #954 fix/re-review evidence — 3 Sep 2026:** Fixed the reported build, tenant-isolation, schema/data-quality, save atomicity/idempotency, validation deep-link, stale detail-state, queue lifecycle, role-gate, risk-appetite, and laboratory-question issues in Worktree C. Added regression coverage. Final scoped ESLint passed; six focused test files passed 52 tests; repository type-check exited 0; and `git diff --check` passed. Second review found no remaining instance of the reported defects. The branch was then rebased onto current `origin/main`, committed as `94b3c29c5`, and force-pushed with lease to the existing PR branch. Post-push GitHub state is `MERGEABLE` with checks in progress. Existing generated `html/` changes and untracked `test-results/` remain preserved.
+
+**PR #1007 review/fix/re-review evidence — 7 Sep 2026 (Worktree A):** `/pr-review` on `cursor/temporal-intelligence-f2-epic-07c9` (Phase F2.1 Temporal Intelligence Engine — compute-only, no persistence claimed) found a stale merge conflict against `main` (PR #997 Predictions had landed the same registry pattern) plus five metric-math bugs (uneven-interval acceleration bias, unfloored confidence scores, inverted direction for severity/priority series, sparse-segment "unknown" over-triggering, chart ignoring requested `seriesKey`) and nine worth-a-second-look items (UTC-vs-Sydney bucketing, zero-mean seasonality false positives, missing plateau data-gate, velocity sign loss at zero, future-dated snapshot inclusion, etc.) — all fixed. A subsequent `/fresh-eyes` pass caught a confidence-aggregation bug conflating "insufficient data" with a legitimate zero score, a UTC/Sydney mismatch between seasonality and the calendar timeline, `seriesKey` still dropped in the history timeline, a third severity-rank copy missing case normalisation, and a dead metric-provider registry — all fixed, with a regression test catching a wrong reuse of an unrelated inverted-sort helper before it shipped. 24 regression tests added; scoped ESLint and full suite clean. Confirmed no migrations or edge functions anywhere in the PR. One item flagged but not fixed (needs Brian's go-ahead, DB change): the live `intelligence_get_insight_memory` RPC caps `p_limit` at 200 and returns the *oldest* 200 rows, silently starving long-history insights of any recent data — worth a FRAME. PR merged `2026-09-07T02:17:40Z` (`14d75b900`); Worktree A returned to `main`, registry row released.
 
 ## Pending — awaiting reply
 
@@ -43,6 +55,33 @@ Useful references:
 
 ## Backlog — PARKED findings (NOT scheduled work)
 
+- **8 pairs of duplicate active `cron.job` rows, plus hardcoded anon-key auth on several jobs** —
+  surfaced 4 Sep 2026 while capturing `cron.job` for the PR 4 cutover's non-schema-items gate (migration
+  drift remediation). Pairs confirmed both `active: true` targeting the same function: `ingest-tga-unit-parents-nightly`/`-nightly-fixed`,
+  `ingest-tga-companion-files-nightly`/`-nightly-fixed`, `ingest-ncver-nominal-hours-daily`/`-daily-fixed`,
+  `trial-email-reminders`/`-fixed`, `enforce-billing-lockout-nightly`/`-fixed`, `snapshot-usage-nightly`/`-fixed`,
+  `nightly-tas-monitor`/`-fixed`, `ops-run-diagnostics-15m`/`-fixed` (offset schedule, so this pair fires
+  more often than intended rather than colliding). Looks like an in-progress migration from hardcoded-Authorization-header
+  jobs to a `vault.decrypted_secrets`-based pattern where the old job was never disabled once its `-fixed`
+  replacement shipped — net effect is several ingest/reminder functions firing twice. Separately, several
+  jobs (both old and some `-fixed` ones, e.g. `ingest-tga-unit-parents-nightly-fixed`) still hardcode the
+  Supabase **anon** key directly in the `Authorization` header instead of using the vault secret — not a
+  credential leak (anon keys are publishable by design) but an inconsistent, weaker auth pattern than the
+  jobs already migrated. Full snapshot: `complyhub-kb/audit/pr4-cutover-2026-09-04/cron-jobs-snapshot.json`.
+  Needs a FRAME: disable the 8 superseded old jobs (confirm each `-fixed` pair truly duplicates before
+  disabling, don't assume from name alone) and finish migrating the remaining hardcoded-anon-key jobs to
+  the vault pattern.
+
+- **`sa-delete-tenant-complete` edge function is not actually complete** — surfaced 3 Sep 2026 while scoping removal of the legacy `vivacity-ian-troubleshooting` test tenant (0 members, subscription canceled, no billing). Function's own comment claims "the database has 158 CASCADE rules" and relies on CASCADE to clean up everything after it explicitly deletes only 4 tables (`user_invitations`, `tenant_settings`, `tenant_plans`, `tenant_documents`) and the `tenants` row itself. Verified live via `information_schema`: the vast majority of ~400 tenant-scoped tables — including `tar_register`, `tp_trainers`, `trainer_unit_map`, and effectively all governance/compliance/TAS content tables — have **no FK constraint back to `tenants(id)` at all**, so none of that data is actually removed. The function still reports `"Tenant has been completely deleted from the system"` regardless. Not a live security/data-leak risk (orphaned rows become unreachable once the tenant record is gone — every read path requires an active `tenant_members` row), just silently incomplete — wasted storage, and a misleading success message for anyone relying on it for genuine data purge. Needs a FRAME: correctly enumerate every tenant-scoped table and either add real CASCADE FKs or delete explicitly in dependency order, in its own dedicated session (not a rushed inline fix, per the same caution already applied to the 214/218-item migration drift reconciliation project above).
+- **`TrainerDocumentsDialog.tsx`/`OnboardingSummaryCard.tsx` fetch data in the component body** — surfaced 3 Sep 2026 during `/fresh-eyes` on `feat/trainer-uploaded-documents-view`, confirmed bugs fixed same session (orphaned tile/dialog mismatch, broken preview for legacy trainer-path files, swallowed query error). This item is the one AGENTS.md convention violation ("no `supabase.from()` in components — hooks only") left untouched, since fixing it means extracting several new hooks — a bigger reshape than a bug fix. `TrainerDocumentsDialog.tsx` is also 361 lines (repo cap ~300). Needs a FRAME if Brian wants it done.
+- **`TrainerDocumentsDialog.tsx` only shows the first link per document** — surfaced same session. A document linked to both a credential and a PD record displays one badge; the tooltip promises "see which file is linked to which record" and under-delivers for multi-link documents (8 in production as of 3 Sep 2026). Not wrong, just incomplete — needs its own FRAME if worth fixing.
+- ~~Consultants can't see PD record titles in the Linked documents dialog~~ — **FALSE POSITIVE, closed 3 Sep 2026.** Original `/fresh-eyes` finding assumed `trainer_pd`'s RESTRICTIVE `restrict_select_trainer_pd` policy (`sec.has_tenant_role(tenant_id, ARRAY['Administrator','Compliance Manager'])`) excludes Consultant. Verified live: `sec.has_tenant_role`'s own body auto-appends `'Consultant'` to the effective role set whenever `'Administrator'` is requested (`WHEN 'Administrator' = ANY(p_roles) THEN p_roles || ARRAY['Consultant']`), and confirmed real active Consultant `tenant_members` rows (Proper Case) exist in tenants with `trainer_pd` data. Consultants already pass this policy — no RLS change made, no migration written.
+
+- **`get_my_app_context` still returns JSON-null `is_superadmin`** — parked 1 Sep 2026 after PR #922. Client coerce ships on production; SQL `COALESCE` / `false OR NULL` → false is a follow-up when worktree A is free of DB work. Do not start while A is mid Phase B apply.
+- **Draft-based `rpc_compile_tas` with live access check** — parked 2 Sep 2026 during PR 3. Skipped leftover `20260822045800` because it would drop `is_tenant_authorized` on build-state v2 and final compile. No later leftover carries the draft assembler plus that gate. Promote only via a new FRAME.
+- **SSO accept/start membership + revoke unused 1-arg submit** — parked 2 Sep 2026 during PR 3. Skipped leftover `20260822060000` because the same file would overlay Wave 0g governance suggestion RPCs (`assert_core_governance_access`, already stamped `20260822103643`) and would add Consultant Assistant on SSO accept. Live accept/start still use `profiles.role`. Promote only via a new FRAME.
+- **TAS trainer-matrix membership without dropping later tenant gate** — parked 3 Sep 2026 during PR 3. Skipped `20260822120000` because live already has `is_tenant_authorized` and calls `build_trainer_matrix_internal`. Promote only via a new FRAME.
+
 _Adjacent issues surfaced during work but outside the task's Scope Line. Parked here so they
 aren't lost and aren't chased. Promote to a real task only via a new FRAME._
 
@@ -61,6 +100,7 @@ aren't lost and aren't chased. Promote to a real task only via a new FRAME._
   reconcile it with `/industry-engagement`), or confirm it's superseded/retire it and repoint any surviving
   callers. Until decided, the entire plan/engage/outcomes/review UI is inert.
 2. **"Supabase Preview" branch-DB build fails on every PR, not just drift-affected ones** — confirmed 19 Aug 2026 during PR #500 (ComplyBot Phase 0). Error: `duplicate key value violates unique constraint "schema_migrations_pkey" — Key (version)=(20260814061750) already exists`. Verified live: production's ledger already has this exact version/name (`reschedule_fixed_tga_ingest_crons_avoid_race`) matching the git file — not a naming collision. Root cause: the preview-branch builder clones a production snapshot (which already has this version recorded) then replays all local migration files on top, including ones the snapshot already has, instead of skipping already-applied versions. This is the branch-DB-fails symptom `supabase/migrations/CLAUDE.md`'s "supabase db push is currently unusable" section already documents. **Confirmed pre-existing and universal**: PR #496 and #494 (both already merged last week, unrelated changes) show the identical "Supabase Preview: fail." Does not block merge (`mergeStateStatus: MERGEABLE`, not a required check) but means no PR gets a working preview branch DB right now. Full fix is the same ~2,000-version reconciliation project below — not a quick patch.
+  - **Update 4 Sep 2026 — the flakiness has multiple, unrelated root causes, not just the one above.** Cross-checked three recent PRs' Supabase bot comments and found three distinct failure signatures on three distinct PRs: (a) PR #970 (`feat/fresh-database-verification-harness`, today) — `failed to read project config: unexpected status 404: Failed to retrieve project's storage config`, dying at the **Configurations** step before Migrations/Seeding/Edge Functions even start; (b) PR #968 (3 Sep) — `FATAL: terminating connection due to administrator command (SQLSTATE 57P01)`, a connection killed mid-replay on a `user_avatars` storage RLS policy statement; (c) PR #779/#778 (25 Aug) — `failed to clone repo: couldn't find remote ref`, already diagnosed in `migration-drift-remediation.md` §4.4.4 Stage B as stale/deleted git refs. Confirmed PR #970's own diff touches no `config.toml` and adds only new files (a workflow + 3 scripts + 33 lines in `reference_data.sql`), so its failure is not caused by anything in that PR — it's ambient platform-side preview-branch instability, same category as the original 19 Aug finding, just proof the mechanism isn't singular. Not investigated further — parked, since none of the three block a merge (none is a required check).
 3. **types.ts hand-patching practice gap** — surfaced 18 Aug 2026 during PR #472 (post-457/467
   cleanup). `types.ts` hadn't had a full `generate_typescript_types` regen since 5 Aug 2026 — every
   PR since (including #457 itself) only hand-added the specific column(s) it needed, so tables added
@@ -128,6 +168,16 @@ Full recount against live `list_migrations` + local `supabase/migrations/*.sql` 
   FRAME if Brian wants it actually fixed.
 
 ---
+
+12. **`index.ts` still over the 500-line edge-function cap after PR #789** — surfaced 26 Aug 2026
+  reviewing PR #789 (merged 25 Aug 2026, `parse-tas-document` Mammoth DOCX fix). The PR's stated
+  reason for extracting `failDocument.ts` was to bring `supabase/functions/parse-tas-document/index.ts`
+  under the repo's 500-line cap — verified independently (`wc -l`) it's still 527 lines. Only 1 of 6
+  duplicate DB-write+Response failure blocks (lines ~218, 228, 309, 365, 381, 451) was migrated to the
+  new `failDocument.ts` helper; the other 5 still inline the same pattern. Not a functional bug — the
+  fix itself (mammoth `{buffer: bytes}` instead of `{arrayBuffer}`) is correct and already shipped to
+  production via auto-deploy. Needs a FRAME: migrate the remaining 5 call sites to `failDocument.ts` to
+  actually satisfy the line-count goal.
 
 ### 9. Document Register bulk-delete storage-orphan bug — root cause diagnosed, fix not yet designed
 
