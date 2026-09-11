@@ -174,6 +174,23 @@ When making a bug fix, feature addition, or any code change on a branch in `rto-
 
 **Explicitly out of scope for now:** Playwright/end-to-end browser tests — come later as part of a dedicated QA protocol.
 
+### Invitation RPC and delivery checklist
+
+For Super Admin invitation changes, verify all of the following before merge:
+
+- `user_invitations.full_name` is generated; write only `first_name` and `last_name`.
+- Membership checks use `tenant_members` with `status = 'active'`, not the legacy
+  `organization_members` compatibility view.
+- `SECURITY DEFINER` RPCs explicitly revoke `PUBLIC` and `anon`, then grant only the intended
+  authenticated or service roles.
+- The client calls the canonical `send-invite` Edge Function after the invitation row is created,
+  and reports success only after delivery succeeds.
+- Generated Supabase types are updated whenever an RPC signature or return shape changes.
+
+If unit-test CI is intentionally omitted for a narrowly scoped PR, record that decision in the
+PR/work ledger and still run the relevant unit tests locally before merge; removing a CI job is not
+a substitute for validating the changed behavior.
+
 ### Pre-push adversarial self-review (effective 14 Jul 2026)
 
 Before pushing any commit to `rto-compass-hub` (and before opening/updating a PR), run a dedicated adversarial self-review of the actual diff — not just `tsc`/`eslint`, which only catch syntax/type issues, not logic bugs. Trace through each changed function's branches by hand, specifically checking:
