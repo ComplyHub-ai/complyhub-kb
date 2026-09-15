@@ -1,6 +1,23 @@
+> **Last updated:** 10 Jul 2026 (last commit) · **Reconsider by:** — · **Confidence:** unverified — freshness header added 15 Sep 2026 from git history; content not re-checked.
+
 # DB Schema Cheat Sheet (production: gdwhlstfguxarnxasrrs)
 
-<!-- last_migration: 20260710044121_fix_critical_suggestion_qi_rpcs -->
+> ## ⚠️ STALE SNAPSHOT — check the stamp before trusting (flagged 15 Sep 2026)
+>
+> Snapshot stamp is `20260710044121` — **two months old**. Two events since then invalidate large
+> parts of it:
+>
+> 1. **The 4 Sep 2026 baseline squash (PR #975)** collapsed ~1,050 migration files into a single
+>    fresh baseline, so the `last_migration` stamp no longer maps to the ledger the way it did
+>    when this file was generated.
+> 2. **Continuous schema change** — the 28 Aug 2026 audit
+>    (`audit/2026-08-28_types-drift-56-tables-78-functions.md`) found **56 tables and 78 functions**
+>    missing from the generated types alone.
+>
+> The "check the stamp before trusting" instruction below still stands — it now fails for almost
+> everything. Re-derive from `information_schema`/`pg_catalog` for any table you actually depend on.
+
+<!-- last_migration: 20260710044121_fix_critical_suggestion_qi_rpcs (STALE — predates the 4 Sep 2026 baseline squash) -->
 <!-- generated: live structural snapshot via information_schema/pg_catalog queries (execute_sql) — no row data -->
 <!-- excluded: 313 legacy tables matching _deprecated/_zz_deprecated/_import_ prefixes -->
 

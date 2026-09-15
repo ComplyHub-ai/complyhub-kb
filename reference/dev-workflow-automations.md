@@ -1,3 +1,5 @@
+> **Last updated:** 09 Jul 2026 (last commit) · **Reconsider by:** — · **Confidence:** unverified — freshness header added 15 Sep 2026 from git history; content not re-checked.
+
 # Developer Workflow Automations — Brian (Khian)
 
 > **Created:** 2 July 2026

@@ -1,3 +1,5 @@
+> **Last updated:** 11 Aug 2026 (last commit) · **Reconsider by:** — · **Confidence:** unverified — freshness header added 15 Sep 2026 from git history; content not re-checked.
+
 # Diagnosis discipline
 
 > Moved from `CLAUDE.local.md` (10 July 2026). Content unchanged from the original. Kept as team-wide reference since these lessons apply to anyone diagnosing bugs in this codebase, not just Brian.

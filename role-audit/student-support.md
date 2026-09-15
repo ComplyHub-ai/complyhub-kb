@@ -1,3 +1,5 @@
+> **Last updated:** 08 Jun 2026 (last commit) · **Reconsider by:** — · **Confidence:** unverified — freshness header added 15 Sep 2026 from git history; content not re-checked.
+
 # Role Audit — Student & Student Support Officer (SSO)
 
 **Date:** 5 June 2026

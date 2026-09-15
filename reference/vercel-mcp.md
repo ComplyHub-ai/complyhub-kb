@@ -1,3 +1,5 @@
+> **Last updated:** 10 Jul 2026 (last commit) · **Reconsider by:** — · **Confidence:** unverified — freshness header added 15 Sep 2026 from git history; content not re-checked.
+
 # Vercel MCP — reference
 
 > Moved from `CLAUDE.local.md` (10 July 2026, added 02 July 2026 originally). Content unchanged from the original.

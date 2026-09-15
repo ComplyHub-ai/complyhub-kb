@@ -1,3 +1,5 @@
+> **Last updated:** 22 Jul 2026 (last commit) · **Reconsider by:** — · **Confidence:** unverified — freshness header added 15 Sep 2026 from git history; content not re-checked.
+
 # PR process automation audit — 11 July 2026
 
 > Read-only audit of Angela's new PR process. No GitHub workflows, rulesets,

@@ -1,3 +1,5 @@
+> **Last updated:** 20 Aug 2026 (last commit) · **Reconsider by:** — · **Confidence:** unverified — freshness header added 15 Sep 2026 from git history; content not re-checked.
+
 # AI Engineering Director Workflow
 
 Purpose: reduce "fix the fix" loops by forcing scope, risk, current-state facts, and proof of done before implementation starts.

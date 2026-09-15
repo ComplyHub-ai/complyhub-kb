@@ -1,3 +1,5 @@
+> **Last updated:** 12 Aug 2026 (last commit) · **Reconsider by:** — · **Confidence:** unverified — freshness header added 15 Sep 2026 from git history; content not re-checked.
+
 > ## ⚠️ SUPERSEDED — historical record, not current policy
 > Written 11 July 2026 around **six named callsigns** (Scout/Hound/Compass/Maker/Tinker/Sentinel).
 > Collapsed 20 Jul 2026 to **three agents** — Scout, Fixer, Reviewer — because six roles was too many

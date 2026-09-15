@@ -1,3 +1,5 @@
+> **Last updated:** 02 Jul 2026 (last commit) · **Reconsider by:** — · **Confidence:** unverified — freshness header added 15 Sep 2026 from git history; content not re-checked.
+
 # ComplyHub UI Navigation Reference
 
 > Use this file when instructing someone where to go in the ComplyHub platform.

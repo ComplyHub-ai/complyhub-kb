@@ -1,3 +1,5 @@
+> **Last updated:** 07 Sep 2026 (last commit) · **Reconsider by:** — · **Confidence:** unverified — freshness header added 15 Sep 2026 from git history; content not re-checked.
+
 # Tenant access gating — how "is this tenant allowed in" actually works
 
 > Written 27 Aug 2026, after PR #807 fixed a live lockout bug caused by two divergent

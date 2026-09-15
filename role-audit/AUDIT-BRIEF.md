@@ -1,3 +1,5 @@
+> **Last updated:** 08 Jun 2026 (last commit) · **Reconsider by:** — · **Confidence:** unverified — freshness header added 15 Sep 2026 from git history; content not re-checked.
+
 # ComplyHub — Per-Role QA Audit Brief (shared)
 
 **Read this fully before starting. Every role-audit agent follows this same brief.**

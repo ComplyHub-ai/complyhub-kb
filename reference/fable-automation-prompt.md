@@ -1,3 +1,5 @@
+> **Last updated:** 09 Jul 2026 (last commit) · **Reconsider by:** — · **Confidence:** unverified — freshness header added 15 Sep 2026 from git history; content not re-checked.
+
 # ComplyHub Automation & Improvement Discovery Prompt — Fable Edition
 
 > **Purpose:** Paste this entire prompt into a Fable (claude-fable-5) session to run a

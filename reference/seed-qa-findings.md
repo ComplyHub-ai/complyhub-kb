@@ -1,3 +1,5 @@
+> **Last updated:** 17 Jun 2026 (last commit) · **Reconsider by:** — · **Confidence:** unverified — freshness header added 15 Sep 2026 from git history; content not re-checked.
+
 # ComplyHub — Seed QA Findings Log
 **Branch DB:** `agcdvmrwzzgnlmfyrxtb`
 **QA Round 1:** 2026-06-09 — 22 findings identified
@@ -84,7 +86,7 @@ Owner guide:
 
 ## Round 6 — Session A (partial, 2026-06-11)
 
-**App URL:** `https://complyhub-rto-git-fix-local-run-complyhub.vercel.app`
+**App URL:** ~~`https://complyhub-rto-git-fix-local-run-complyhub.vercel.app`~~ — **DEAD** (branch retired ~Jun 2026; flagged 15 Sep 2026). Historical record — this log refers to a QA run against that dead preview.
 **Tester:** Claude Chrome (Sonnet 4.6)
 **Outcome:** INCOMPLETE — rate limit hit during Role 3
 

@@ -1,7 +1,22 @@
+> **Last updated:** 10 Jul 2026 (last commit) · **Reconsider by:** — · **Confidence:** unverified — freshness header added 15 Sep 2026 from git history; content not re-checked.
+
 # Edge Functions Map (production: gdwhlstfguxarnxasrrs)
 
+> ## ⚠️ STALE SNAPSHOT — verify before relying on it (flagged 15 Sep 2026)
+>
+> Catalogued **353** functions as of 10 Jul 2026. The repo now contains **376** function folders,
+> and the live project has diverged further — functions have been added, renamed (#1145) and
+> undeployed (#1093 removed `echo-auth`, which may still appear below).
+>
+> A repo folder existing does **not** mean the function is deployed, and removing a folder does
+> **not** undeploy it — that mismatch was itself the root cause in PR #1093.
+>
+> **Use `list_edge_functions` for live state.** Treat this file as orientation only.
+> Security posture in particular is out of date: PR #1149 (14 Sep 2026) found **120 functions
+> still untriaged** after four remediation phases in July.
+
 <!-- generated: structural snapshot from list_edge_functions -->
-<!-- total functions catalogued: 353 -->
+<!-- total functions catalogued: 353 (stale — 376 folders in repo as of 15 Sep 2026) -->
 
 ## _shared
 - Purpose: unclear (from name: _shared)

@@ -1,3 +1,5 @@
+> **Last updated:** 29 Jul 2026 (last commit) · **Reconsider by:** — · **Confidence:** unverified — freshness header added 15 Sep 2026 from git history; content not re-checked.
+
 # ComplyHub — Platform Audit Report
 
 **Date:** 1 June 2026

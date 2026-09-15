@@ -1,3 +1,5 @@
+> **Last updated:** 27 Jul 2026 (last commit) · **Reconsider by:** — · **Confidence:** unverified — freshness header added 15 Sep 2026 from git history; content not re-checked.
+
 # Handover — fix `supabase db push` so it stops failing on every migration
 
 **Date:** 22 July 2026

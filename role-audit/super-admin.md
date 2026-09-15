@@ -1,3 +1,5 @@
+> **Last updated:** 08 Jun 2026 (last commit) · **Reconsider by:** — · **Confidence:** unverified — freshness header added 15 Sep 2026 from git history; content not re-checked.
+
 # Role Audit — Super Administrator (`super_admin`) + SuperAdmin/Platform-Admin surface
 
 **Date:** 4 June 2026

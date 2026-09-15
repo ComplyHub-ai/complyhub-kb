@@ -1,3 +1,5 @@
+> **Last updated:** 20 Aug 2026 (last commit) · **Reconsider by:** — · **Confidence:** unverified — freshness header added 15 Sep 2026 from git history; content not re-checked.
+
 # Engineering Director Task Flow
 
 Use this handoff when Brian asks for substantial implementation, bug diagnosis, PR review, production behavior changes, DB/RLS/auth/storage work, edge functions, AI behavior, dependency PRs, or ambiguous work.

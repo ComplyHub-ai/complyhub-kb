@@ -1,3 +1,5 @@
+> **Last updated:** 12 Aug 2026 (last commit) · **Reconsider by:** — · **Confidence:** unverified — freshness header added 15 Sep 2026 from git history; content not re-checked.
+
 # Parallel worktree workflow
 
 > Moved from `CLAUDE.md` (10 July 2026) to shrink that file to identity + hard gates only. Content unchanged from the original.

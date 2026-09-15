@@ -1,3 +1,5 @@
+> **Last updated:** 10 Jul 2026 (last commit) · **Reconsider by:** — · **Confidence:** unverified — freshness header added 15 Sep 2026 from git history; content not re-checked.
+
 # Context-md + handover workflow (added 10 July 2026)
 
 > Moved from `CLAUDE.local.md` (10 July 2026). Content unchanged from the original.

@@ -3,7 +3,7 @@
 **Last updated:** 2026-06-11
 **Status:** Round 6 ready — all P1/P2 items fixed on branch. This is the final sweep.
 **Findings log:** `seed-qa-findings.md`
-**Branch Vercel URL:** `https://complyhub-rto-git-fix-local-run-complyhub.vercel.app`
+**Branch Vercel URL:** ~~`https://complyhub-rto-git-fix-local-run-complyhub.vercel.app`~~ — **DEAD** (the `fix/local-run` branch was retired ~Jun 2026; flagged 15 Sep 2026). Production is `rto.complyhub.ai`; use the PR's own Vercel preview URL for branch QA.
 
 ---
 

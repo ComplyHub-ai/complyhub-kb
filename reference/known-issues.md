@@ -1,5 +1,19 @@
 > **Last updated:** 5 May 2026 · **Reconsider by:** ongoing — update weekly. Stale bug lists are worse than none.
 
+> ## ⚠️ STALE — DO NOT TRUST (flagged 15 Sep 2026)
+>
+> This file has not been updated since **5 May 2026** — over four months — despite its own rule to
+> update it weekly. Roughly 900 PRs have merged since. Every entry below must be treated as
+> **unverified**, not as current state.
+>
+> Two prior audits already flagged this and it was never actioned:
+> `audit/security_audit_july02.md` (KB-IMP-002) and `audit/action-plan-02-07-2026.md`.
+>
+> **Before citing anything here, verify it against the current codebase and live DB.**
+> For current defect patterns, use `pinned/conventions.md` and the `audit/` entries instead —
+> those are maintained. Several docs still link here (`key-flows.md`, `user-roles.md`,
+> `test-scenarios.md`, the Fable prompts), which is why this file is flagged rather than deleted.
+
 # Known Issues
 
 Current known bugs, workarounds, and investigation status.

@@ -1,3 +1,5 @@
+> **Last updated:** 12 Aug 2026 (last commit) · **Reconsider by:** — · **Confidence:** unverified — freshness header added 15 Sep 2026 from git history; content not re-checked.
+
 # PR review + fix workflow
 
 > **What this file is:** the step-by-step *procedure* for reviewing and landing a

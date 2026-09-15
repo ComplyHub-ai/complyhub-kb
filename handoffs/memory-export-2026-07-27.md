@@ -1,3 +1,5 @@
+> **Last updated:** 27 Jul 2026 (last commit) · **Reconsider by:** — · **Confidence:** unverified — freshness header added 15 Sep 2026 from git history; content not re-checked.
+
 # Memory Export — 2026-07-27
 
 > Cross-machine transfer file. Brian's Claude Code memory system

@@ -1,3 +1,5 @@
+> **Last updated:** 07 Sep 2026 (last commit) · **Reconsider by:** — · **Confidence:** unverified — freshness header added 15 Sep 2026 from git history; content not re-checked.
+
 # reference/
 
 Fetched via GitHub MCP on demand. Not pinned — loaded when needed.

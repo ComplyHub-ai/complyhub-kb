@@ -1,3 +1,5 @@
+> **Last updated:** 22 Jul 2026 (last commit) · **Reconsider by:** — · **Confidence:** unverified — freshness header added 15 Sep 2026 from git history; content not re-checked.
+
 # PR merge roadmap — July 2026
 
 > Human-readable plan for clearing the open PR queue and making Angela's merge

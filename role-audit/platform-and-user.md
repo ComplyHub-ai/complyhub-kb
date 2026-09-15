@@ -1,3 +1,5 @@
+> **Last updated:** 08 Jun 2026 (last commit) · **Reconsider by:** — · **Confidence:** unverified — freshness header added 15 Sep 2026 from git history; content not re-checked.
+
 # Role Audit — Platform global_role tier (platform_owner / platform_admin / operations / qa_tester / support / finance) and the generic `user` fallback
 
 **Auditor scope:** the PLATFORM tier (`profiles.global_role`) and the bare/`null` "user" fallback.

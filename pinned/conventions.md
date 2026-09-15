@@ -1,4 +1,4 @@
-> **Last updated:** 7 Sep 2026 · **Reconsider by:** 7 Mar 2027 · **Confidence:** medium — RLS and Edge function sections added from production incident; other sections still scaffold.
+> **Last updated:** 15 Sep 2026 · **Reconsider by:** 15 Mar 2027 · **Confidence:** high — RLS policy composition, sweep completeness, silent-failure and role-parity rules derived from a cross-reference of 148 audit entries against 968 merged PRs (Mar–Sep 2026).
 
 # System Design — Conventions & Patterns
 
@@ -15,6 +15,36 @@ RLS is the primary access control layer for all `public` schema tables. It works
 **Rule:** If a private bucket Storage operation fails from the browser after one RLS fix attempt, pivot to the Edge Function gateway pattern rather than adding more policies. See `patterns/storage-gateway.md` for the full pattern and `supabase/functions/document-file-manager/` as the reference implementation.
 
 **Diagnostic shortcut:** A working `/object/list/{bucket}` does not prove that download will work — list uses a different internal code path. Do not treat listing success as RLS proof.
+
+### Policy composition — a gate written PERMISSIVE grants instead of restricting (effective 15 Sep 2026)
+
+This is the highest-frequency security defect in the repo: **34 merged PRs between 15 Jul and 14 Sep 2026** exist solely to repair it. It has three variants, all with the same root shape — *a rule intended to restrict access instead widened it.*
+
+**1. PERMISSIVE vs RESTRICTIVE.** Postgres combines policies as `(PERMISSIVE₁ OR PERMISSIVE₂ OR …) AND (RESTRICTIVE₁ AND RESTRICTIVE₂ AND …)`. A gate added as PERMISSIVE (the default) **OR-merges** with the existing membership policy, so instead of narrowing access it becomes an *additional way in*.
+
+**Rule:** Any policy whose purpose is to *deny* — billing gates, active-tenant checks, paid-through gates — must be declared `AS RESTRICTIVE`. Never rely on the default.
+
+```sql
+-- WRONG: OR-merges with the membership policy — widens access
+CREATE POLICY billing_gate_active_tenant ON some_table
+  FOR ALL TO authenticated USING (is_tenant_active(tenant_id));
+
+-- RIGHT: AND-merges — genuinely gates
+CREATE POLICY billing_gate_active_tenant ON some_table
+  AS RESTRICTIVE FOR ALL TO authenticated USING (is_tenant_active(tenant_id));
+```
+
+Evidence: #207, #395, #470, #781, #806, #1142 (*"close billing_gate OR-merge bypass"*), #1152.
+
+**Syntax trap:** `CREATE POLICY ... FOR INSERT, UPDATE, DELETE` is **invalid** — `FOR` takes exactly one command, or `ALL`. GRANT-list syntax does not apply here. This shipped to `main` once (PR #470) and needed #476 to repair it, because nothing in the pipeline executes the SQL. Execute any new policy for real (branch DB or `execute_sql`) before calling it verified.
+
+**2. Fail-closed by default.** A `SECURITY DEFINER` RPC that resolves tenant membership must **deny** when membership is unresolved, errored, or null — not fall through to allow. Twelve PRs exist to retrofit this (#533, #584, #670, #762, #764, #782, #968, #984, #1003, #1020, #1064).
+
+**Rule:** In any membership/role resolution path, the `else`, the `catch`, and the null case all deny. If you cannot prove the caller is a member, they are not.
+
+**3. `PUBLIC`/`anon` EXECUTE grants return after `CREATE OR REPLACE`.** Replacing a function re-applies default grants, silently re-opening `anon` access on a function that was previously revoked. PR #759 is literally titled *"reassert PUBLIC/anon revokes"* — they came back.
+
+**Rule:** Every migration containing `CREATE OR REPLACE FUNCTION` on a `SECURITY DEFINER` function must re-issue its `REVOKE EXECUTE ... FROM PUBLIC, anon;` in the same migration. Treat the revoke as part of the function definition, not a one-time setup step. See also `### CREATE OR REPLACE ... — check git history first` below.
 
 ## Edge functions
 
@@ -219,7 +249,53 @@ When reviewing a PR that modifies a form, mutation, or `useEffect` that runs on 
 
 **How to apply:** Any PR touching a form with edit mode, any mutation writing junction-table rows, any `useEffect` filtering saved state against external data.
 
+## Sweep completeness — "change X everywhere" needs a denominator (effective 15 Sep 2026)
+
+Any change shaped *"replace X with Y everywhere"* — renaming a column, repointing a bucket, revoking a grant, adding a gate, triaging functions — has repeatedly landed partially, with the tail discovered weeks later by users or review bots.
+
+The pattern is visible in the PR titles themselves: **#1079 → #1080 "gate leftover public entitlement writers after #1079" → #1083 → #1088 "gate leftover public billing writers after #1083" → #1099 → #1142 → #1152.** Seven PRs, each closing what the previous one missed. The same chain appears for the `qual_code` rename (#204, #218, #233, #236 *"remaining 5 RPCs missed by rename-chain batch"*), the storage bucket repoints (#367 → #368, #371, #964, #1091), and the edge-function security triage — swept in four phases across July (#189, #190, #191, #193), yet #1149 on 14 Sep still found **120 remaining untriaged functions**.
+
+**Root cause:** the call-site list is built by *reading code*, never by *querying the full object set*. Nobody records the denominator, so "done" is unverifiable and the tail is invisible.
+
+**Rule — before fixing, enumerate; in the PR, state the denominator.**
+
+1. Derive the complete target set from authoritative state, not from reading files:
+   - policies/tables → `pg_policies`, `information_schema`
+   - functions and their grants → `pg_proc` + `information_schema.role_routine_grants`
+   - edge functions → `list_edge_functions` (live), not the repo folder alone
+   - frontend call sites → repo-wide `grep`, including tests, triggers and RPC bodies
+2. Write the count into the PR description: *"14 tables have this policy; all 14 changed."*
+3. If you fix a subset deliberately, say which subset and why, and file the remainder to `active-work.md` Backlog — do not let it be discovered later.
+
+Data-layer objects are the most commonly missed: triggers, RPC bodies and stored views hold pointers that a frontend `grep` will not surface. PR #371 (*"fix evidence-link trigger gap"*) and #964 (*"repoint PD count query"*) were both data-layer tails of a code-layer sweep already declared complete.
+
 ## New table checklist
+
+Run this before opening a PR that adds a tenant-scoped table.
+
+- [ ] `tenant_id` column present, `NOT NULL`, FK to `tenants`
+- [ ] RLS enabled
+- [ ] Membership policy (PERMISSIVE) for read/write by tenant members
+- [ ] **Billing/active-tenant gate declared `AS RESTRICTIVE`** — see "Policy composition" above. PR #1099 had to retrofit this to four Intelligence/TAS tables that shipped without it
+- [ ] Super Admin access preserved and explicitly tested
+- [ ] **Role parity checked for Consultant and Governing Person** — see below
+- [ ] Migration is idempotent (safe to run twice)
+- [ ] Rollback plan present (see `pinned/guardrails.md`)
+- [ ] Generated TypeScript types regenerated
+
+### Role parity — Consultant and Governing Person (effective 15 Sep 2026)
+
+**38 PRs between 16 Jun and 11 Sep 2026** exist to retrofit Consultant access to a feature that had already shipped: #918 → #933 → #955 → #966 → #1100 *"restore Consultant write parity"*. Governing Person has the same shape (#979, #1021). It recurs roughly monthly and has never stopped.
+
+**Why it keeps happening:** features are built and tested as Admin or Compliance Manager. Consultant and Governing Person are cross-tenant/oversight roles that no default test path exercises, so a missing policy or role check is invisible until a real user hits it.
+
+**Rule:** Every new tenant-scoped table, RPC, RLS policy or route gate must make an explicit, recorded decision for **Consultant** and **Governing Person** — grant or deny. "Not considered" is the failure mode; an intentional deny is fine. State the decision in the PR description.
+
+**Reminder:** `tenant_members.role` is **Proper Case**, not snake_case. The six values live in production (verified 15 Sep 2026) are exactly:
+
+`Administrator` · `Compliance Manager` · `Consultant` · `Governing Person` · `Student Support Officer` · `Trainer/Assessor`
+
+Note `Trainer/Assessor` contains a slash, and `Consultant Assistant` **no longer exists** — it was removed as non-canonical in PR #994. Re-verify with `select distinct role from tenant_members` rather than copying an allowlist from another file; a stale allowlist is how role checks silently deny the wrong people.
 
 ## What NOT to do
 
@@ -241,6 +317,34 @@ if (!SUPABASE_URL) throw new Error('VITE_SUPABASE_URL is not set');
 If the env var is missing, surface a clear error rather than silently falling back to a hardcoded value. Hardcoded URLs leak infrastructure details into the public repo and create a false sense of security.
 
 This applies equally to any code written by Claude in Lovable prompts, KB docs, or direct file edits — prompts that end up as committed code are held to the same standard.
+
+### Never return an empty result for a failed query (effective 15 Sep 2026)
+
+**The most common root cause in the audit history — 33 of 148 audit entries.** An error is caught and converted into an empty array, `false`, or `null`, so a genuine outage becomes indistinguishable from "there is no data". Nothing alerts, nothing logs, and the failure survives for weeks.
+
+Real instances:
+
+- `buildClauseDirectory` *"swallowed its own DB error into an empty array with no error signal"* — a retrieval outage looked identical to a knowledge-base miss (#523)
+- Every service-role write from any edge function to the `platform` schema *"has been silently failing with a permission error since the schema was created — invisible because the only place the error surfaced was…"* (#147–150)
+- `kb_miss` *"column existed but was never set — silently `false` on every row, including real misses"* (#500)
+- #1122 *"stop discarding RPC errors"*; #1144 *"surface blocked ingest as a real failure, not a silent 200"*
+
+**Rule:** An empty collection means *the query succeeded and matched nothing*. If the query failed, propagate the error — never collapse the two states into one value.
+
+```typescript
+// WRONG: an outage is now indistinguishable from "no results"
+try { const { data } = await supabase.from('x').select(); return data ?? []; }
+catch { return []; }
+
+// RIGHT: the caller can tell the difference
+const { data, error } = await supabase.from('x').select();
+if (error) throw new Error(`x lookup failed: ${error.message}`);
+return data ?? [];
+```
+
+**Second variant — computed but never wired.** A value is fetched or built correctly, then never reaches its consumer. No error is thrown because nothing failed; the feature is just quietly inert. `documentContext` was never passed into the tool-loop's system prompt, so attachments were silently dropped (#523). `useConsultationSurveys` never fetched `allow_anonymous`/`expires_at`, so republishing a survey silently reset both (#490).
+
+**How to apply:** for any new field or option, trace it end to end — written → read → passed → *actually used* — and assert on the consumer, not just the producer. A test proving the value was computed does not prove it was applied.
 
 ### `rto-compass-hub`'s `tsc --noEmit` checks ZERO files — do not trust it as verification
 

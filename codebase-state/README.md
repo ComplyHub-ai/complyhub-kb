@@ -1,3 +1,5 @@
+> **Last updated:** 05 May 2026 (last commit) · **Reconsider by:** — · **Confidence:** unverified — freshness header added 15 Sep 2026 from git history; content not re-checked.
+
 # codebase-state/
 
 As-shipped state of the codebase. Fetched via GitHub MCP on demand.

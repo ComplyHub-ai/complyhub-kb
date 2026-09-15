@@ -1,4 +1,4 @@
-> **Last updated:** 29 July 2026 · **Reconsider by:** 29 Jan 2027 · **Confidence:** high — canonical rules for all AI tools in this workspace.
+> **Last updated:** 15 September 2026 · **Reconsider by:** 15 Mar 2027 · **Confidence:** high — canonical rules for all AI tools in this workspace.
 
 # Guardrails
 
@@ -11,7 +11,8 @@ Rules that apply to every AI tool (Claude Code, Codex, Claude Desktop) in this w
 | `complyhub-kb/` | Full — read, write, commit, push to any branch including `main` |
 | `complyhub-kb/audit/` | Full — same as above; lives inside the same repo |
 | `rto-compass-hub/` on `main` | Read-only — `git fetch` and `git pull` only; no commit, no push, no file edits |
-| `rto-compass-hub/` on `fix/local-run` | Edits and commits allowed — this is the active Vercel migration working branch |
+| `rto-compass-hub/` on any `feat/*` or `fix/*` branch | Edits and commits allowed — all new work goes through a branch + PR |
+| `rto-compass-hub/` on any `cursor/*` branch | Edits and commits allowed — PR review workflow only |
 
 Feature branch naming for `complyhub-kb/` where used: `fix/<slug>`, `kb/<slug>`, `adr-<NNN>`, `restructure/<slug>`
 
@@ -47,7 +48,9 @@ There is no Lovable-prompt workflow anymore (retired, confirmed 22–23 Jul 2026
 
 `rto-compass-hub/main` is read-only — no direct edits, commits, or pushes. All code changes reach it via the 7-step gated dev workflow (raise → findings → plan → build/ship only after RJ's explicit go-ahead, then branch + commit + push + PR) — see the workspace `CLAUDE.md` section 3 for the full loop.
 
-`rto-compass-hub/fix/local-run` allows edits and commits directly. All code changes on this branch must follow the rules in `rto-compass-hub/CLAUDE.md` (Carl's file) — that file is authoritative for all code decisions. Do not create guardrails or patterns that conflict with it.
+Work happens on a `feat/*` or `fix/*` branch (or `cursor/*` for PR review), which allows edits and commits directly. All code changes on any branch must follow the rules in `rto-compass-hub/CLAUDE.md` (Carl's file) — that file is authoritative for all code decisions. Do not create guardrails or patterns that conflict with it.
+
+The old `fix/local-run` branch is retired (it was the temporary Lovable-to-Vercel migration branch, May–June 2026). Any doc still naming it as the working branch is stale.
 
 ## Database migrations
 
