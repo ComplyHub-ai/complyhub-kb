@@ -1,4 +1,4 @@
-> **Last updated:** 5 May 2026 (content) · reviewed 15 Sep 2026 · **Reconsider by:** 5 Nov 2026 · **Confidence:** medium — the Edge Function gateway pattern is still correct and in production, but this file predates the Aug 2026 bucket consolidation (35 PRs, ~24 buckets collapsed into `tenant-documents`); bucket names in the examples may be dead. One flagged contradiction inline.
+> **Last updated:** 5 May 2026 (content) · reviewed 15 Sep 2026 · **Reconsider by:** 5 Nov 2026 · **Confidence:** medium — the Edge Function gateway pattern is still correct and in production, but this file predates the Aug 2026 bucket consolidation (35 PRs, ~24 buckets collapsed into `tenant-documents`); bucket names in the examples may be dead.
 
 # Pattern: Storage Gateway Edge Function
 
@@ -87,14 +87,12 @@ The frontend gateway (`documentFiles.ts`, `trainerEvidenceDownload.ts`) wraps th
 - Calls `supabase.auth.getSession()` to get the current access token.
 - Sends `Authorization: Bearer {token}` + `apikey: {anonKey}` headers (Kong gateway requires both).
 - Returns a `Blob`, creates an object URL, triggers the `<a>` download, then revokes.
-- The anon key is inlined as a local constant — it is a public key (already in `client.ts`) and Lovable regenerates `client.ts` so it cannot be exported from there safely.
-  > **⚠️ FLAGGED 15 Sep 2026 — stale rationale, unresolved contradiction. Needs Brian's decision.**
-  > Lovable was retired 22–23 Jul 2026 (`pinned/guardrails.md`), so "Lovable regenerates `client.ts`"
-  > is no longer a reason for anything. The inlining advice also contradicts
-  > `pinned/conventions.md` → "Never hardcode service URLs or credentials in source code", which
-  > allows the anon key only as a documented Lovable-era exception.
-  > **Not edited** — changing this implies a code change in `documentFiles.ts` /
-  > `trainerEvidenceDownload.ts`, which is out of scope for a KB pass.
+- The anon key is read from `import.meta.env.VITE_SUPABASE_ANON_KEY`, same as `client.ts` — not inlined.
+  (Corrected 15 Sep 2026: this line previously claimed the key was hardcoded because Lovable
+  regenerated `client.ts`. Lovable was retired 22–23 Jul 2026, and checking `documentFiles.ts`
+  directly shows it already reads the key from the env var, following the standard
+  "never hardcode credentials" rule in `pinned/conventions.md`. The old rationale described
+  code that doesn't exist — no app change needed.)
 
 ---
 
