@@ -7,8 +7,10 @@
 > (10 July 2026). Light touch 11 July 2026 for Angela's automation context.
 >
 > **What this file is NOT:** it does **not** hold PR status, verdicts, or queue
-> state. That lives in one place only:
-> **`pr-review-open-prs.md`** (workspace root).
+> state. There is no hand-maintained queue file anymore — `pr-review-open-prs.md`
+> (workspace root) went stale for weeks at a time because nothing enforced
+> keeping it in sync with GitHub, so it was retired as a source of truth.
+> **GitHub itself is the queue** — `gh pr list --state open` / `gh pr view <N>`.
 
 Carl has approved edits and commits on PR branches.
 
@@ -16,7 +18,7 @@ Carl has approved edits and commits on PR branches.
 
 | Question | Read this |
 |---|---|
-| Which PRs are open, merged, blocked, verdict? | `pr-review-open-prs.md` |
+| Which PRs are open, merged, blocked, verdict? | `gh pr list --state open` / `gh pr view <N>` — GitHub, not a file |
 | How do we run a `/pr-review` and land a merge? | This file + `.claude/commands/pr-review.md` |
 | What did the 11 July automation audit find? | `pr-process-automation-audit-2026-07-11.md` (workspace root) |
 
@@ -35,7 +37,7 @@ Angela enabled Tier A/B labels, CODEOWNERS, auto-merge, and stale sweep on
 
 ## Steps per PR
 
-1. Read current queue state in `pr-review-open-prs.md`
+1. Read current queue state from GitHub: `gh pr list --state open`, then `gh pr view <N>`
 2. Agent reviews PR diff + dry-run merge against `main`
 3. Check tier labels (infer from paths if missing — see audit doc)
 4. Plain English verdict to Brian
@@ -45,7 +47,7 @@ Angela enabled Tier A/B labels, CODEOWNERS, auto-merge, and stale sweep on
 8. Brian says "push it" → push
 9. Merge (Tier B: RJ/Khian approval; Tier A: auto-merge only when CI gate restored)
 10. Post-merge verification (below)
-11. **Update `pr-review-open-prs.md`** with verdict, merge hash, deploy/migration notes
+11. Confirm the merge on GitHub (`gh pr view <N>` shows `MERGED`) — no separate ledger file to update
 12. `git checkout main && git pull` before next PR
 
 Full checklist: `.claude/commands/pr-review.md` (Reviewer).
@@ -54,7 +56,7 @@ Full checklist: `.claude/commands/pr-review.md` (Reviewer).
 
 - Never edit `main` directly
 - Never commit or push without Brian's explicit words
-- All PR outcomes logged in **`pr-review-open-prs.md` only**
+- PR outcomes live on GitHub itself — merge state, verdict comments, labels — not in a workspace file
 - Treat sensitive paths as Tier B even if `tier-b` label is missing
 
 ## Post-merge checklist (mandatory)

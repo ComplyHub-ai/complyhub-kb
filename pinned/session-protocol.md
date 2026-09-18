@@ -6,16 +6,27 @@ Shared start-of-session and end-of-session procedures for all AI tools in this w
 
 ## Session start (mandatory first action)
 
+`CLAUDE.md` (or `AGENTS.md` under Codex) is already auto-loaded before you do anything, and it
+auto-loads this file plus `pinned/guardrails.md` and `pinned/conventions.md` alongside it — none of
+that needs to be manually "read" as a first step, it's already in context. The one thing that does
+need an explicit visit is `rto-compass-hub/docs/kb/README.md` — the main frame for
+engineering-initiative work; this KB is the companion layer around it (guardrails, routing, audit,
+process), not the main entry point.
+
 Run in order before any other work:
 
-1. `cd complyhub-kb && git pull --ff-only && cd ..`
-   (pulls audit/ too, since it lives inside the same repo)
-2. `cd rto-compass-hub && git fetch && git pull && cd ..`
-3. Report: latest commit in `complyhub-kb` and `rto-compass-hub` after pulling
+1. Go to `rto-compass-hub/docs/kb/README.md` for the actual initiative frame — what's in progress,
+   what's next.
+2. `cd complyhub-kb && git pull --ff-only && cd ..` — sync this KB (pulls `audit/` too, since it
+   lives inside the same repo). This is a freshness sync, not a reading step.
+3. `git -C rto-compass-hub worktree list` — check what task worktrees currently exist. The anchor
+   (`rto-compass-hub` itself) is a read-only baseline: fetch/pull it, but create or select a
+   dedicated task worktree for any actual edit — see `CLAUDE.md` § "Orchestration → Worktrees" for
+   the on-demand create/teardown steps.
+4. Report: latest commit in `complyhub-kb` and `rto-compass-hub`, and the task worktree/branch in
+   use (if any).
 
 If any pull fails (conflict, divergence, dirty working tree): **STOP and report.** Do not attempt to resolve conflicts autonomously.
-
-4. **Check local machine setup** — some local artifacts (Claude Code hooks, `.claude/settings.local.json` entries) are gitignored/personal and do NOT travel with a `git clone` of this repo. If this looks like a machine that hasn't been bootstrapped yet (e.g. `.claude/hooks/session-start-context.sh` is missing, or pinned docs clearly weren't auto-injected this session), read `complyhub-kb/pinned/machine-bootstrap.md` and follow it to recreate them.
 
 ## Session end
 
@@ -36,14 +47,14 @@ These files are loaded as static knowledge in the Claude Desktop project. After 
 | `complyhub-kb/pinned/guardrails.md` | yes |
 | `complyhub-kb/pinned/session-protocol.md` | yes |
 | `complyhub-kb/pinned/conventions.md` | yes |
-| `complyhub-kb/pinned/decisions.md` | yes |
-| `complyhub-kb/pinned/kb-hygiene.md` | yes |
 
 **End-of-session reminder:** if any file in this table was modified this session, add to your session summary: "⚠️ Claude Desktop sync needed — update [filename] in the project knowledge before next session."
 
 ## Source precedence
 
-When sources conflict, resolve in this order:
+`rto-compass-hub/docs/kb/` is canonical for initiative decisions specifically — scope, sequencing,
+acceptance criteria, evidence. For everything else (guardrails, routing, safety, cross-tool
+process), resolve conflicts in this order:
 
 1. Pinned KB docs (`complyhub-kb/pinned/`) — highest authority
 2. `complyhub-kb/` via filesystem or GitHub MCP
