@@ -1,4 +1,4 @@
-> **Last updated:** 5 May 2026 · **Reconsider by:** 5 Nov 2026 · **Confidence:** high — testing patterns are stable; verify test command syntax against current `package.json` before running.
+> **Last updated:** 18 Sep 2026 · **Reconsider by:** 18 Mar 2027 · **Confidence:** high — commands and script names re-verified against current `package.json` on this date.
 
 # QA Handbook
 
@@ -13,10 +13,17 @@ Three frameworks coexist — confirm with RJ which is canonical for new tests.
 | Tool | Purpose | Location |
 |---|---|---|
 | **Vitest** | Unit + integration (React components, hooks, utilities) | `tests/` |
-| **Playwright** | E2E (browser automation) | Config: `playwright.config.ts` |
+| **Playwright** | E2E (browser automation), including gated production-safe specs | Config: `playwright.config.ts`, specs in `tests/e2e/` |
 | **Cypress** | E2E (alternative) | `cypress/e2e/` |
 
-> `package.json` currently has no test scripts. Tests run via direct CLI — verify commands below with RJ before running in CI.
+**Before writing or running any Playwright spec that touches production data**, read
+`complyhub-kb/reference/playwright-qa-conventions.md` first — it documents which lanes are
+production-safe, the `.env.playwright.local` credential convention, and the current state of
+post-run data cleanup. This handbook covers testing practice generally; that doc is the
+authoritative source for anything Playwright-and-production-specific.
+
+`package.json` has real `npm` scripts (confirmed 18 Sep 2026 — the "no test scripts" note below is
+no longer accurate and was corrected in this pass).
 
 ---
 
@@ -24,18 +31,18 @@ Three frameworks coexist — confirm with RJ which is canonical for new tests.
 
 ```bash
 # Unit tests
-bunx vitest              # watch mode
-bunx vitest run          # single run
-bunx vitest run tests/contexts/AppContext.test.tsx   # single file
+npm test                 # single run (vitest run)
+npm run test:watch       # watch mode
+npx vitest run tests/contexts/AppContext.test.tsx   # single file
 
 # Playwright
-bunx playwright test
-bunx playwright test --ui        # interactive mode
-bunx playwright test --debug     # step through
+npm run test:e2e
+npx playwright test --ui        # interactive mode
+npx playwright test --debug     # step through
 
-# Cypress
-bunx cypress open        # interactive
-bunx cypress run         # headless
+# Cypress (no npm script defined — invoke directly)
+npx cypress open        # interactive
+npx cypress run         # headless
 ```
 
 ---

@@ -1,148 +1,142 @@
-> **Last updated:** 11 Aug 2026 (last commit) · **Reconsider by:** — · **Confidence:** unverified — freshness header added 15 Sep 2026 from git history; content not re-checked.
+> **Last updated:** 18 Sep 2026 · **Reconsider by:** 18 Mar 2027 · **Confidence:** high — consolidated from prior incident write-ups plus `/fresh-eyes`'s standing review principles.
 
 # Diagnosis discipline
 
-> Moved from `CLAUDE.local.md` (10 July 2026). Content unchanged from the original. Kept as team-wide reference since these lessons apply to anyone diagnosing bugs in this codebase, not just Brian.
+Consolidated 18 Sep 2026: previously a chronological list of "Learned from PR/finding X" incident
+write-ups. The incident narratives are gone — they're what happened once, not what to do next time.
+What's kept below is the durable principle each one produced, plus the reusable principles
+`/fresh-eyes` already applies on every adversarial branch review, so both live in one place instead
+of two.
 
 ## Trace the full flow — never hand off mid-chain
 
-When diagnosing a bug or tracing a feature, follow the execution path all the way to the end before reporting findings. Do not stop at a plausible-looking file or function and hand the problem back with "this is probably where it is." That approach misses bugs and adds unnecessary work hours.
+When diagnosing a bug or tracing a feature, follow the execution path all the way to the end before
+reporting findings. Start at the actual user action (button click, route load, login event) and
+follow the code forward — not at the file that merely looks responsible. Don't stop at a
+plausible-looking file and hand the problem back with "this is probably where it is."
 
 The complete trace means:
 - User action → component → hook → RPC/edge function → DB function → return value → UI render
 - Follow every branch of the chain that could affect the outcome
-- Confirm each step is actually called in the right context (grep callers, don't assume)
+- Confirm each step is actually called in the right context — grep callers, don't assume
 - Only report findings once the full path is traced and the root cause is confirmed, not suspected
 
-If the trace is genuinely blocked (e.g., missing source, external service), state exactly where it stops and why — not just "it might be here."
+If the trace is genuinely blocked (missing source, external service), state exactly where it stops
+and why — not just "it might be here."
 
-## DB data-state check — standard diagnosis step
+## DB data-state check — standard first step, not a last resort
 
-For any bug report involving data not loading, links not working, or content appearing missing: query the relevant database rows early in the diagnosis — before theorising about code causes. The actual data state (status, token, expiry, flags) resolves most hypotheses in a single step and avoids chasing the wrong fix. Use the Supabase MCP server (read-only) as the first investigative tool, not the last.
+For any bug involving data not loading, links not working, or content appearing missing: query the
+relevant database rows early — before theorising about code causes. The actual data state (status,
+token, expiry, flags) resolves most hypotheses in a single step. Use a read-only DB query as the
+first investigative tool, not the last.
 
-## Learned from NEW-013 multi-attempt failure
+## Grep callers before editing any function
 
-These rules apply to every bug fix, not just QA findings. Violating them is how a fix lands in the wrong file and wastes iterations.
+If a function's real callers can't be seen from the place being fixed, the right fix target hasn't
+been found yet. A function that looks correct in isolation can be called from the wrong place
+entirely — verify the actual call site, not the assumed one.
 
-1. **Trace the execution path from the user action, not from the plausible-looking file.** Start at the button click / route load / login event and follow the code forward to the actual decision point. Do not start at the file you expect is responsible.
+## Audit every entry in the same block, not just the one being fixed
 
-2. **Grep callers before editing any function.** If you cannot see the function being called from the right place, you have not found the right fix target. (`routeAfterLogin` looked correct but was only called from `ResetPassword` — not normal login.)
+Switch/case blocks, role arrays, and directories of similar files (guards, configs) tend to share
+one bug across every entry, introduced once and copied forward. When fixing one case, read every
+other case in the same block and ask: does each entry have the equivalent config the one being
+fixed just got? When fixing one guard, grep every guard in the same folder for the same wrong value
+before reporting the broader area clean.
 
-3. **For switch/case blocks or arrays of roles — audit every entry.** When fixing one case, read every other case in the same block. Ask: does each entry have a corresponding config? This is how the Consultant sidebar bug was missed when fixing CM's case.
+## Cross-reference field names against the actual schema before wiring up a component
 
-4. **For a directory of similar files — check all files for the same pattern.** When fixing one guard, grep all guards in the same folder for the same wrong value before reporting the BRC as clean.
+A feature-parity check (does it have the right columns, the right form?) does not substitute for a
+field-name correctness check (are the actual property names correct?). This is mandatory when the
+file has `// @ts-nocheck` — TypeScript cannot catch a field-name mismatch there, so it has to be
+done manually against `src/types/` and the live schema.
 
-5. **For context-switching bugs — query the DB early.** Check `profiles.active_tenant_id` and `tenant_members` for the affected user before theorising. The actual DB state resolves hypotheses in one step.
+## A live DB fetch alone is not proof of the correct guard set
 
-6. **Before routing any previously-unrouted component — cross-reference every DB field name used in the component against `src/types/` and the actual schema.** A feature parity check (does it have the right columns, the right form?) does NOT substitute for a field-name correctness check (are the actual property names correct?). This step is mandatory when the file has `// @ts-nocheck` on line 1 — TypeScript cannot catch mismatches, so the cross-reference must be done manually. Failure to do this was the root cause of the MCN register white screen (PR #98 route switch, July 2026): `change_title`, `description_of_change`, `submitted_to_asqa`, and `date_of_change` were used throughout `mcn/index.tsx` but none of them exist on `MCNRegister` — the correct fields are `title`, `change_description`, `date_submitted`, and `change_date`.
+Reading a function's live definition before `CREATE OR REPLACE` protects against dropping something
+yourself — it does not protect against the live database already being **behind** what's merged in
+git. Before replacing an existing function, in addition to fetching its live definition, check
+`git log` (content search, not filename) for any migration touching that function more recent than
+what the live fetch reflects. If one exists, check `list_migrations`/`schema_migrations` for a
+version gap before treating the live fetch as ground truth.
 
-## Learned from PR #279 — a live DB fetch is not proof of the correct guard set
+## Before deleting anything, search for the literal identifier — not a call-pattern grep
 
-`CLAUDE.md` requires reading a function's *live* definition before `CREATE OR REPLACE`, so nothing already-live gets silently dropped. That rule is necessary but not sufficient: it only protects against the AI dropping something itself. It does not protect against the live database already being **behind** what's merged in git.
+"Is this still referenced?" checked via one specific call shape (e.g. `storage.from('<id>')`) misses
+references held as a **string value inside a config/lookup/dispatch object**, resolved dynamically
+at runtime. Before deleting or dropping anything (buckets, tables, columns, functions):
 
-On PR #279 (`rpc_tas_create_draft`), the live function was faithfully copied and preserved — but the live copy itself was already missing a `tenant_scope_items` upsert path from a migration (`20260716090000`) that had been merged to `main` on 16 July but never actually applied to production. Cursor Bugbot and Vercel's bot both flagged the replacement as "dropping" that logic — correctly, because they diff against git history, not the live DB, and git said the function should look different from what was live. Confirmed via `supabase_migrations.schema_migrations`: the version jumped straight past `20260716090000`, meaning it was merged but never deployed.
+1. Search for the literal identifier as an unrestricted string, no method-call wrapper assumed,
+   across the entire relevant codebase (frontend and edge functions both) — a cheap false positive
+   beats a missed true one.
+2. Explicitly check config objects, lookup/dispatch maps, and `Record<string, ...>`-shaped
+   structures separately — edge functions are easy to under-scrutinize relative to frontend screens.
+3. Only after the unrestricted pass is clean does a narrower, call-pattern-specific search count as
+   confirmation, never as the sole check.
+4. Re-run the check immediately before executing the delete, not just once during planning — code
+   can change between the two points.
 
-**Rule going forward:** before any `CREATE OR REPLACE FUNCTION` on an existing function, in addition to fetching the live definition, run `git log --oneline -- 'supabase/migrations/*<function_name>*'` (or grep migration files/content for the function name). If a migration touching that function is more recent in git than what the live fetch reflects, stop and check `list_migrations` / `schema_migrations` for a version gap before treating the live fetch as ground truth — the live DB and git can silently disagree, and only a history check catches it.
+## A "skip if already done" guard must read live state, not a client-side cache
 
-## Learned from PR #356 — a call-pattern-scoped search is not the same as "is this referenced anywhere"
+A check like "has this already run" that reads a client-side cache can't see a *previous* attempt at
+the same operation that partially failed. Ask explicitly: if this exact code path partially failed
+and the user retries, what does the check actually see? The guard must query the database directly,
+immediately before deciding.
 
-Before deleting anything (storage buckets, tables, columns, functions), "is this still referenced in
-code?" was checked by grepping for a specific call shape — e.g. `storage.from('<bucket-id>')`. That
-search came back clean for 6 storage buckets, which were then queued for deletion in a PR. Cursor
-Bugbot caught, before merge, that all 6 were actually live: referenced not as a direct call argument but
-as a **string value inside a config/lookup object**
-(`supabase/functions/register-evidence-manager/index.ts`'s `REGISTERS` map, e.g.
-`ofi: { bucket: "ofi-evidence" }`), resolved dynamically at runtime rather than passed literally to
-`.storage.from(...)`. The call-pattern-scoped grep was structurally blind to this — it only ever could
-have matched the one shape it was written to look for.
+## `.insert(...).select(...)` depends on the SELECT policy too, not just INSERT
 
-**Rule going forward:** before deleting or dropping anything, search for the **literal identifier
-itself** (bucket id, table name, column name, function name) as a plain string across the **entire**
-relevant codebase — not scoped to a specific call pattern, and not scoped to only `src/`. Specifically:
-1. Do the first pass as an unrestricted string search (no `.method(...)` wrapper, no quote-style
-   assumption) across both frontend (`src/`) and edge functions (`supabase/functions/`) — this is
-   deliberately blunter and will surface more candidates to manually rule out, but a cheap false
-   positive is vastly preferable to a missed true one.
-2. Explicitly check config objects, lookup/dispatch maps, and any `Record<string, ...>`-shaped
-   structures in edge functions separately — this is exactly the pattern this incident missed, and
-   edge functions in particular are easy to under-scrutinize relative to user-facing frontend screens.
-3. Only after the unrestricted pass comes back clean should a narrower, call-pattern-specific search be
-   trusted as confirmation — never as the sole check.
-4. Re-run the same check again immediately before executing the delete, not just once during planning —
-   code can change between the two points.
+Confirming the INSERT policy allows a role is not "permissions checked" if the code also reads the
+row back (`.select().maybeSingle()`) — that triggers a separate SELECT RLS check. A role that can
+insert but can't read back its own new row makes the insert silently succeed while the code treats
+the null read-back as a failure. Check the SELECT policy for every role the write path needs to
+support, or avoid the read-back entirely (client-generated `secureId()`, no `.select()`).
 
-## Learned from PR #362 review — both bugs came from checking the happy path only
+## A blanket policy across many tables needs a per-table check, not one batch review
 
-Two review bots (Cursor Bugbot, Vercel) each caught a separate bug in the same ~15-line block that
-implemented "publish this record, unless it was already published." Both slipped through because the
-first-draft implementation only proved the happy-path, first-attempt, admin-role case worked — neither
-retries nor the full set of allowed roles were stress-tested before calling it done.
+A single RESTRICTIVE (or otherwise AND-combining) policy applied across a loop of many tables in one
+migration must be checked **one table at a time**, not once against the batch's stated intent:
 
-1. **A "skip if already done" check must read live state, not a client-side cache.** The draft checked
-   `item.published_to_register_id` from a React Query cache already sitting in the component. That
-   cache can't reflect a *previous* attempt at the same operation that partially failed (e.g. the create
-   succeeded but the follow-up link-back update didn't) — which is exactly the scenario the check exists
-   to protect against. **Rule:** any "does this already exist / has this already run" guard in front of
-   a create-if-not-exists flow must query the database directly, immediately before deciding, not trust
-   data fetched earlier in the session. Ask explicitly: "if this exact code path partially failed and
-   the user retries, what does my check see?"
+1. Read each table's *other* pre-existing policies, not just confirm the new policy's own logic.
+2. Explicitly look for non-membership-by-design patterns before assuming a tenant-membership AND is
+   safe: owner/author-only checks, public/unauthenticated access, cross-tenant affiliate/consultant
+   flows, and super-admin-only tables where the caller may have no membership anywhere.
+3. For every flagged table, grep real call sites and confirm which Supabase client is used — a
+   service-role client bypasses RLS regardless of what the new policy says on paper; resolve this
+   with file:line evidence, not as "theoretical."
+4. A table with a genuine public/unauthenticated access requirement is a design decision to flag,
+   not a mechanical fix to silently patch or silently leave broken.
 
-2. **`.insert(...).select(...)` depends on the SELECT RLS policy, not just INSERT.** The draft confirmed
-   the INSERT policy allowed all 5 approver roles (having just widened it for 2 of them) and treated
-   that as "permissions checked." It missed that requesting data back from an insert
-   (`.select().maybeSingle()`) triggers a second, separate RLS check — the table's SELECT policy — to
-   read the row back. Two of the five roles could insert but not read back their own new row (a
-   RESTRICTIVE audience-based SELECT policy filtered it out), so the insert silently succeeded while the
-   code treated the null read-back as a failure. **Rule:** when writing any `.insert(...).select(...)`
-   against a table with RLS, check the SELECT policy for every role the write path needs to work for —
-   not just the INSERT/WRITE policy — or avoid the read-back entirely by generating the row's ID
-   client-side (`secureId()`) and inserting without `.select()`.
+## Verify against live state — never trust the diff's own assumptions (from `/fresh-eyes`)
 
-**Standing habit these both point to:** before calling an insert/create flow done, explicitly write out
-(a) what happens on a second, retried call, and (b) whether the exact write-then-read pattern used has
-been checked against every role/permission tier the feature is meant to support — not just the role
-used to write the code.
+For every RPC, direct table read/write, or edge-function call touched in a review or a fix, verify
+against the **live** project instead of trusting the code's own assumptions:
 
-## Learned from PR #381/#383 — a blanket RESTRICTIVE gate applied across many tables needs a per-table access-pattern check, not a single review
+- **RPC calls** — pull the live definition and confirm every field the client sends is actually
+  read/used by the function. A client sending a field the RPC silently ignores is a real bug.
+- **Direct table writes** — pull the live RLS policies and confirm the roles/conditions the
+  client-side code assumes are allowed actually match what the policy permits.
+- **`SECURITY DEFINER` functions** — confirm an independent authorization check exists, not just
+  `auth.uid() IS NOT NULL`. A `SECURITY DEFINER` function bypasses RLS entirely, so with no
+  independent role/tenant check, anyone authenticated can call it directly regardless of what the
+  UI allows.
+- **Edge functions** — pull the live deployed source and confirm it matches git; a PR can silently
+  assume a deployed function still matches its git source when it doesn't.
+- **Migrations** — confirm idempotency (safe to run twice), and that any replaced function/policy
+  re-implements every guard of what it replaces (checked via git history, not just the live version).
 
-PR #381 added one RESTRICTIVE policy (`billing_gate_active_tenant`, requiring
-`sec.user_in_tenant(tenant_id) AND sec.tenant_is_active(tenant_id)`) across a loop of **~48 tables** in a
-single "blanket" migration batch. It was reviewed once, as a batch, against the general principle
-("stop inactive/unpaid tenants from writing data") — not against each table's actual pre-existing access
-pattern. Two regressions escaped: `consultant_portfolio_requests` (an affiliate/consultant requesting
-access to a client tenant they are *not yet* a member of — the exact non-member path the new membership
-check blocked) and, found only in a follow-up audit on PR #383, the identical structural bug on
-`trainer_vet_currency` and `trainer_wud_log` (owner-only insert — `trainer_id = auth.uid()` — with no
-tenant-membership requirement by design, also blocked by the new AND).
+## Multi-statement migrations on trigger-guarded tables need trigger-order tracing
 
-A full 50-table audit on PR #383 found the blast radius was larger than either individual fix: 1
-confirmed-broken table already fixed by #383 (`consultant_portfolio_requests`), 1 more confirmed broken
-and fixed in the same PR (`trainer_vet_currency`, real call site in
-`src/pages/trainer-portal/vet-currency.tsx`), 1 fixed defensively despite being dormant
-(`trainer_wud_log` — same structural bug, no live caller found), and one **genuine design question, not
-a bug** — `survey_tokens` has a real PUBLIC/unauthenticated SELECT policy for token-based lookups (e.g.
-survey links opened without login) that the blanket gate would also block; this was deliberately left
-unfixed pending a product decision on whether that public lookup path should sit behind this gate at all.
-The remaining ~45 tables were individually confirmed safe (either already tenant-scoped, or writes go
-exclusively through a service-role client that bypasses RLS regardless of the gate).
+If a migration writes to the same table more than once (raw `UPDATE`s, RPC calls, or a mix), pull
+every `BEFORE INSERT`/`BEFORE UPDATE` trigger on that table and trace, in the exact order the
+migration executes its statements, whether a later statement's touched columns re-fire a trigger
+whose logic could overwrite a value an earlier statement intentionally set. Checking each statement
+in isolation is not enough — treat any migration touching 2+ trigger-watched columns across multiple
+statements as requiring this trace regardless of how simple it otherwise looks.
 
-**Rule going forward:** any migration that applies the *same* RESTRICTIVE (or otherwise AND-combining)
-policy across a loop/batch of multiple tables must be checked **one table at a time**, not once against
-the batch's stated intent:
-1. For every table in the batch, read its *other* pre-existing policies (SELECT/INSERT/UPDATE) — not
-   just confirm the new policy's own logic is correct.
-2. Explicitly look for "non-membership-by-design" patterns before assuming a tenant-membership AND is
-   safe: owner/author-only checks (`x_id = auth.uid()` with no tenant condition), public/unauthenticated
-   access (`USING (true)` or token-based lookups), cross-tenant affiliate/consultant flows, and
-   super-admin-only tables where the caller may have no membership anywhere.
-3. For every flagged table, grep `src/` and `supabase/functions/` for real call sites and confirm which
-   Supabase client is used — a user-JWT client is subject to RLS and can be broken by the new gate; a
-   service-role client bypasses RLS entirely, so the gate is a no-op for that caller regardless of what
-   the policy says on paper. Don't leave this as "theoretical" — resolve it with file:line evidence one
-   way or the other.
-4. A table with a genuine public/unauthenticated access requirement is a **design decision**, not a
-   mechanical fix — flag it to the human rather than silently patching the gate or silently leaving it
-   broken.
-5. Batch-applying one migration across many tables is efficient to *write*, but each table still needs
-   its own before/after check — "reviewed the batch's intent" is not the same as "reviewed every table's
-   interaction with that intent."
+## Report findings in three buckets, every time
+
+Confirmed bug (verified against live state where applicable) / worth a second look (plausible, not
+fully nailed down, or a judgment call) / checked and cleared (explicitly verified and ruled out, so
+it doesn't get silently re-litigated later). Don't blur a suspicion into a confirmed finding, and
+don't drop something that was actually checked — a cleared item is worth recording too.

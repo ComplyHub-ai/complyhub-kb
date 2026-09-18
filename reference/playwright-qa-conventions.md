@@ -1,77 +1,87 @@
+> **Last updated:** 18 Sep 2026 · **Reconsider by:** 18 Dec 2026 · **Confidence:** high — reflects Brian's actual current practice, confirmed directly, not inferred from repo spec files. Read this before writing or running any Playwright spec against production.
+
 # Playwright QA conventions
 
-> Last updated: 28 August 2026 · Proven end-to-end via `tests/e2e/qi-public-survey-submission.spec.ts`
-> (PR #811 follow-up, `rto-compass-hub` PR #813). Read this before writing a new Playwright spec.
+**Correction (18 Sep 2026):** the previous version of this doc documented `tests/e2e/*.spec.ts`
+patterns (`tas-pdf-pagination.spec.ts`, `qi-public-survey-submission.spec.ts`) and, briefly, a set
+of `tests/e2e/safe/` specs as the canonical approach. Neither reflects actual current practice —
+confirmed disregarded, not just stale. `docs/quality/playwright-harness.md` (a codebase doc) is
+**also** not relied on for the same reason. This doc is the authoritative source for Playwright
+QA convention going forward, standing on its own.
 
-## Two gated, production-safe patterns
+## The real credential/lane convention: `.env.playwright.local`
 
-Both patterns run against **real production data**, gated behind env vars so they never run
-unattended or in CI — skipped by default unless a human deliberately sets the vars to opt in.
+Production-safe QA runs against the **Vivacity Testing Tenant** in production, authenticated with
+role-specific test accounts. Credentials live in a gitignored file, `.env.playwright.local`, at the
+root of each repo checkout:
 
-### 1. Authenticated feature check
+```
+PLAYWRIGHT_LANE=<name of the scenario/journey this run exercises>
+PLAYWRIGHT_VIVACITY_TRAINER_EMAIL=...       PLAYWRIGHT_VIVACITY_TRAINER_PASSWORD=...
+PLAYWRIGHT_VIVACITY_GOVERNANCE_EMAIL=...    PLAYWRIGHT_VIVACITY_GOVERNANCE_PASSWORD=...
+PLAYWRIGHT_VIVACITY_CONSULTANT_EMAIL=...    PLAYWRIGHT_VIVACITY_CONSULTANT_PASSWORD=...
+PLAYWRIGHT_VIVACITY_ADMIN_EMAIL=...         PLAYWRIGHT_VIVACITY_ADMIN_PASSWORD=...
+```
 
-Pattern: `tests/e2e/tas-pdf-pagination.spec.ts`.
+(Values shown as `...` deliberately — never paste real credentials into this or any KB doc.)
 
-- `test.skip(!email || !password || !buildId, ...)` at the top of the `describe` block.
-- Signs in directly via `@supabase/supabase-js` (`auth.signInWithPassword`), then injects the
-  session into `localStorage` before navigating — not a UI login flow.
-- Use this for any feature behind a login.
+**Setup — this file must exist in every repo checkout, not just one worktree.** Each of
+`rto-compass-hub`, `rto-compass-hub-worktree-b`, and `rto-compass-hub-C` is a separate checkout;
+an untracked, gitignored file in one does not appear in the others. Copy `.env.playwright.local`
+into each worktree that will run production Playwright QA — it will not travel on its own via
+`git fetch`/`git pull`. It's gitignored specifically because it holds real plaintext account
+passwords; never remove it from `.gitignore`, never commit it, and never paste its contents into a
+chat, doc, or commit message.
 
-### 2. Public (no-login) feature check
+## Target practice, starting 18 Sep 2026 — tests must become persisted and rerunnable
 
-Pattern: `tests/e2e/qi-public-survey-submission.spec.ts`.
+**Historical practice (until this date):** a Playwright check against the Vivacity Testing Tenant
+was written and run once, verified by hand, and whatever data it created was manually cleaned up
+case by case — no reusable wipe mechanism, and the spec itself often wasn't kept afterward. This is
+why the repo's existing `tests/e2e/` spec files don't reliably reflect current practice: they're
+artifacts of that one-off pattern, not a maintained suite.
 
-- Same `test.skip` gating shape, but on whatever identifiers the public route needs (e.g. survey
-  slugs) — no email/password, no session injection.
-- Navigates straight to the public route.
-- If the form renders its fields dynamically (question bank varies per tenant/type) and has no
-  `data-testid` attributes, answer generically by rendered control type (radiogroup, textarea,
-  combobox, star rating) rather than hardcoding field identifiers.
+**This changes starting today.** Every new Playwright QA check written against the Vivacity Testing
+Tenant must be:
 
-Pick whichever of the two matches the feature being tested — most of the app needs pattern 1.
+1. **Persisted** — committed as a real spec file, not written and discarded after one manual run.
+2. **Rerunnable** — safe to run again without manual pre-cleanup; it must not depend on the tenant
+   being in whatever state the last run happened to leave it in.
+3. **Self-cleaning** — the spec itself defines and performs its own cleanup of whatever it creates,
+   as part of the test (e.g. a `finally`/teardown block scoped to that spec's own created records),
+   not a manual follow-up step someone has to remember. There is no generic, reusable wipe utility
+   today — each spec is responsible for its own scoped cleanup because what needs cleaning up
+   genuinely differs case by case (a submitted report, a started meeting, a created record). Write
+   that cleanup as part of writing the spec, not as a TODO.
+4. **Verified clean** — the spec should assert its own cleanup succeeded (the created record no
+   longer exists / the state it changed was reverted) rather than assuming the cleanup step ran
+   without checking.
 
-## Gotchas that will bite any new spec written this way
+A spec that can't yet meet all four should not run against production — narrow it to a read-only
+check, or hold it until its cleanup step is actually written.
 
-1. **`locator(...).count()` does not auto-wait.** It snapshots the DOM at that instant. If the
-   page loads content asynchronously (an RPC call, a query), counting/looping over elements
-   immediately after `page.goto()` returns 0 every time, silently. Always `.waitFor({ state:
-   'visible' })` on a real piece of loaded content first.
+## General gotchas (still accurate, unrelated to the disregarded spec files)
+
+1. **`locator(...).count()` does not auto-wait.** It snapshots the DOM at that instant. If the page
+   loads content asynchronously (an RPC call, a query), counting/looping over elements immediately
+   after `page.goto()` returns 0 every time, silently. Always `.waitFor({ state: 'visible' })` on a
+   real piece of loaded content first.
 2. **A bare `npm run dev` does not pick up `.env` locally.** `vite.config.ts` reads
    `process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL` directly in its `define` block —
    this bypasses Vite's own `.env`-file auto-loading, and only sees vars actually exported into the
-   shell. Before running `npm run dev` (or letting Playwright's `webServer` spawn it), run:
+   shell. Before running `npm run dev` (or letting Playwright's `webServer` spawn it):
    ```bash
    set -a; source .env; set +a
    ```
-   Confirmed live 27 Aug 2026 — a bare `npm run dev` threw `"supabaseUrl is required"` in the
-   browser until this was done, even with a fully populated `.env`.
 3. **Cold Vite start + first-route compile can take 45–60s+.** Give `test.setTimeout(...)` and
    `page.goto(url, { timeout: ... })` real headroom beyond Playwright's defaults, especially on the
-   very first test run after switching env vars (forces a dependency re-optimization).
+   very first test run after switching env vars.
 
-## Supabase Branch DB for Playwright — investigated, parked (not wired up)
+## Supabase Branch DB for Playwright — separate future path, still parked
 
-Investigated 27–28 Aug 2026 while looking for a way to run broad, automatic, every-PR Playwright
-coverage without touching production.
-
-**What works:** `supabase branches get <branch> --project-ref <ref> -o env` (Supabase CLI) returns
-real, usable branch DB credentials — `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`,
-etc. — matching the exact env var names `vite.config.ts` already reads. This is a viable mechanism
-for a future CI job, if one gets built.
-
-**Why it's parked:** a fresh branch DB starts with schema only, no seed data (`with_data: false`).
-Existing specs like `tenants.spec.ts` require a pre-seeded super-admin account
-(`admin@complyhub.io`) that doesn't exist on a fresh branch DB — so most current specs simply hang
-waiting for a login that can never succeed. No `.github/workflows/*.yml` job runs Playwright today
-either way; this would be new CI surface area needing Carl's review (`.github/workflows/` is his
-owned territory per `rto-compass-hub/CLAUDE.md`'s roles table).
-
-**If this gets picked up again:** the missing piece is a seeding story for branch DBs (either a
-`seed.sql` addition covering the accounts existing specs expect, or new specs written to create
-their own fixtures on the fly), plus an actual GitHub Actions job to wire it together.
-
-## See also
-
-- `rto-compass-hub/supabase/migrations/CLAUDE.md` § "Branch DB testing" — Supabase Branching
-  background, and the separate migration-drift issue that makes most branch DBs fail to build at
-  all (`MIGRATIONS_FAILED`) regardless of the seeding gap above.
+Investigated previously as a way to run broad, automatic, every-PR Playwright coverage without
+touching production at all — genuinely separate from the Vivacity-Testing-Tenant practice above,
+not a replacement for it. **Still parked, not wired up:** a fresh branch DB starts schema-only, no
+seed data, so most existing specs would hang waiting for accounts that don't exist on a fresh branch
+DB. Would also need a real GitHub Actions job — none runs Playwright today. Revisit only as a
+distinct initiative, not folded into the production-QA practice above.

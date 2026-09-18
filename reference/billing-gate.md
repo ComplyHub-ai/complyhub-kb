@@ -1,80 +1,120 @@
-> **Last updated:** 07 Sep 2026 (last commit) · **Reconsider by:** — · **Confidence:** unverified — freshness header added 15 Sep 2026 from git history; content not re-checked.
+> **Last updated:** 18 Sep 2026 · **Reconsider by:** 18 Dec 2026 · **Confidence:** high — every function body below pulled live via `pg_get_functiondef` on 18 Sep 2026, not copied from a prior doc or an audit-entry summary.
 
 # Tenant access gating — how "is this tenant allowed in" actually works
 
-> Written 27 Aug 2026, after PR #807 fixed a live lockout bug caused by two divergent
-> implementations of this check existing at once. Full incident detail:
-> `complyhub-kb/audit/2026-08-27_pr807_billing-gate-paid-through-date-lockout.md`.
+> Original version written 27 Aug 2026 after PR #807. Rewritten 18 Sep 2026 after confirming
+> the picture had changed materially since then — PR #1077 (9 Sep) introduced the `send_invoice`
+> delegation described below, and the previous version only documented one function
+> (`get_access_gate`) when the real system is three, each with a distinct job.
 
-## Single source of truth: `public.get_access_gate(p_tenant_id uuid)`
+## Three functions, not one — know which one you're looking at
 
-This is the **only** function that should ever decide whether a tenant can log in. It's called two
-ways in the app:
+| Function | Job | Called by |
+|---|---|---|
+| `public.get_access_gate(p_tenant_id)` | **Login gate** — can this user get into the app at all | `src/hooks/useAccessGate.ts` (direct RPC); `billing-gate` Edge Function → `src/hooks/useBillingGate.ts` |
+| `sec.evaluate_billing_access(p_tenant_id)` | **Billing-state evaluator** — the richer state machine `get_access_gate` now delegates to for `send_invoice` tenants specifically | `get_access_gate` (delegation); `sec.is_tenant_write_locked` (delegation) |
+| `sec.is_tenant_write_locked(p_tenant_id)` | **RLS write-lock check** — a separate concern from login: can this tenant write data, independent of whether they can log in | RLS policies directly (not the login path) |
 
-- Directly via `supabase.rpc('get_access_gate', ...)` from `src/hooks/useAccessGate.ts`.
-- Indirectly via the `billing-gate` Edge Function (`supabase/functions/billing-gate/index.ts`),
-  which `src/hooks/useBillingGate.ts` → `src/guards/BillingGateGuard.tsx` call to decide whether to
-  redirect to `/billing/locked`.
+**Do not write a second gate/evaluator function.** This is exactly how the PR #807 bug happened —
+a second independent implementation (`sec.tenant_access_state`, since dropped — confirmed absent
+from the live schema as of this rewrite) diverged from the canonical logic. If a new billing/access
+concept needs to affect login or writes, it goes into one of the three functions above, not a new one.
 
-**Do not write a second gate function.** That's exactly how the PR #807 bug happened —
-`sec.tenant_access_state` was a second, independent implementation that the `billing-gate` Edge
-Function called instead of `get_access_gate`, and it never learned about the `paid_through_date`
-guard added to the canonical function. It was retired (dropped) in PR #807 for this reason. If a new
-billing/access concept needs to affect login, add it to `get_access_gate`, not a new function.
+## `get_access_gate` — the login-gate check order
 
-## Check order inside `get_access_gate`
+Confirmed live, in order:
 
-Roughly in priority order (see the live function via `pg_get_functiondef` for the exact current
-SQL — this is a summary, not a copy):
-
-1. **`paid_through_date >= now()` guard** — if the tenant has a future `paid_through_date` on
-   `public.tenants`, access is granted immediately (`reason: paid_invoice`), regardless of what
-   `subscription_status` or `billing_subscriptions.billing_state` say. This is how invoice/manual
-   billing tenants are covered — their Stripe subscription may show `cancelled` (because it
-   genuinely was, as part of migrating them to invoice billing), but `paid_through_date` is the
-   real signal for those tenants.
+0. **No tenant context** (`p_tenant_id IS NULL`) → deny (`no_tenant_context`). This covers
+   consultant/affiliate identities inspecting their own account outside any tenant.
+0. **Membership guard (added since the original version of this doc)** — the caller must be an
+   active `tenant_members` row for this tenant, OR `sec.is_service_role()`, OR a `super_admin`/
+   internal-staff-with-`global_role` profile. Fails closed: `tenant_access_denied` if none match.
+0. **`send_invoice` full delegation** — if this tenant's `billing_subscriptions.collection_method`
+   is `send_invoice`, `get_access_gate` calls `sec.evaluate_billing_access` and returns its result
+   **directly**, skipping every step below entirely. This is the single most important thing this
+   doc got wrong before this rewrite — `send_invoice` tenants are not evaluated by this function's
+   own priority order at all.
+1. **`paid_through_date >= now()`** → allow (`paid_invoice`), for the remaining (non-`send_invoice`) tenants.
 2. **Diamond/manual override** — `tenant_plans.tier = 'diamond' AND billing_provider = 'manual'`.
-3. **Founders tier bypass** — only when `requires_payment_method = false`; otherwise falls through
-   to entitlements so payment can actually be enforced for founders tenants that need it.
-4. **Trial safety net** — unexpired `subscription_status = 'trialing'` always grants access.
-5. **Hard block for `billing_subscriptions.billing_state IN ('cancelled', 'trial_expired')` with no
-   Stripe subscription attached** — unless `billing_source = 'invoice'` with a `paid_through_date`
-   set, in which case it's an `invoice_grace` allow (write-locked).
-6. **`billing.entitlements` table check** — `active`, `payment_required`, `past_due`/`grace`,
-   `canceled`/`cancelled` branches.
+3. **Founders tier** — richer than previously documented: `lifecycle_status = 'subscriber_active'`
+   with no payment method required allows; otherwise branches on `subscription_status`
+   (`active`/`trialing` → allow, `payment_required` → allow but `write_locked: true`,
+   `canceled`/`cancelled` → deny as `suspended`).
+4. **Trial safety net** — unexpired `subscription_status = 'trialing'`.
+5. **Hard block** — `billing_subscriptions.billing_state IN ('cancelled','trial_expired')` with no
+   Stripe subscription attached, unless `billing_source = 'invoice'` with a `paid_through_date` set
+   (→ `invoice_grace`, write-locked).
+6. **`billing.entitlements` check** — `active`/`payment_required`/`past_due`/`grace`/`canceled` branches.
 7. **Legacy trial fallback** on `tenants.subscription_status`/`trial_expires_at`/`trial_consumed`.
 
-## Soft-block reasons — "let them log in, just read-only"
+## `sec.evaluate_billing_access` — its own priority order
 
-`get_access_gate` returns `allowed: false` for `past_due` and `payment_required` entitlement
-states — but the intent (matching the old `tenant_access_state` contract) is that these tenants
-should still be able to log in and see their data read-only, not get bounced to the paywall screen
-entirely. The `billing-gate` Edge Function handles this with an explicit allowlist:
+Not a helper — a standalone evaluator with its own `access_state` vocabulary
+(`active`/`locked`/`trial_active`/`cancelled`/`unpaid_invoice`/`not_configured`/...), confirmed live:
+
+1. No tenant → `not_configured` / `no_tenant_context`.
+2. Diamond (`tier = 'diamond'` OR `tenants.is_diamond`) → always allowed, `diamond_bypass`.
+3. Plan/tenant explicitly `cancelled`/`archived` → hard deny, `tenant_cancelled`/`tenant_locked`.
+4. **`send_invoice` branch** — invoice coverage is the source of truth regardless of the underlying
+   Stripe subscription status: a future `paid_through_date` allows even if the Stripe subscription
+   row itself is cancelled (deliberate — covers Founders-tier tenants with no live Stripe
+   subscription at all). Falls through to `latest_invoice_status`/effective Stripe status otherwise.
+5. Generic `paid_through_date >= now()` → allow, `paid_invoice`.
+6. Approved trial (`trialing` + unexpired, or `billing_state = 'trial_active'`) → allow.
+7. Has a `billing_subscriptions` row → branch on effective status (`past_due`/`unpaid`/`cancelled`/
+   etc. → deny; `active` → allow; anything else → deny as `unknown_billing_state`).
+8. No row at all → deny, `no_billing_record`.
+
+## `sec.is_tenant_write_locked` — separate from login, checked by RLS directly
+
+Confirmed live. Priority order: diamond (manual) → never locked; `send_invoice` tenant → delegates
+to `evaluate_billing_access`'s `allowed` flag; invoice-paid with future `paid_through_date` → never
+locked; grace period open (either `billing.entitlements.status = 'grace'` or the legacy
+`tenants.subscription_status = 'grace'` path) → not locked; otherwise falls back to the raw
+`tenants.write_locked` flag. **This function was not documented at all in the previous version of
+this doc** — it's what RLS policies actually call, independent of whether `get_access_gate` would
+let the same user log in.
+
+## Soft-block reasons — "let them log in, just read-only" (re-verified, unchanged)
+
+`billing-gate/index.ts` still hand-maintains this allowlist against `get_access_gate`'s reason
+vocabulary — confirmed live 18 Sep 2026, unchanged from the original version of this doc:
 
 ```ts
 const SOFT_BLOCK_REASONS = new Set(['past_due', 'payment_required']);
 const loginAllowed = state.allowed || SOFT_BLOCK_REASONS.has(state.reason);
 ```
 
-**This allowlist is hand-maintained, not derived from `get_access_gate` itself.** If
-`get_access_gate`'s reason vocabulary changes (a new entitlement state, a renamed reason string),
-this list won't automatically track it. Check `billing-gate/index.ts` when touching
-`get_access_gate`'s reason strings.
+Still hand-maintained, not derived from `get_access_gate` itself — check `billing-gate/index.ts`
+whenever `get_access_gate`'s reason strings change.
 
-## Known duplication not yet resolved
+## Client-side paths — corrected, these are not just "two paths to the same result"
 
-`useAccessGate.ts` (direct RPC call) and `useBillingGate.ts` (via the Edge Function, which now also
-calls `get_access_gate`) are two separate React hooks that both ultimately resolve to the same
-underlying function today, but through different paths. Not a bug — both converge on the same
-source of truth — but worth a FRAME at some point to check whether both are still independently
-necessary, or one could be retired now that they agree.
+- **`useAccessGate.ts`** — calls `get_access_gate` RPC directly, no wrapper logic.
+- **`useBillingGate.ts`** — calls the `billing-gate` Edge Function, and layers real client-side
+  behavior on top that the previous version of this doc didn't mention: **SuperAdmins bypass the
+  check entirely** (never call the gate), and on a **transport/gate error the hook fails open**
+  (`allowed: true`) — a deliberate choice so a `billing-gate` outage can't lock out healthy
+  (diamond/founders/paid) tenants. An explicit `block_login` in a successful response still denies.
+
+These are genuinely different behaviors, not one duplicated implementation — worth knowing if
+debugging "user X can/can't log in" depends on which of the two paths the surface in question uses.
 
 ## Where the tenants really stand — checking a specific tenant
 
 ```sql
-select public.get_access_gate('<tenant-uuid>'::uuid);
+select public.get_access_gate('<tenant-uuid>'::uuid);        -- login gate
+select sec.evaluate_billing_access('<tenant-uuid>'::uuid);    -- billing-state detail, esp. send_invoice
+select sec.is_tenant_write_locked('<tenant-uuid>'::uuid);     -- RLS write-lock, separate question
 ```
 
-This is the ground truth. Don't infer access from `tenants.subscription_status` or
-`billing_subscriptions.billing_state` alone — either can be stale/misleading on its own (that's
-exactly what caused the PR #807 incident). Always check what the function itself returns.
+Ground truth is whichever of the three actually governs the surface being diagnosed — don't infer
+from `tenants.subscription_status`/`billing_subscriptions.billing_state` alone, and don't assume
+the login answer and the write-lock answer are the same question.
+
+## Recent history — see also
+
+Extensive billing work landed between this doc's original version and this rewrite — PRs #1077,
+#1078–1081, #1083, #1088, #1142, #1146, #1149, #1193. `sec.tenant_access_state` (the PR #807
+duplicate) is confirmed dropped from the live schema. See `complyhub-kb/audit/` for the individual
+PR write-ups if tracing a specific historical change.

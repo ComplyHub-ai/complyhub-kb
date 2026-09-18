@@ -233,6 +233,24 @@ Before pushing any commit to `rto-compass-hub` (and before opening/updating a PR
 
 **How to apply:** After finishing a round of fixes and before every `git push`, re-read the full diff once specifically hunting for these three patterns before considering the round done. In addition to, not instead of, `tsc`/`eslint`/unit tests above.
 
+### Integration closure — do not stop at the local fix
+
+After implementation, and again after every round of bot-review fixes, verify the complete connected
+flow for each changed feature. The reviewer must build a small closure matrix, not just inspect the
+changed hunk:
+
+- callers and existing test mocks agree with the changed contract;
+- UI checks, direct PostgREST access, RLS, RPCs, and Edge Functions enforce the same permission gate;
+- trigger/function order is correct for INSERT, UPDATE, and DELETE, including retries and partial
+  failure;
+- actual stored data shapes and legacy path formats are covered;
+- role helpers intentionally distinguish strict checks from compatibility checks, including
+  SuperAdmin and multi-role sessions; and
+- every confirmed boundary has a regression test or branch-database scenario.
+
+Green static checks or a passing mock alone are not integration proof. Any unchecked matrix cell must
+be reported as unchecked rather than silently treated as clear.
+
 ### Never run `npm run build`
 
 Never run `npm run build` for any reason — verification, pre-push checks, or confirming a fix compiles. It hangs the local workstation. To verify code correctness, run `npm run type-check` (TypeScript) and `npm run lint` (ESLint) instead — both are fast and sufficient for pre-commit verification. The actual build gate is Vercel, which runs automatically after push.
